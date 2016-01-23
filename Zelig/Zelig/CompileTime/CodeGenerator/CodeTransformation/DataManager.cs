@@ -1397,6 +1397,20 @@ namespace Microsoft.Zelig.CodeGeneration.IR
                         InstantiateVTable( res );
                     }
 
+                    //
+                    // Eliminate strings from v-tables
+                    //
+                    ObjectDescriptor od = res as ObjectDescriptor;
+                    if(res != null)
+                    {
+                        VTable vt = od.Source as VTable;
+
+                        if(vt != null)
+                        {
+                            //vt.EliminateReflectionData( ); 
+                        }
+                    }
+
                     return res;
                 }
             }

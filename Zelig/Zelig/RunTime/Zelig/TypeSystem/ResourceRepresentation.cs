@@ -48,6 +48,7 @@ namespace Microsoft.Zelig.Runtime.TypeSystem
 
         private AssemblyRepresentation m_owner;
         private Attributes             m_flags;
+        [WellKnownField( "ResourceRepresentation_m_name" )] 
         private string                 m_name;
         private Pair[]                 m_values;
 

@@ -103,7 +103,8 @@ namespace Microsoft.Zelig.Runtime.TypeSystem
         //
         // State
         //
-
+        
+        [WellKnownField( "AssemblyRepresentation_m_name" )] 
         private string      m_name;
         private VersionData m_version;
 

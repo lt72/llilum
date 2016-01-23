@@ -61,6 +61,7 @@ namespace Microsoft.Zelig.Runtime.TypeSystem
 
         protected TypeRepresentation m_ownerType;
         protected Attributes         m_flags;
+        [WellKnownField( "FieldRepresentation_m_name" )] 
         protected string             m_name;
         protected TypeRepresentation m_fieldType;
 

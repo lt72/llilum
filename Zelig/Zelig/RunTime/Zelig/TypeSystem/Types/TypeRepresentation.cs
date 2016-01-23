@@ -306,7 +306,9 @@ namespace Microsoft.Zelig.Runtime.TypeSystem
         protected BuiltInTypes                    m_builtinType;
         protected Attributes                      m_flags;
         protected BuildTimeAttributes             m_buildFlags;
+        [WellKnownField( "TypeRepresentation_m_name" )] 
         protected string                          m_name;
+        [WellKnownField( "TypeRepresentation_m_namespace" )] 
         protected string                          m_namespace;
         protected TypeRepresentation              m_enclosingClass;
 

@@ -70,6 +70,15 @@ namespace Microsoft.Zelig.Runtime.TypeSystem
         public readonly FieldRepresentation GarbageCollectionManager_m_extensionTargets;
         public readonly FieldRepresentation GarbageCollectionManager_m_extensionHandlers;
 
+        //--//
+        
+        public readonly FieldRepresentation AssemblyRepresentation_m_name; 
+        public readonly FieldRepresentation TypeRepresentation_m_name; 
+        public readonly FieldRepresentation TypeRepresentation_m_namespace; 
+        public readonly FieldRepresentation MethodRepresentation_m_name; 
+        public readonly FieldRepresentation FieldRepresentation_m_name; 
+        public readonly FieldRepresentation ResourceRepresentation_m_name; 
+
         //
         // Helper Methods
         //
