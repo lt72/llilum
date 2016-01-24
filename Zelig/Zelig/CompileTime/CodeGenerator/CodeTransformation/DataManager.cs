@@ -13,7 +13,7 @@ namespace Microsoft.Zelig.CodeGeneration.IR
     using System;
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
-
+    using CompilationSteps.Phases;
     using Microsoft.Zelig.Runtime.TypeSystem;
 
 
@@ -273,6 +273,39 @@ namespace Microsoft.Zelig.CodeGeneration.IR
             }
 
             protected abstract string ToString( bool fVerbose );
+        }
+
+        internal void EliminateflectionStrings( GenerateImage generateImage )
+        {
+            WellKnownFields wkf = m_typeSystem.WellKnownFields;
+            WellKnownTypes  wkt = m_typeSystem.WellKnownTypes;
+
+            foreach (var dd in m_data.Values)
+            {
+                if (dd is IR.DataManager.ObjectDescriptor)
+                {
+                    IR.DataManager.ObjectDescriptor od = (IR.DataManager.ObjectDescriptor)dd;
+
+                    if (od.Context == wkt.Microsoft_Zelig_Runtime_TypeSystem_VTable)
+                    {
+                        //
+                        // This is the first time we analyze the v-table for this descriptor.
+                        // We will operate on all the fields that need curing before proceeding further.
+                        //
+                        if(od.Values.ContainsKey((InstanceFieldRepresentation)wkf.VTable_TypeInfo))
+                        {
+                            IR.DataManager.ObjectDescriptor typeInfo = (IR.DataManager.ObjectDescriptor)od.Values[(InstanceFieldRepresentation)wkf.VTable_TypeInfo];
+
+                            var odFields = typeInfo.Values;
+
+                            odFields[(InstanceFieldRepresentation)wkf.TypeRepresentation_m_name] = String.Empty;
+                            odFields[(InstanceFieldRepresentation)wkf.TypeRepresentation_m_namespace] = String.Empty;
+                        }
+                    }
+                }
+            }
+
+            //RefreshValues( generateImage );
         }
 
         //--//--//--//--//--//--//--//--//--//
@@ -1398,18 +1431,18 @@ namespace Microsoft.Zelig.CodeGeneration.IR
                     }
 
                     //
-                    // Eliminate strings from v-tables
+                    // Eliminate strings from v-tables here ???
                     //
-                    ObjectDescriptor od = res as ObjectDescriptor;
-                    if(res != null)
-                    {
-                        VTable vt = od.Source as VTable;
+                    //////ObjectDescriptor od = res as ObjectDescriptor;
+                    //////if(res != null)
+                    //////{
+                    //////    VTable vt = od.Source as VTable;
 
-                        if(vt != null)
-                        {
-                            //vt.EliminateReflectionData( ); 
-                        }
-                    }
+                    //////    if(vt != null)
+                    //////    {
+                    //////        vt.EliminateReflectionData( ); 
+                    //////    }
+                    //////}
 
                     return res;
                 }

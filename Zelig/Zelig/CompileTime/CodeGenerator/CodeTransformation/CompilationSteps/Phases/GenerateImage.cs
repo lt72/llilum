@@ -38,6 +38,8 @@ namespace Microsoft.Zelig.CodeGeneration.IR.CompilationSteps.Phases
                 } );
 #endif // LLVM
 
+            this.TypeSystem.DataManagerInstance.EliminateflectionStrings( this );
+
             this.TypeSystem.GenerateImage( this );
 
             return this.NextPhase;

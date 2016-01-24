@@ -330,6 +330,23 @@ namespace Microsoft.Zelig.LLVM
             {
                 IR.DataManager.ObjectDescriptor od = ( IR.DataManager.ObjectDescriptor )dd;
 
+                if (od.Context == wkt.Microsoft_Zelig_Runtime_TypeSystem_VTable)
+                {
+                    //////    //
+                    //////    // This is the first time we analyze the v-table for this descriptor.
+                    //////    // We will operate on all the fields that need curing before proceeding further.
+                    //////    //
+                    //////    IR.DataManager.ObjectDescriptor typeInfo = (IR.DataManager.ObjectDescriptor)od.Values[ (TS.InstanceFieldRepresentation)wkf.VTable_TypeInfo ];
+
+                    //////    var odFields = typeInfo.Values;
+
+                    //////    odFields[(TS.InstanceFieldRepresentation)wkf.TypeRepresentation_m_name     ] = String.Empty;
+                    //////    odFields[(TS.InstanceFieldRepresentation)wkf.TypeRepresentation_m_namespace] = String.Empty;
+
+                    //////    m_typeSystem.DataManagerInstance.RefreshValues( );    
+                }
+
+
                 var fields = new List<Constant>( );
 
 #if CANONICAL_OBJECT_POINTERS
@@ -416,9 +433,21 @@ namespace Microsoft.Zelig.LLVM
                                 fields.Add(GlobalValueFromDataDescriptor(valDD, false));
                             }
                         }
-                        else if( fd.FieldType is TS.ScalarTypeRepresentation )
+                        else if (fd.FieldType is TS.ScalarTypeRepresentation)
                         {
-                            fields.Add( GetScalarTypeUCV( fd.FieldType, fdVal ) );
+                            fields.Add(GetScalarTypeUCV(fd.FieldType, fdVal));
+                        }
+                        else if (fd.FieldType == wkt.System_String)
+                        {
+                            var chars = new List<Constant>();
+                            foreach (char c in fdVal.ToString().ToCharArray())
+                            {
+                                chars.Add(GetScalarTypeUCV(wkf.StringImpl_FirstChar.FieldType, c));
+                            }
+
+                            chars.Add(GetScalarTypeUCV(wkf.StringImpl_FirstChar.FieldType, '\0'));
+
+                            fields.Add(m_module.GetUCVArray(GetOrInsertType(wkf.StringImpl_FirstChar.FieldType), chars));
                         }
                         else
                         {
