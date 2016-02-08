@@ -171,7 +171,9 @@ namespace Microsoft.Zelig.Runtime.Synchronization
                                           WaitableObject target,
                                           SchedulerTime timeout)
         {
+            BugCheck.Log( "GetInstance - prima" );
             BugCheck.AssertInterruptsOn();
+            BugCheck.Log( "GetInstance - dopo" );
 
             WaitingRecord wr = null;
 

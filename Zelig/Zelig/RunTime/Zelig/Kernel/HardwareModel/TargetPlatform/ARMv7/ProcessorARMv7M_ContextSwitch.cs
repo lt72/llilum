@@ -290,8 +290,7 @@ namespace Microsoft.Zelig.Runtime.TargetPlatform.ARMv7
             }
 
 #endregion
-
-
+            
             private static UIntPtr ContextSwitch( ThreadManager tm, UIntPtr stackPointer )
             {
                 ThreadImpl currentThread = tm.CurrentThread;

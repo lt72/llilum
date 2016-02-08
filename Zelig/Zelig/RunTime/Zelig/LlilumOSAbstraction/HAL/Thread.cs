@@ -12,45 +12,33 @@ namespace Microsoft.Zelig.LlilumOSAbstraction.HAL
     {
         public enum ThreadPriority
         {
-            Lowest = 0,
-            BelowNormal,
-            Normal,
-            AboveNormal,
-            Highest,
+            Lowest      = 0,
+            BelowNormal ,
+            Normal      ,
+            AboveNormal ,
+            Highest     ,
         }
 
-        public static unsafe uint LLOS_THREAD_CreateThread(Delegate dlgEntry, ThreadImpl thread, ref UIntPtr threadHandle )
+        public static unsafe uint LLOS_THREAD_CreateThread(Delegate dlgEntry, ThreadImpl threadImpl, ref UIntPtr threadHandle )
         {
             UIntPtr threadEntry;
             UIntPtr threadParam;
-            UIntPtr managedThread;
+            UIntPtr managedThreadCtx;
 
-            DelegateImpl dlg = (DelegateImpl)(object)dlgEntry;
-            threadEntry = new UIntPtr( dlg.InnerGetCodePointer( ).Target.ToPointer( ) );
-            threadParam = ( (ObjectImpl)dlgEntry.Target ).ToPointer( );
-            managedThread = ( (ObjectImpl)(object)thread ).ToPointer( );
+            DelegateImpl dlg    = (DelegateImpl)(object)dlgEntry;
+            threadEntry         = new UIntPtr( dlg.InnerGetCodePointer( ).Target.ToPointer( ) );
+            threadParam         = ( (ObjectImpl)dlgEntry.Target ).ToPointer( );
+            managedThreadCtx    = ( (ObjectImpl)(object)threadImpl.SwappedOutContext).ToPointer( );
 
-            return LLOS_THREAD_CreateThread( threadEntry, threadParam, managedThread, 8*1024, ref threadHandle );
+            return LLOS_THREAD_CreateThread( threadEntry, threadParam, managedThreadCtx, 8*1024, ref threadHandle );
         }
 
         [DllImport( "C" )]
-        public static unsafe extern uint LLOS_THREAD_GetCurrentThread( ref UIntPtr threadHandle );
-
+        private static unsafe extern uint LLOS_THREAD_CreateThread( UIntPtr threadEntry, UIntPtr threadParameter, UIntPtr managedThreadCtx, uint stackSize, ref UIntPtr threadHandle );
+        
         [DllImport( "C" )]
-        private static unsafe extern uint LLOS_THREAD_CreateThread( UIntPtr threadEntry, UIntPtr threadParameter, UIntPtr managedThread, uint stackSize, ref UIntPtr threadHandle );
-
-        [DllImport( "C" )]
-        public static unsafe extern uint LLOS_THREAD_Start( UIntPtr threadHandle );
-
-        [DllImport( "C" )]
-        public static unsafe extern uint LLOS_THREAD_Yield( );
-
-        [DllImport( "C" )]
-        public static unsafe extern uint LLOS_THREAD_Wait(UIntPtr threadHandle, int timeoutMs);
-
-        [DllImport( "C" )]
-        public static unsafe extern uint LLOS_THREAD_Signal(UIntPtr threadHandle);
-
+        public static unsafe extern uint LLOS_THREAD_SwitchTo( UIntPtr threadHandle );
+        
         [DllImport( "C" )]
         public static unsafe extern uint LLOS_THREAD_DeleteThread( UIntPtr threadHandle );
 
@@ -59,8 +47,5 @@ namespace Microsoft.Zelig.LlilumOSAbstraction.HAL
 
         [DllImport( "C" )]
         public static unsafe extern uint LLOS_THREAD_GetPriority( UIntPtr threadHandle, out ThreadPriority threadPriority );
-
-        [DllImport( "C" )]
-        public static unsafe extern void LLOS_THREAD_Sleep( int timeoutMs );
     }
 }

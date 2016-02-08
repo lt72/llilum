@@ -60,18 +60,22 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="HardwareModel\Board.cs" />
+    <Compile Include="HardwareModel\ChipSet\EmulatedPeripherals\NVIC.cs" />
     <Compile Include="HardwareModel\Device.cs" />
+    <Compile Include="HardwareModel\Drivers\InterruptController.cs" />
     <Compile Include="HardwareModel\HardwareProviders\HardwareProvider.cs" />
-    <Compile Include="HardwareModel\InterruptsSafeHandle.cs" />
+    <Compile Include="HardwareModel\InterruptsSafeHandleWin32.cs" />
     <Compile Include="HardwareModel\Memory.cs" />
     <Compile Include="HardwareModel\Peripherals.cs" />
-    <Compile Include="HardwareModel\Processor.cs" />
+    <Compile Include="HardwareModel\ProcessorWin32_ContextSwitch.cs" />
+    <Compile Include="HardwareModel\ProcessorWin32.cs" />
     <Compile Include="HardwareModel\SerialPortsManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SystemServices\MemoryManager.cs" />
     <Compile Include="SystemServices\SchedulerTimeImpl.cs" />
     <Compile Include="SystemServices\SchedulerTimeSpanImpl.cs" />
-    <Compile Include="SystemServices\ThreadManager.cs" />
+    <Compile Include="SystemServices\Win32ThreadManager.cs" />
     <Compile Include="SystemServices\TypeSystemManager.cs" />
   </ItemGroup>
   <ItemGroup>

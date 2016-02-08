@@ -5,8 +5,8 @@
 
 namespace Microsoft.DeviceModels.Win32
 {
-    using LLOS = Zelig.LlilumOSAbstraction;
-    using RT = Microsoft.Zelig.Runtime;
+    using LLOS  = Zelig.LlilumOSAbstraction;
+    using RT    = Microsoft.Zelig.Runtime;
 
     public class Device : RT.Device
     {

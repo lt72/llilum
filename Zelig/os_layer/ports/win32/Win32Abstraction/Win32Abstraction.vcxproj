@@ -72,6 +72,7 @@
     <ClCompile Include="LlosDebug.cpp" />
     <ClCompile Include="LlosEntry.cpp" />
     <ClCompile Include="LlosGarbageCollection.cpp" />
+    <ClCompile Include="LlosInterrupts.cpp" />
     <ClCompile Include="LlosMemory.cpp" />
     <ClCompile Include="LlosMutex.cpp" />
     <ClCompile Include="LlosStubs.cpp" />

@@ -1,156 +1,78 @@
 #include "LlosWin32.h"
 #include <llos_thread.h>
+#include <llos_debug.h>
 
-static DWORD WINAPI LlosThreadEntryWrapper(LPVOID lpThreadParameter)
+//--//
+
+VOID WINAPI LlosThreadEntryWrapper(LPVOID lpThreadParameter)
 {
-    LlosThread *pThread = (LlosThread*)lpThreadParameter;
-    LlosThread** ppvData = nullptr;
-
-    if (pThread == nullptr)
-    {
-        return 1;
-    }
+    LlosThreadData *pThread = (LlosThreadData*)lpThreadParameter;
 
     try
     {
-        ppvData = (LlosThread**)LocalAlloc(LPTR, sizeof(LlosThread*));
-
-        if (ppvData == nullptr)
-        {
-            return 1;
-        }
-
-        *ppvData = pThread;
-        TlsSetValue(g_dwTlsIndex, ppvData);
-
         pThread->entry(pThread->param);
     }
     catch (...)
     {
     }
-
-    if (ppvData != nullptr)
-    {
-        TlsSetValue(g_dwTlsIndex, nullptr);
-        LocalFree(ppvData);
-    }
-
-    return 0;
 }
 
-LlosThread* GetThreadLocalStorage()
+HRESULT LLOS_THREAD_CreateThread(LLOS_ThreadEntry threadEntry, LLOS_Context threadParameter, LLOS_Context managedThreadCtx, uint32_t stackSize, LLOS_Handle* threadHandle)
 {
-    LlosThread** lpvData = (LlosThread**)TlsGetValue(g_dwTlsIndex);
-
-    if (lpvData != nullptr)
-    {
-        return *lpvData;
-    }
-
-    return nullptr;
-}
-
-HRESULT LLOS_THREAD_GetCurrentThread(LLOS_Context* threadHandle)
-{
-    LlosThread *pThread;
-
     if (threadHandle == nullptr)
     {
         return E_INVALIDARG;
     }
 
-    pThread = GetThreadLocalStorage();
+    LlosThreadData *pFiberData = (LlosThreadData*)calloc(1, sizeof(LlosThreadData));
 
-    if (pThread != nullptr)
-    {
-        *threadHandle = pThread->managedThread;
-    }
-    else
-    {
-        *threadHandle = nullptr;
-    }
-
-    return *threadHandle != nullptr ? S_OK : E_FAIL;
-}
-
-HRESULT LLOS_THREAD_CreateThread(LLOS_ThreadEntry threadEntry, LLOS_Context threadParameter, LLOS_Context managedThread, uint32_t stackSize, LLOS_Handle* threadHandle)
-{
-    LlosThread *pThread = (LlosThread*)calloc(1, sizeof(LlosThread));
-
-    if (threadHandle == nullptr)
-    {
-        return E_INVALIDARG;
-    }
-
-    if (pThread == nullptr)
+    if (pFiberData == nullptr)
     {
         return E_OUTOFMEMORY;
     }
 
-    pThread->entry = threadEntry;
-    pThread->param = threadParameter;
-    pThread->managedThread = managedThread;
-    pThread->globalLockRefCount = 0;
+    pFiberData->entry            = threadEntry;
+    pFiberData->param            = threadParameter;
+    pFiberData->managedThreadCtx = managedThreadCtx;
 
-    pThread->hndThread = CreateThread(NULL, stackSize, LlosThreadEntryWrapper, pThread, CREATE_SUSPENDED, NULL);
+    pFiberData->hndThread = CreateFiber( stackSize, LlosThreadEntryWrapper, pFiberData );
 
-    if (pThread->hndThread == INVALID_HANDLE_VALUE)
+    if (pFiberData->hndThread == NULL)
     {
-        free(pThread);
-        pThread = nullptr;
+        free(pFiberData);
+        pFiberData = nullptr;
     }
 
-    *threadHandle = pThread;
+    *threadHandle = pFiberData;
 
-    return pThread != nullptr ? S_OK : E_FAIL;
+    wchar_t buffer[ 128 ];
+    _snwprintf_s( buffer, 128, L"Created Thread!  Context=%p, Param=0x%08x\r\n", pFiberData->managedThreadCtx, pFiberData->param );
+    LLOS_DEBUG_LogText( buffer, 128 );
+
+    return pFiberData != nullptr ? S_OK : E_FAIL;
 }
 
 HRESULT LLOS_THREAD_Start(LLOS_Handle threadHandle)
 {
-    LlosThread *pThread = (LlosThread*)threadHandle;
-
-    if (pThread == nullptr)
-    {
-        return E_INVALIDARG;
-    }
-
-    return ResumeThread(pThread->hndThread);
-}
-
-HRESULT LLOS_THREAD_Yield(VOID)
-{
-    SwitchToThread();
-
+    //
+    // Fiber do not need to get started
+    //
     return S_OK;
 }
 
-HRESULT LLOS_THREAD_Wait(LLOS_Handle threadHandle, int32_t timeoutMs)
+HRESULT LLOS_THREAD_SwitchTo( LPVOID threadHandle )
 {
-    HRESULT hr;
-    LlosThread *pThread = (LlosThread*)threadHandle;
+    LlosThreadData *pThread = (LlosThreadData*)threadHandle;
 
-    if (pThread == nullptr)
-    {
-        return E_INVALIDARG;
-    }
+    wchar_t buffer[ 128 ];
+    _snwprintf_s( buffer, 128, L"SWITCH!  Context=%p, Param=0x%08x\r\n", pThread->managedThreadCtx, pThread->param );
+    LLOS_DEBUG_LogText( buffer, 128 );
 
-    hr = WaitOnAddress(&pThread->waitAddress, &pThread->compareAddress, sizeof(DWORD), timeoutMs) ? S_OK : E_ABORT;
-    pThread->waitAddress = 0;
+    ConvertThreadToFiber( NULL );
 
-    return hr;
-}
+    SwitchToFiber(pThread->hndThread);
 
-HRESULT LLOS_THREAD_Signal(LLOS_Handle threadHandle)
-{
-    LlosThread *pThread = (LlosThread*)threadHandle;
-
-    if (pThread == nullptr)
-    {
-        return E_INVALIDARG;
-    }
-
-    pThread->waitAddress = 1;
-    WakeByAddressAll(&pThread->waitAddress);
+    ConvertFiberToThread( );
 
     return S_OK;
 }
@@ -158,7 +80,7 @@ HRESULT LLOS_THREAD_Signal(LLOS_Handle threadHandle)
 HRESULT LLOS_THREAD_SetPriority(LLOS_Handle threadHandle, LLOS_ThreadPriority threadPriority)
 {
     int pri = THREAD_PRIORITY_NORMAL;
-    LlosThread *pThread = (LlosThread*)threadHandle;
+    LlosThreadData *pThread = (LlosThreadData*)threadHandle;
 
     if (pThread == nullptr)
     {
@@ -193,7 +115,7 @@ HRESULT LLOS_THREAD_SetPriority(LLOS_Handle threadHandle, LLOS_ThreadPriority th
 HRESULT LLOS_THREAD_GetPriority(LLOS_Handle threadHandle, LLOS_ThreadPriority* threadPriority)
 {
     LLOS_ThreadPriority llosPri = ThreadPriority_Normal;
-    LlosThread *pThread = (LlosThread*)threadHandle;
+    LlosThreadData *pThread = (LlosThreadData*)threadHandle;
 
     if (pThread == nullptr || threadPriority == nullptr)
     {
@@ -231,7 +153,7 @@ HRESULT LLOS_THREAD_GetPriority(LLOS_Handle threadHandle, LLOS_ThreadPriority* t
 
 HRESULT LLOS_THREAD_DeleteThread(LLOS_Handle threadHandle)
 {
-    LlosThread *pThread = (LlosThread*)threadHandle;
+    LlosThreadData *pThread = (LlosThreadData*)threadHandle;
 
     if (pThread != nullptr)
     {
@@ -243,7 +165,3 @@ HRESULT LLOS_THREAD_DeleteThread(LLOS_Handle threadHandle)
     return S_OK;
 }
 
-void LLOS_THREAD_Sleep(int32_t timeoutMilliseconds)
-{
-    Sleep(timeoutMilliseconds);
-}

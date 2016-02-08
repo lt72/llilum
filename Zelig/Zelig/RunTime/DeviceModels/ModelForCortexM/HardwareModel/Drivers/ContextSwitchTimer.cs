@@ -119,7 +119,8 @@ namespace Microsoft.DeviceModels.Chipset.CortexM.Drivers
             if(m_enabled)
             {
                 // If the timer is already enabled, then only the counter needs to be
-                // reset.
+                // reset. Resetting the counter will give the quantum a closer aproximation
+                // of the nominal running quantum value
                 m_sysTick.ResetAndClear();
             }
             else
@@ -160,7 +161,7 @@ namespace Microsoft.DeviceModels.Chipset.CortexM.Drivers
             m_sysTick.Match   = match;
             m_sysTick.Counter = 0;
             m_sysTick.Enabled = true; 
-            m_enabled = true;
+            m_enabled         = true;
         }
 
         [RT.Inline]

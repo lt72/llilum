@@ -2,12 +2,12 @@
 // Copyright (c) Microsoft Corporation.    All rights reserved.
 //
 
-#define LPC1768
+//#define LPC1768
 //#define K64F
 //#define STM32F411
 //#define STM32F401
 //#define STM32F091
-//#define WIN32
+#define WIN32
 
 //#define USE_I2C
 //#define USE_SPI
@@ -457,16 +457,20 @@ namespace Microsoft.Zelig.Test.mbed.Simple
 
         static void TestWin32Threading()
         {
+            BugCheck.Log( ">> TestWin32Threading << - 1" );
+
             Thread th1 = new Thread( ( ) =>
             {
                 int i=0;
 
                 while(true)
                 {
-                    BugCheck.Log( "Thread1: " + i++);
+                    BugCheck.Log( ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Thread1: " + i++);
                     Thread.Sleep(500);
                 }
             } );
+            
+            BugCheck.Log( ">> TestWin32Threading << - 2" );
 
             Thread th2 = new Thread( ( ) =>
             {
@@ -474,28 +478,40 @@ namespace Microsoft.Zelig.Test.mbed.Simple
 
                 while(true)
                 {
-                    BugCheck.Log( "Thread2: " + i++);
+                    BugCheck.Log( ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Thread2: " + i++);
                     Thread.Sleep(500);
                 }
             } );
+            
+            BugCheck.Log( ">> TestWin32Threading << - 3" );
 
             Timer t1 = new Timer( (object arg) =>
             {
-                BugCheck.Log( "Timer1: " + s_Counter1++ );
+                BugCheck.Log( ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Timer1: " + s_Counter1++ );
             }, null, 1000, 1000 );
+            
+            BugCheck.Log( ">> TestWin32Threading << - 4" );
 
             Timer t2 = new Timer( (object arg) =>
             {
-                BugCheck.Log( "Timer2: " + s_Counter2++ );
+                BugCheck.Log( ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Timer2: " + s_Counter2++ );
             }, null, 2000, 2000 );
+            
+            BugCheck.Log( ">> TestWin32Threading << - 5" );
 
             Timer t3 = new Timer( (object arg) =>
             {
-                BugCheck.Log( "Timer3: " + s_Counter3++ );
+                BugCheck.Log( ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Timer3: " + s_Counter3++ );
             }, null, 4000, 4000 );
+            
+            BugCheck.Log( ">> TestWin32Threading << - 6" );
 
             th1.Start( );
+            
+            BugCheck.Log( ">> TestWin32Threading << - 7" );
             th2.Start( );
+            
+            BugCheck.Log( ">> TestWin32Threading << - SLEEP" );
 
             while(true)
             {

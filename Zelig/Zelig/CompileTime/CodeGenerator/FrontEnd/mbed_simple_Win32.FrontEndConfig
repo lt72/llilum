@@ -9,7 +9,6 @@
 -CompilationSetupPath ..\..\..\..\ZeligBuild\Host\bin\Debug\Microsoft.Llilum.BoardConfigurations.Win32.dll
 -CompilationSetup Microsoft.Llilum.BoardConfigurations.Win32CompilationSetup
 
-
 ###
 ### We need to include this assembly to get the right drivers.
 ###

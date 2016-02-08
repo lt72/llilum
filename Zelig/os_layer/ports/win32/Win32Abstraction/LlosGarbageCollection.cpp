@@ -1,5 +1,7 @@
 #include "LlosWin32.h"
-#include <llos_mutex.h>
+#include <llos_thread.h>
+#include <llos_interrupts.h>
+
 
 extern "C"
 {
@@ -45,12 +47,12 @@ extern "C"
         // Helpers for starting / ending section of code that needs to be atomic
         __inline void StartAtomicOperations(void)
         {
-            LLOS_MUTEX_Acquire(g_globalMutex, -1);
+            LLOS_INTERRUPTS_DisableInterruptsWithPriorityLevelLowerOrEqualTo(c_Priority__Highest);
         }
 
         __inline void EndAtomicOperations(void)
         {
-            LLOS_MUTEX_Release(g_globalMutex);
+            LLOS_INTERRUPTS_DisableInterruptsWithPriorityLevelLowerOrEqualTo(c_Priority__Lowest);
         }
 
         __inline void AddReferenceFast(Object* target)

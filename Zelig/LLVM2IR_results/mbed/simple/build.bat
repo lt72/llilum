@@ -73,7 +73,7 @@ IF %1.==. (
     SET LLILUM_TARGET_CPU=x86-64
     SET LLILUM_TARGET_TRIPLE=x86_64-pc-windows-msvc
     SET LLILUM_TARGET_ARCH=x86
-    SET LLILUM_TARGET_EXTRA=-function-sections -dwarf-version=3 
+    SET LLILUM_TARGET_EXTRA=-function-sections
     SET LLILUM_SKIP_LLC=0
     SET LWIP_USE=0
     ) ELSE (    

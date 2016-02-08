@@ -51,7 +51,10 @@ namespace Microsoft.CortexM3OnMBED
 
         private void WaitExpired(Drivers.SystemTimer.Timer sysTickTimer, ulong currentTime)
         {
-            WaitExpired(RT.SchedulerTime.FromUnits(currentTime));
+            using(RT.SmartHandles.InterruptState.Disable( ))
+            {
+                WaitExpired( RT.SchedulerTime.FromUnits( currentTime ) );
+            }
         }
     }
 }

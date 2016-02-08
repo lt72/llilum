@@ -2,11 +2,11 @@
 // Copyright (c) Microsoft Corporation.    All rights reserved.
 //
 
-namespace Microsoft.CortexM3OnMBED
+namespace Microsoft.DeviceModels.Runtime.Win32
 {
     using System;
 
-    using RT = Microsoft.Zelig.Runtime;
+    using RT   = Microsoft.Zelig.Runtime;
     using LLOS = Zelig.LlilumOSAbstraction;
 
 

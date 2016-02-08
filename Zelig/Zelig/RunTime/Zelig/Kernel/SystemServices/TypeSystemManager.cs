@@ -342,9 +342,10 @@ namespace Microsoft.Zelig.Runtime
         [TS.WellKnownMethod("TypeSystemManager_Throw")]
         public virtual void Throw(Exception obj)
         {
-            ThreadImpl.CurrentThread.CurrentException = obj;
-            UIntPtr exception = Unwind.LLOS_AllocateException(obj, Unwind.ExceptionClass);
-            Unwind.LLOS_Unwind_RaiseException(exception);
+            while(true) ;
+            //////ThreadImpl.CurrentThread.CurrentException = obj;
+            //////UIntPtr exception = Unwind.LLOS_AllocateException(obj, Unwind.ExceptionClass);
+            //////Unwind.LLOS_Unwind_RaiseException(exception);
         }
 
         [NoReturn]

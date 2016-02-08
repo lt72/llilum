@@ -198,12 +198,14 @@ namespace Microsoft.Zelig.Runtime
             //
             // Start the first active thread.
             //
+            BugCheck.Log( "================= m_mainThread.Start()..." );
             m_mainThread.Start();
 
             //
             // Long jump to the idle thread context, which will re-enable interrupts and 
             // cause the first context switch to the process stack of this thread
             //
+            BugCheck.Log( "================= bootstrapThread.SwappedOutContext.SwitchTo()..." );
             bootstrapThread.SwappedOutContext.SwitchTo();
         }
 
@@ -263,7 +265,9 @@ namespace Microsoft.Zelig.Runtime
 
         public virtual void Yield()
         {
+            BugCheck.Log( "Yield - prima" );
             BugCheck.AssertInterruptsOn();
+            BugCheck.Log( "Yield - dopo" );
 
             ThreadImpl thisThread = ThreadImpl.CurrentThread;
 
@@ -279,7 +283,9 @@ namespace Microsoft.Zelig.Runtime
 
         public virtual void SwitchToWait( Synchronization.WaitingRecord wr )
         {
+            BugCheck.Log( "SwitchToWait - prima" );
             BugCheck.AssertInterruptsOn();
+            BugCheck.Log( "SwitchToWait - dopo" );
 
             using(SmartHandles.InterruptState hnd = SmartHandles.InterruptState.Disable())
             {
@@ -320,9 +326,7 @@ namespace Microsoft.Zelig.Runtime
 
         public virtual void TimeQuantumExpired( )
         {
-#if !ARMv7
             BugCheck.AssertInterruptsOff( );
-#endif
 
             InsertInPriorityOrder( m_runningThread );
 
@@ -332,7 +336,7 @@ namespace Microsoft.Zelig.Runtime
         public virtual void SetNextQuantumTimerIfNeeded()
         {
             ThreadImpl nextThread = m_nextThread;
-
+            
             if(nextThread == m_idleThread)
             {
                 CancelQuantumTimer(); // No need to set a timer, we are just idling.
@@ -340,7 +344,7 @@ namespace Microsoft.Zelig.Runtime
             else
             {
                 ThreadImpl lastThread = m_readyThreads.LastTarget();
-
+                
                 //
                 // If the next thread is not an idle thread, there has to be a ready thread.
                 //
@@ -534,9 +538,9 @@ namespace Microsoft.Zelig.Runtime
             {
                 try
                 {
-                    //BugCheck.Log( "[MainThreads] !!! EXECUTING APP !!!" );
-                    //BugCheck.Log( "[MainThreads] !!! EXECUTING APP !!!" );
-                    //BugCheck.Log( "[MainThreads] !!! EXECUTING APP !!!" );
+                    BugCheck.Log( "[MainThreads] !!! EXECUTING APP !!!" );
+                    BugCheck.Log( "[MainThreads] !!! EXECUTING APP !!!" );
+                    BugCheck.Log( "[MainThreads] !!! EXECUTING APP !!!" );
 
                     Configuration.ExecuteApplication();
                 }

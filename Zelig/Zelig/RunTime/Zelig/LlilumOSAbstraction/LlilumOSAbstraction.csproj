@@ -64,6 +64,7 @@
     <Compile Include="HAL\Clock.cs" />
     <Compile Include="API\IO\Ethernet.cs" />
     <Compile Include="HAL\Mutex.cs" />
+    <Compile Include="HAL\Interrupts.cs" />
     <Compile Include="HAL\Thread.cs" />
     <Compile Include="HAL\Timer.cs" />
     <Compile Include="API\RuntimeMemory.cs" />
@@ -142,6 +143,9 @@
     </Content>
     <Content Include="..\..\..\..\os_layer\inc\hal\llos_clock.h">
       <Link>Native\HAL\llos_clock.h</Link>
+    </Content>
+    <Content Include="..\..\..\..\os_layer\inc\hal\llos_interrupts.h">
+      <Link>Native\HAL\llos_interrupts.h</Link>
     </Content>
     <Content Include="..\..\..\..\os_layer\inc\hal\llos_mutex.h">
       <Link>Native\HAL\llos_mutex.h</Link>

@@ -56,7 +56,7 @@ typedef enum LLOS_AsyncStatus
     LLOS_CompletedWithCancellation,
 } LLOS_AsyncStatus;
 
-typedef VOID(*LLOS_Callback)(LLOS_Context);
+typedef VOID(*LLOS_Callback   )(LLOS_Context);
 typedef VOID(*LLOS_ThreadEntry)(LLOS_Context);
 
 typedef struct LLOS_AddressRange

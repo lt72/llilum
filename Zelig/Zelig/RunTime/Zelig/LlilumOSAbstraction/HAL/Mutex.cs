@@ -10,9 +10,6 @@ namespace Microsoft.Zelig.LlilumOSAbstraction.HAL
     public static class Mutex
     {
         [DllImport( "C" )]
-        public static unsafe extern uint LLOS_MUTEX_CreateGlobalLock( ref UIntPtr mutexHandle );
-
-        [DllImport( "C" )]
         public static unsafe extern uint LLOS_MUTEX_Create( UIntPtr attributes, UIntPtr name, ref UIntPtr mutexHandle );
 
         [DllImport( "C" )]

@@ -79,11 +79,6 @@ namespace Microsoft.Zelig.Runtime
             {
                 get;
             }
-
-            public ThreadImpl OwnerThread
-            {
-                get { return m_owner; }
-            }
         }
 
         //
