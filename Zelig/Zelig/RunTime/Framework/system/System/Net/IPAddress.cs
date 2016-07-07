@@ -13,9 +13,12 @@ namespace System.Net
     [Serializable]
     public class IPAddress
     {
-
         public static readonly IPAddress Any = new IPAddress(0x0000000000000000);
-        public static readonly IPAddress Loopback = new IPAddress(0x000000000100007F);
+        public static readonly  IPAddress Loopback = new IPAddress(0x000000000100007F);
+        public static readonly  IPAddress Broadcast = new IPAddress(0x00000000FFFFFFFF);
+        public static readonly  IPAddress None = Broadcast;
+
+        internal const long LoopbackMask = 0x00000000000000FF;
 
         //--//
 
@@ -117,6 +120,43 @@ namespace System.Net
                     ((byte)(m_Address >> 16)).ToString() +
                     "." +
                     ((byte)(m_Address >> 24)).ToString();
+        }
+
+        public static bool IsLoopback( IPAddress address )
+        {
+            if(address == null)
+            {
+                throw new ArgumentNullException( "address" );
+            }
+            //////if(address.m_Family == AddressFamily.InterNetworkV6)
+            //////{
+            //////    //
+            //////    // Do Equals test for IPv6 addresses
+            //////    //
+            //////    return address.Equals( IPv6Loopback );
+            //////}
+            //////else
+            //////{
+                return ((address.m_Address & IPAddress.LoopbackMask) == (IPAddress.Loopback.m_Address & IPAddress.LoopbackMask));
+            //////}
+        }
+
+        internal bool IsBroadcast
+        {
+            get
+            {
+                //////if(m_Family == AddressFamily.InterNetworkV6)
+                //////{
+                //////    //
+                //////    // No such thing as a broadcast address for IPv6
+                //////    //
+                //////    return false;
+                //////}
+                //////else
+                //////{
+                    return m_Address == Broadcast.m_Address;
+                //////}
+            }
         }
 
         //--//

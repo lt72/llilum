@@ -10,6 +10,11 @@ namespace System.Net
 
     public static class Dns
     {
+        public static IPHostEntry GetHostEntry( IPAddress address )
+        {
+            return GetHostEntry( address.ToString( ) );
+        }
+
         public static IPHostEntry GetHostEntry(string hostNameOrAddress)
         {
             //Do we need to try to pase this as an Address????
@@ -45,7 +50,7 @@ namespace System.Net
                 }
             }
 
-            ipHostEntry.hostName = canonicalName;
+            ipHostEntry.hostName    = canonicalName;
             ipHostEntry.addressList = ipAddresses;
 
             return ipHostEntry;

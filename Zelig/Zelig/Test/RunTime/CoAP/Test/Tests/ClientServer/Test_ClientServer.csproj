@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{069A6E75-A9D5-4E67-BBD4-5F971C3EE98E}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Microsoft.Zelig.Test</RootNamespace>
+    <AssemblyName>Test_mscorlib</AssemblyName>
+    <AssemblyName>Microsoft.Zelig.Test.Runtime.Test_ClientServer</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <NoWarn>CS0618; CS0661; CS0660; CS0628; CS1058; CS0067; CS0108; CS0168; CS0109; CS0414; CS0626; CS1718; CS0675; 0CS0108; CS0162; CS0219; ; CS0164; CS0219; CS0649; CS0414; CS0169; CS0114; CS0251</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>full</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\..\..\..\ZeligBuild\Target\bin\Release\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DebugSymbols>true</DebugSymbols>
+    <NoWarn>CS0108; CS0162; CS0219; ; CS0164; CS0219; CS0649; CS0414; CS0169; CS0114; CS0251</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="CoApTestBase.cs" />
+    <Compile Include="MultiClient\TestMultiClient.cs" />
+    <Compile Include="NonIdempotent\TestNonIdempotentMethods.cs" />
+    <Compile Include="Options\TestContentFormat.cs" />
+    <Compile Include="Options\TestBadOptions.cs" />
+    <Compile Include="RequestResponse\TestUnsupportedMethods.cs" />
+    <Compile Include="RequestResponse\TestServerReset.cs" />
+    <Compile Include="RequestResponse\TestDelayedResponse.cs" />
+    <Compile Include="RequestResponse\TestPiggyBackedResponse.cs" />
+    <Compile Include="Uri\TestUris.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\..\RunTime\Framework\CoAP\CoAP.Common\CoAP.Common.csproj">
+      <Project>{8316dd5f-3130-423a-84a0-ddbe772b9784}</Project>
+      <Name>CoAP.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\..\RunTime\Framework\CoAP\CoAP.Stack\CoAP.Stack.csproj">
+      <Project>{e41d342a-fe06-46c2-a3b1-acb4a6143af3}</Project>
+      <Name>CoAP.Stack</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\..\RunTime\Framework\system\system.csproj">
+      <Project>{186f31a3-ef89-4a25-b2d5-20070702aa01}</Project>
+      <Name>system</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\..\RunTime\Framework\System_Core\system_core.csproj">
+      <Project>{186f31a3-ef89-4a25-b2d5-20080628aa01}</Project>
+      <Name>system_core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\Common\Test_Common.csproj">
+      <Project>{b649b569-516b-4c88-a7b1-ebd02e12dd99}</Project>
+      <Name>Test_Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ClientServerUtils\Test_ClientServerUtils.csproj">
+      <Project>{34776898-6675-4a69-82b2-7f95722ff768}</Project>
+      <Name>Test_ClientServerUtils</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

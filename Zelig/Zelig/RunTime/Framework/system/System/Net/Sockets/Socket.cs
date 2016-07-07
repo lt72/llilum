@@ -17,6 +17,7 @@ namespace System.Net.Sockets
         private  readonly bool       m_fBlocking     = true;
         internal          int        m_handle        = -1;
         private           EndPoint   m_localEndPoint = null;
+        private           bool       m_fBound        = false;
 
         // timeout values are stored in uSecs since the Poll method requires it.
         private int m_recvTimeout = System.Threading.Timeout.Infinite;
@@ -133,6 +134,14 @@ namespace System.Net.Sockets
             }
         }
 
+        public bool IsBound
+        {
+            get
+            {
+                return m_fBound;
+            }
+        }
+
         public void Bind(EndPoint localEP)
         {
             if (m_handle == -1)
@@ -141,6 +150,8 @@ namespace System.Net.Sockets
             }
 
             NativeSocket.bind(this.m_handle, localEP.Serialize().m_Buffer);
+
+            m_fBound = true;
 
             m_localEndPoint = localEP;
         }
@@ -162,6 +173,8 @@ namespace System.Net.Sockets
 
         public void Close()
         {
+            m_fBound = false;
+
             ((IDisposable)this).Dispose();
         }
 

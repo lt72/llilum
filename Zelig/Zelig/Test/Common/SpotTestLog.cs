@@ -27,9 +27,19 @@ namespace Microsoft.Zelig.Test
         /// This method is used to log any test comments.
         /// </summary>
         /// <param name="message">A string containing the test comments.</param>
-        public static void Comment(string message)
+        public static void Comment( string message )
         {
-            BugCheck.Log( "\t" + message );    
+            BugCheck.Log( "\t" + message );
+            //LocalComment(message, CommentType.Comment);
+        }
+
+        /// <summary>
+        /// This method is used to log any test comments.
+        /// </summary>
+        /// <param name="message">A string containing the test comments.</param>
+        public static void NewLine( )
+        {
+            BugCheck.Log( "\r\n" );
             //LocalComment(message, CommentType.Comment);
         }
 

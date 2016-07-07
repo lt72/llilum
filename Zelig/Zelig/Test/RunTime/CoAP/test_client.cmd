@@ -1,0 +1,1 @@
+%Cd%\Samples\CoAP.Samples.Server\bin\Debug\CoAP.Samples.Server.exe 
