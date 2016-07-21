@@ -229,7 +229,7 @@ namespace CoAP.Stack
                 }
             }
 
-            stream.Advance( ); 
+            stream.Advance( 1 ); 
 
             //
             // Complete option delta remainder

@@ -2,13 +2,15 @@
 // Copyright (c) Microsoft Corporation.    All rights reserved.
 //
 
+//#define DEBUG_PARSER
+
 namespace CoAP.Stack
 {
     using System;
+    using System.Diagnostics;
     using System.Threading;
     using System.Net;
     using CoAP.Common;
-
 
     public class MessageParser : IDisposable
     {
@@ -102,6 +104,8 @@ namespace CoAP.Stack
             }
 
             var stream = new NetworkOrderBinaryStream( buffer, offset, count );
+
+            stream.Encoding = Common.Defaults.Encoding;
 
             CoAPMessage.Error error = CoAPMessageRaw.Error.None; 
 
@@ -222,7 +226,7 @@ namespace CoAP.Stack
                 {
                     CheckAvailableAndLengthOrThrow( stream, 1, length );
                     
-                    var stringValue = stream.ReadString( length, Common.Defaults.Encoding ); 
+                    var stringValue = stream.ReadString( length ); 
 
                     opt = MessageOption_String.New( number, stringValue ); 
                 }
@@ -327,12 +331,13 @@ namespace CoAP.Stack
 
             return value;
         }
-
+        
         private static bool CheckAvailable( NetworkOrderBinaryStream stream, int count )
         {
             return stream.Available >= count;
         }
 
+        [Conditional( "DEBUG_PARSER" )]
         private static void CheckAvailableOrThrow( NetworkOrderBinaryStream stream, int count )
         {
             if(CheckAvailable( stream, count ) == false)
@@ -341,6 +346,7 @@ namespace CoAP.Stack
             }
         }
 
+        [Conditional( "DEBUG_PARSER" )]
         private static void CheckAvailableAndLengthOrThrow( NetworkOrderBinaryStream stream, int minimum, int advertized )
         {
             if(minimum > advertized || CheckAvailable( stream, advertized ) == false)

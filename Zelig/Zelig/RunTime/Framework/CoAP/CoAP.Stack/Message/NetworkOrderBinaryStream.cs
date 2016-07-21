@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.    All rights reserved.
 //
 
+
 namespace CoAP.Stack
 {
     using System;
@@ -44,13 +45,6 @@ namespace CoAP.Stack
         //
         // Helper methods
         //
-
-        internal void Advance()
-        {
-            ThrowOnOutofBounds( 1 );
-
-            m_current++;
-        }
 
         internal void Advance( int count )
         {
@@ -98,11 +92,11 @@ namespace CoAP.Stack
             m_current += count; 
         }
 
-        internal string ReadString( int count, Encoding encoding )
+        internal string ReadString( int count )
         {
             ThrowOnOutofBounds( 4 );
             
-            var s = encoding.GetString( m_buffer, m_current, count );
+            var s = this.Encoding.GetString( m_buffer, m_current, count );
 
             m_current += count; 
 
@@ -214,9 +208,10 @@ namespace CoAP.Stack
             }
         }
 
-        //--//
+        public Encoding Encoding { get; internal set; }
 
-        [Conditional("DEBUG")]
+        //--//
+        
         private void ThrowOnOutofBounds( int requested )
         {
             if(requested > this.Available)
