@@ -40,35 +40,35 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\RunTime\Framework\CoAP\CoAP.Client\CoAP.Client.csproj">
+    <ProjectReference Include="$(LlilumSourceRoot)\RunTime\Framework\CoAP\CoAP.Client\CoAP.Client.csproj">
       <Project>{7018cb11-072e-4f1f-9b38-8d1326dd9433}</Project>
       <Name>CoAP.Client</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\..\RunTime\Framework\CoAP\CoAP.Common\CoAP.Common.csproj">
+    <ProjectReference Include="$(LlilumSourceRoot)\RunTime\Framework\CoAP\CoAP.Common\CoAP.Common.csproj">
       <Project>{8316dd5f-3130-423a-84a0-ddbe772b9784}</Project>
       <Name>CoAP.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\..\RunTime\Framework\CoAP\CoAP.Server\CoAP.Server.csproj">
+    <ProjectReference Include="$(LlilumSourceRoot)\RunTime\Framework\CoAP\CoAP.Server\CoAP.Server.csproj">
       <Project>{61884666-9bc2-43e9-969d-aa1f8e5cf93e}</Project>
       <Name>CoAP.Server</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\..\RunTime\Framework\CoAP\CoAP.Stack\CoAP.Stack.csproj">
+    <ProjectReference Include="$(LlilumSourceRoot)\RunTime\Framework\CoAP\CoAP.Stack\CoAP.Stack.csproj">
       <Project>{e41d342a-fe06-46c2-a3b1-acb4a6143af3}</Project>
       <Name>CoAP.Stack</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\..\RunTime\Framework\CoAP\Transports\CoAP.UdpTransport\CoAP.UdpTransport.csproj">
+    <ProjectReference Include="$(LlilumSourceRoot)\RunTime\Framework\CoAP\Transports\CoAP.UdpTransport\CoAP.UdpTransport.csproj">
       <Project>{f4f92ede-ad4b-407f-95d0-47dbde27c880}</Project>
       <Name>CoAP.UdpTransport</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\Common\Test_Common.csproj">
+    <ProjectReference Include="$(LlilumSourceRoot)\Test\Common\Test_Common.csproj">
       <Project>{b649b569-516b-4c88-a7b1-ebd02e12dd99}</Project>
       <Name>Test_Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ClientServerUtils\Test_ClientServerUtils.csproj">
+    <ProjectReference Include="$(LlilumSourceRoot)\Test\RunTime\CoAP\Test\ClientServerUtils\Test_ClientServerUtils.csproj">
       <Project>{34776898-6675-4a69-82b2-7f95722ff768}</Project>
       <Name>Test_ClientServerUtils</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Tests\ClientServer\Test_ClientServer.csproj">
+    <ProjectReference Include="$(LlilumSourceRoot)\Test\RunTime\CoAP\Test\Tests\ClientServer\Test_ClientServer.csproj">
       <Project>{069a6e75-a9d5-4e67-bbd4-5f971c3ee98e}</Project>
       <Name>Test_ClientServer</Name>
     </ProjectReference>

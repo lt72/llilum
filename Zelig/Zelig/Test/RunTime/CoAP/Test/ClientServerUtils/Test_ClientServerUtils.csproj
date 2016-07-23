@@ -81,10 +81,6 @@
       <Project>{186f31a3-ef89-4a25-b2d5-20070702aa01}</Project>
       <Name>system</Name>
     </ProjectReference>
-    <ProjectReference Include="$(LlilumSourceRoot)\RunTime\Framework\CoAP\CoAP.Client\CoAP.Client.csproj">
-      <Project>{7018cb11-072e-4f1f-9b38-8d1326dd9433}</Project>
-      <Name>CoAP.Client</Name>
-    </ProjectReference>
     <ProjectReference Include="$(LlilumSourceRoot)\RunTime\Framework\CoAP\CoAP.Common\CoAP.Common.csproj">
       <Project>{8316dd5f-3130-423a-84a0-ddbe772b9784}</Project>
       <Name>CoAP.Common</Name>
@@ -104,6 +100,10 @@
     <ProjectReference Include="$(LlilumSourceRoot)\RunTime\Framework\CoAP\Transports\CoAP.UdpTransport\CoAP.UdpTransport.csproj">
       <Project>{f4f92ede-ad4b-407f-95d0-47dbde27c880}</Project>
       <Name>CoAP.UdpTransport</Name>
+    </ProjectReference>
+    <ProjectReference Include="$(LlilumSourceRoot)\RunTime\Framework\CoAP\CoAP.Client\CoAP.Client.csproj">
+      <Project>{7018cb11-072e-4f1f-9b38-8d1326dd9433}</Project>
+      <Name>CoAP.Client</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />
