@@ -4,13 +4,12 @@
 
 namespace CoAP.Server
 {
-    using CoAP.Stack.Abstractions;
     using CoAP.Common.Diagnostics;
 
 
-    public partial class MessageProcessor
+    internal partial class MessageProcessor
     {
-        internal class ProcessingState_ResetReceived : ProcessingState
+        internal sealed class ProcessingState_ResetReceived : ProcessingState
         {
             private ProcessingState_ResetReceived( )
             {
@@ -25,15 +24,15 @@ namespace CoAP.Server
             // Mhelper methods
             // 
 
-            public override void Process( )
+            internal override void Process( )
             {
                 var processor = this.Processor;
 
-                processor.Engine.Owner.Statistics.ResetsReceived++;
+                processor.MessageEngine.Owner.Statistics.ResetsReceived++;
 
                 var messageCtx = processor.MessageContext;
 
-                Logger.Instance.LogWarning( $"==(S)==> Received RESET from {messageCtx.Source}: '{messageCtx.Message}'" );
+                Logger.Instance.LogWarning( $"==[S({this.Processor.MessageEngine.LocalEndPoint})]==> Rx RESET ID={messageCtx.Message.MessageId} from {messageCtx.Source}: '{messageCtx.Message}'" );
 
                 Advance( ProcessingState.State.Archive );
             }

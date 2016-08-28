@@ -61,15 +61,19 @@
   <ItemGroup>
     <Compile Include="CoApTestAsserts.cs" />
     <Compile Include="MessagingMockHandler.cs" />
-    <Compile Include="Resources\EchoProvider.cs" />
-    <Compile Include="Resources\EchoProvider_Delayed.cs" />
+    <Compile Include="ResourceProvider\EchoProvider.cs" />
+    <Compile Include="ResourceProvider\EchoProviderProxy.cs" />
+    <Compile Include="ResourceProvider\EchoProviderProxy_Delayed.cs" />
+    <Compile Include="ResourceProvider\EchoProviderProxy_Immediate.cs" />
+    <Compile Include="ResourceProvider\EchoProvider_Delayed.cs" />
+    <Compile Include="ResourceProvider\EchoProvider_Immediate.cs" />
+    <Compile Include="ResourceProvider\PingProvider.cs" />
     <Compile Include="ServerMessagingMock.cs" />
     <Compile Include="TestConstants.cs" />
     <Compile Include="ClientMessagingMock.cs" />
-    <Compile Include="Resources\EchoProvider_Immediate.cs" />
     <Compile Include="UdpTestClient.cs" />
+    <Compile Include="UdpTestProxyServer.cs" />
     <Compile Include="UdpTestServer.cs" />
-    <Compile Include="Resources\PingProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(LlilumSourceRoot)\RunTime\Framework\mscorlib\mscorlib.csproj">

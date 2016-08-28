@@ -12,8 +12,10 @@ namespace CoAP.Common.Diagnostics
 
         void LogSuccess( string msg );
 
-        void LogError( string msg );
-
         void LogWarning( string msg );
+
+        void LogProtocolError( string msg );
+
+        void LogError( string msg );
     }
 }

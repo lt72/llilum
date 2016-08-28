@@ -20,10 +20,11 @@ namespace Microsoft.SPOT.Platform.Tests
         public override TestResult Run( string[ ] args )
         {
             TestResult res = TestResult.Pass;
-            
+
             res |= EmptyReset_CoAPPing                        ( );
             res |= EmptyReset_CoAPPing_HostAndPort            ( );
             res |= VanillaRequestResponse_Confirmable         ( );
+            res |= VanillaRequestResponse_NonConfirmable      ( );
             res |= VanillaRequestResponse__Confirmable__Twice ( );
             res |= DropResponseOnce__Confirmable              ( );
             res |= DropRequestOnce__Confirmable               ( );
@@ -70,15 +71,15 @@ namespace Microsoft.SPOT.Platform.Tests
                 ResetsSent       = 1,
             };
 
-            ClearStatistics( );
+            ClearCachesAndStatistics( );
 
-            var resource = TestConstants.Resource__PingForAck_Immediate;
+            var resource = TestConstants.Resource__CoAPPing;
 
             try
             {
                 var messageBuilder = m_client.Connect( null, resource );
 
-                var request = messageBuilder.CreateEmptyRequest().BuildAndReset( );
+                var request = messageBuilder.CreateEmptyRequest().Build( );
 
                 var response = m_client.MakeRequest( request );
 
@@ -95,7 +96,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 CoApTestAsserts.Assert_SameToken( request, response );
 
                 CoApTestAsserts.Assert_Statistics( m_client.Statistics, desiredClientStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
-                CoApTestAsserts.Assert_Statistics( m_server.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
+                CoApTestAsserts.Assert_Statistics( m_localProxyServer.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
             }
             finally
             {
@@ -123,9 +124,9 @@ namespace Microsoft.SPOT.Platform.Tests
                 ResetsSent       = 1,
             };
 
-            ClearStatistics( );
+            ClearCachesAndStatistics( );
 
-            var resource = TestConstants.Resource__PingForAck_Immediate;
+            var resource = TestConstants.Resource__CoAPPing;
 
             try
             {
@@ -133,8 +134,8 @@ namespace Microsoft.SPOT.Platform.Tests
 
                 var request = messageBuilder.CreateEmptyRequest()
                     .WithOption( MessageOption_String.New( MessageOption.OptionNumber.Uri_Host, "localhost" ))
-                    .WithOption( MessageOption_UInt  .New( MessageOption.OptionNumber.Uri_Port, 8080        ))
-                    .BuildAndReset( );
+                    .WithOption( MessageOption_Int  .New( MessageOption.OptionNumber.Uri_Port, 8080        ))
+                    .Build( );
 
                 var response = m_client.MakeRequest( request );
 
@@ -151,7 +152,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 CoApTestAsserts.Assert_SameToken( request, response );
 
                 CoApTestAsserts.Assert_Statistics( m_client.Statistics, desiredClientStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
-                CoApTestAsserts.Assert_Statistics( m_server.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
+                CoApTestAsserts.Assert_Statistics( m_localProxyServer.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
             }
             finally
             {
@@ -180,7 +181,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 ImmediateResposesSent = 1,
             };
 
-            ClearStatistics( );
+            ClearCachesAndStatistics( );
 
             var resource = TestConstants.Resource__PingForAck_Immediate;
 
@@ -188,15 +189,17 @@ namespace Microsoft.SPOT.Platform.Tests
             {
                 var messageBuilder = m_client.Connect( null, resource );
 
+                // res/ping-send-back-ack-immediate
+
                 var request = messageBuilder
                     .WithVersion    ( CoAPMessage.ProtocolVersion.Version_1 )
                     .WithType       ( CoAPMessage.MessageType.Confirmable )
                     .WithTokenLength( Defaults.TokenLength )
                     .WithRequestCode( CoAPMessage.Detail_Request.GET )
-                    .WithOption     ( MessageOption_String.New( MessageOption.OptionNumber.Uri_Path, resource.Path ) )
-                    .BuildAndReset( );
-
-
+                    .WithOption     ( MessageOption_String.New( MessageOption.OptionNumber.Uri_Path, "res" ) )
+                    .WithOption     ( MessageOption_String.New( MessageOption.OptionNumber.Uri_Path, "ping-send-back-ack-immediate" ) )
+                    .Build( );
+                
                 var response = m_client.MakeRequest( request );
 
                 if(response == null)
@@ -212,7 +215,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 CoApTestAsserts.Assert_SameToken( request, response );
 
                 CoApTestAsserts.Assert_Statistics( m_client.Statistics, desiredClientStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
-                CoApTestAsserts.Assert_Statistics( m_server.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
+                CoApTestAsserts.Assert_Statistics( m_localProxyServer.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
             }
             finally
             {
@@ -241,7 +244,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 ImmediateResposesSent = 1,
             };
 
-            ClearStatistics( );
+            ClearCachesAndStatistics( );
 
             var resource = TestConstants.Resource__PingForAck_Immediate;
 
@@ -254,8 +257,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 .WithType       ( CoAPMessage.MessageType.NonConfirmable )
                 .WithTokenLength( Defaults.TokenLength )
                 .WithRequestCode( CoAPMessage.Detail_Request.GET )
-                .WithOption     ( MessageOption_String.New( MessageOption.OptionNumber.Uri_Path, resource.Path ) )
-                .BuildAndReset( );
+                .Build( );
 
 
                 var response = m_client.MakeRequest( request );
@@ -267,13 +269,13 @@ namespace Microsoft.SPOT.Platform.Tests
                 }
 
                 CoApTestAsserts.Assert_Version( response, CoAPMessage.ProtocolVersion.Version_1 );
-                CoApTestAsserts.Assert_Type( response, new CoAPMessage.MessageType[ ] { CoAPMessage.MessageType.Confirmable, CoAPMessage.MessageType.NonConfirmable } );
+                CoApTestAsserts.Assert_Type( response, CoAPMessage.MessageType.Acknowledgement );
                 CoApTestAsserts.Assert_Code( response, CoAPMessage.Class.Success, CoAPMessage.Detail_Success.Content );
                 CoApTestAsserts.Assert_SameMessageId( request, response );
                 CoApTestAsserts.Assert_SameToken( request, response );
 
                 CoApTestAsserts.Assert_Statistics( m_client.Statistics, desiredClientStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
-                CoApTestAsserts.Assert_Statistics( m_server.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
+                CoApTestAsserts.Assert_Statistics( m_localProxyServer.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
             }
             finally
             {
@@ -302,7 +304,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 ImmediateResposesSent = 2,
             };
 
-            ClearStatistics( );
+            ClearCachesAndStatistics( );
 
             var resource = TestConstants.Resource__PingForAck_Immediate;
 
@@ -310,15 +312,14 @@ namespace Microsoft.SPOT.Platform.Tests
             {
                 var messageBuilder = m_client.Connect( null, resource );
 
-                var request = messageBuilder
-                .WithVersion    ( CoAPMessage.ProtocolVersion.Version_1 )
-                .WithType       ( CoAPMessage.MessageType.Confirmable )
-                .WithTokenLength( Defaults.TokenLength )
-                .WithRequestCode( CoAPMessage.Detail_Request.GET )
-                .WithOption     ( MessageOption_String.New( MessageOption.OptionNumber.Uri_Path, resource.Path ) )
-                .BuildAndReset( );
+                var request1 = messageBuilder
+                    .WithVersion    ( CoAPMessage.ProtocolVersion.Version_1 )
+                    .WithType       ( CoAPMessage.MessageType.Confirmable )
+                    .WithTokenLength( Defaults.TokenLength )
+                    .WithRequestCode( CoAPMessage.Detail_Request.GET )
+                    .Build( );
 
-                var response1 = m_client.MakeRequest( request );
+                var response1 = m_client.MakeRequest( request1 );
 
                 if(response1 == null)
                 {
@@ -326,23 +327,29 @@ namespace Microsoft.SPOT.Platform.Tests
                     return TestResult.Fail;
                 }
 
-                CoApTestAsserts.Assert_Version( response1, CoAPMessage.ProtocolVersion.Version_1 );
-                CoApTestAsserts.Assert_Type( response1, CoAPMessage.MessageType.Acknowledgement );
-                CoApTestAsserts.Assert_Code( response1, CoAPMessage.Class.Success, CoAPMessage.Detail_Success.Content );
-                CoApTestAsserts.Assert_SameMessageId( request, response1 );
-                CoApTestAsserts.Assert_SameToken( request, response1 );
+                CoApTestAsserts.Assert_Version      ( response1, CoAPMessage.ProtocolVersion.Version_1 );
+                CoApTestAsserts.Assert_Type         ( response1, CoAPMessage.MessageType.Acknowledgement );
+                CoApTestAsserts.Assert_Code         ( response1, CoAPMessage.Class.Success, CoAPMessage.Detail_Success.Content );
+                CoApTestAsserts.Assert_SameMessageId( request1, response1 );
+                CoApTestAsserts.Assert_SameToken    ( request1, response1 );
 
+                var request2 = messageBuilder
+                    .WithVersion    ( CoAPMessage.ProtocolVersion.Version_1 )
+                    .WithType       ( CoAPMessage.MessageType.Confirmable )
+                    .WithTokenLength( Defaults.TokenLength )
+                    .WithRequestCode( CoAPMessage.Detail_Request.GET )
+                    .Build( );
 
-                var response2 = m_client.MakeRequest( request );
+                var response2 = m_client.MakeRequest( request2 );
 
-                CoApTestAsserts.Assert_Version( response2, CoAPMessage.ProtocolVersion.Version_1 );
-                CoApTestAsserts.Assert_Type( response2, CoAPMessage.MessageType.Acknowledgement );
-                CoApTestAsserts.Assert_Code( response2, CoAPMessage.Class.Success, CoAPMessage.Detail_Success.Content );
-                CoApTestAsserts.Assert_SameMessageId( request, response2 );
-                CoApTestAsserts.Assert_SameToken( request, response2 );
+                CoApTestAsserts.Assert_Version      ( response2, CoAPMessage.ProtocolVersion.Version_1 );
+                CoApTestAsserts.Assert_Type         ( response2, CoAPMessage.MessageType.Acknowledgement );
+                CoApTestAsserts.Assert_Code         ( response2, CoAPMessage.Class.Success, CoAPMessage.Detail_Success.Content );
+                CoApTestAsserts.Assert_SameMessageId( request2, response2 );
+                CoApTestAsserts.Assert_SameToken    ( request2, response2 );
 
-                CoApTestAsserts.Assert_Statistics( m_client.Statistics, desiredClientStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
-                CoApTestAsserts.Assert_Statistics( m_server.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
+                CoApTestAsserts.Assert_Statistics( m_client          .Statistics, desiredClientStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
+                CoApTestAsserts.Assert_Statistics( m_localProxyServer.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
             }
             finally
             {
@@ -371,7 +378,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 ResetsSent              = 2,
             };
 
-            ClearStatistics( );
+            ClearCachesAndStatistics( );
 
             try
             {
@@ -389,7 +396,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 // 
                 var messageBuilder = m_client.Connect( null, resource );
 
-                var request = messageBuilder.CreateEmptyRequest().BuildAndReset( );
+                var request = messageBuilder.CreateEmptyRequest().Build( );
 
                 var response = m_client.MakeRequest( request );
 
@@ -405,8 +412,8 @@ namespace Microsoft.SPOT.Platform.Tests
                 CoApTestAsserts.Assert_SameMessageId( request, response );
                 CoApTestAsserts.Assert_SameToken( request, response );
 
-                CoApTestAsserts.Assert_Statistics( m_client.Statistics, desiredClientStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
-                CoApTestAsserts.Assert_Statistics( m_server.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
+                CoApTestAsserts.Assert_Statistics( m_client.Statistics     , desiredClientStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
+                CoApTestAsserts.Assert_Statistics( m_localProxyServer.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
             }
             finally
             {
@@ -440,7 +447,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 ResetsSent = 1,
             };
 
-            ClearStatistics( );
+            ClearCachesAndStatistics( );
 
             try
             {
@@ -457,7 +464,7 @@ namespace Microsoft.SPOT.Platform.Tests
 
                 var messageBuilder = m_client.Connect( null, resource );
 
-                var request = messageBuilder.CreateEmptyRequest().BuildAndReset( );
+                var request = messageBuilder.CreateEmptyRequest().Build( );
 
                 var response = m_client.MakeRequest( request );
 
@@ -473,8 +480,8 @@ namespace Microsoft.SPOT.Platform.Tests
                 CoApTestAsserts.Assert_SameMessageId( request, response );
                 CoApTestAsserts.Assert_SameToken( request, response );
 
-                CoApTestAsserts.Assert_Statistics( m_client.Statistics, desiredClientStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
-                CoApTestAsserts.Assert_Statistics( m_server.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
+                CoApTestAsserts.Assert_Statistics( m_client.Statistics     , desiredClientStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
+                CoApTestAsserts.Assert_Statistics( m_localProxyServer.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
             }
             finally
             {
@@ -506,7 +513,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 ImmediateResposesSent = 1,
             };
 
-            ClearStatistics( );
+            ClearCachesAndStatistics( );
 
             var resource = TestConstants.Resource__NotFound_Immediate;
 
@@ -519,8 +526,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 .WithType       ( CoAPMessage.MessageType.Confirmable )
                 .WithTokenLength( Defaults.TokenLength )
                 .WithRequestCode( CoAPMessage.Detail_Request.GET )
-                .WithOption     ( MessageOption_String.New( MessageOption.OptionNumber.Uri_Path, resource.Path ) )
-                .BuildAndReset( );
+                .Build( );
 
 
                 var response = m_client.MakeRequest( request );
@@ -538,7 +544,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 CoApTestAsserts.Assert_SameToken( request, response );
 
                 CoApTestAsserts.Assert_Statistics( m_client.Statistics, desiredClientStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
-                CoApTestAsserts.Assert_Statistics( m_server.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
+                CoApTestAsserts.Assert_Statistics( m_localProxyServer.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
             }
             finally
             {

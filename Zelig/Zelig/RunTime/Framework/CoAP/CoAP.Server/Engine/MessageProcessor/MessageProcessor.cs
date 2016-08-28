@@ -4,131 +4,22 @@
 
 namespace CoAP.Server
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Threading;
     using CoAP.Common;
     using CoAP.Common.Diagnostics;
     using CoAP.Stack;
-    using CoAP.Stack.Abstractions;
 
 
-    public abstract partial class MessageProcessor
+    internal partial class MessageProcessor : FixedMessageProcessor
     {
-        public abstract class ProcessingState
-        {
-            public enum State
-            {
-                MessageReceived,
-                DelayedProcessing,
-                ImmediateResponseAvailable,
-                DelayedResponseAvailable,
-                RetransmitDelayedResponse,
-                SendReset,
-                ResetReceived,
-                AwaitingAck,
-                AckReceived,
-                BadOptions,
-                Error,
-                Archive,
-            }
-
-            //
-            // State
-            //
-
-            protected MessageProcessor m_processor; 
-
-            //--//
-
-            protected ProcessingState( )
-            {
-            }
-
-            internal static ProcessingState Create( State state )
-            {
-                // TODO: pool or pre-allocate states
-                switch(state)
-                {
-                    case State.MessageReceived:
-                        return ProcessingState_MessageReceived.Get( );
-                    case State.ImmediateResponseAvailable:
-                        return ProcessingState_ImmediateResponseAvailable.Get( );
-                    case State.DelayedProcessing:
-                        return ProcessingState_DelayedProcessing.Get( );
-                    case State.DelayedResponseAvailable:
-                        return ProcessingState_DelayedResponseAvailable.Get( );
-                    case State.RetransmitDelayedResponse:
-                        return ProcessingState_RetransmitDelayedResponse.Get( );
-                    case State.SendReset:
-                        return ProcessingState_SendReset.Get( );
-                    case State.ResetReceived:
-                        return ProcessingState_ResetReceived.Get( );
-                    case State.AwaitingAck:
-                        return ProcessingState_AwaitingAck.Get( );
-                    case State.AckReceived:
-                        return ProcessingState__AckReceived.Get( );
-                    case State.Archive:
-                        return ProcessingState_Archive.Get( );
-                    case State.BadOptions:
-                        return MessageProcessor__BadOptions.Get( ); 
-                    case State.Error:
-                        return ProcessingState_Error.Get( );
-                    default:
-                        throw new InvalidOperationException( );
-                }
-            }
-
-            //
-            // Helper methods
-            // 
-
-            public virtual void Process( )
-            {
-            }
-
-            public void SetProcessor( MessageProcessor processor )
-            {
-                m_processor = processor;
-            }
-            
-            protected void Advance( ProcessingState.State stateFlag )
-            {
-                var state = ProcessingState.Create( stateFlag );
-
-                state.SetProcessor( m_processor );
-
-                m_processor.State =  state;
-
-                m_processor.Process( );
-            }
-
-            //
-            // Access methods
-            // 
-
-            protected MessageProcessor Processor
-            {
-                get
-                {
-                    return m_processor;
-                }
-            }
-        }
-
-        //--//
-
         //
         // State
         // 
 
-        private readonly MessageContext   m_messageCtx;
-        protected        ProcessingState  m_state;
-        private          Timer            m_ackTimer;
-        private          int              m_ackRetries;
         private readonly MessageBuilder   m_messageBuilder;
-        private readonly MessageEngine    m_owner;
+        private          Timer            m_ackAndLifeTimeTrackingTimer;
+        private          int              m_ackRetries;
+        private          ResourceHandler  m_resourceHandler;
 
         //--//
 
@@ -136,68 +27,84 @@ namespace CoAP.Server
         // Constructors 
         // 
 
-        public MessageProcessor( MessageContext messageCtx, ProcessingState state, MessageEngine owner )
+        internal MessageProcessor( MessageContext messageCtx, ProcessingState state, MessageEngine owner ) : base( messageCtx, state, owner )
         {
-            m_messageCtx     = messageCtx;
-            m_owner          = owner;
-            m_state          = state;
-            m_messageBuilder = MessageBuilder.Create( owner.Owner.EndPoints[ 0 ] );
+            m_messageBuilder = MessageBuilder.Create( owner.OriginEndPoints[ 0 ] );
         }
 
         //
         // Helper methods
         // 
 
-        public abstract void Process( );
-        
-        public ProcessingState State
-        {
-            get
-            {
-                return m_state;
-            }
-            set
-            {
-                m_state = value;
-            }
-        }
-
-        public MessageEngine Engine
-        {
-            get
-            {
-                return m_owner;
-            }
-        }
-
-        public MessageBuilder MessageBuilder
-        {
-            get
-            {
-                return m_messageBuilder;
-            }
-        }
-
-        public MessageContext MessageContext
-        {
-            get
-            {
-                return m_messageCtx;
-            }
-        }
-                
-        public void StartTrackingAck( int timeout )
+        internal void StartExchangeLifeTimeTrackingTimer( int timeout )
         {
             //
             // Do not track twice!!!
             //
-            if(m_ackTimer == null)
+            if(m_ackAndLifeTimeTrackingTimer == null)
             {
-                lock (this)
+                lock(this)
                 {
-                    if(m_ackTimer != null)
+                    if(m_ackAndLifeTimeTrackingTimer != null)
                     {
-                        Logger.Instance.LogWarning( $"***(S)*** ACK timer already exists." );
+                        Logger.Instance.LogWarning( $"***[S({this.MessageEngine.LocalEndPoint})]*** EXCHANGE_LIFETIME timer already exists." );
+                        return;
+                    }
+
+                    //
+                    // Create timer object
+                    // 
+                    var lifeTimeTimer = new Timer( ( obj ) =>
+                    {
+                        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        // Capture MessageProcessor instance that will process the ACK: it is NOT the instance 
+                        // attached to the context at the time we receive the ACK!
+                        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+                        var proc       = this;
+                        var messageCtx = proc.MessageContext;
+                        var id         = messageCtx.ResponseAwaitingAck.MessageId;
+                        
+                        //
+                        // If timer timed out, archive...
+                        //
+                        Logger.Instance.LogWarning( $"***[S({this.MessageEngine.LocalEndPoint})]*** EXCHANGE_LIFETIME for response with message ID '{id}' timed out, archiving..." );
+
+                        var state = MessageProcessor.ProcessingState.Create( MessageProcessor.ProcessingState.State.Archive );
+
+                        proc.State = state;
+
+                        state.SetProcessor( proc );
+
+                        proc.Process( );
+
+                    }, this, Timeout.Infinite, Timeout.Infinite );
+
+                    //
+                    // Assign state and start timer
+                    // 
+                    m_ackAndLifeTimeTrackingTimer = lifeTimeTimer;
+
+                    m_ackAndLifeTimeTrackingTimer.Change( timeout, timeout );
+
+                    Logger.Instance.Log( $"***[S({this.MessageEngine.LocalEndPoint})]*** Started tracking EXCHANGE_LIFETIME for response with message ID '{this.MessageContext.ResponseAwaitingAck.MessageId}'." );
+                }
+            }
+        }
+
+
+        internal void StartAckTrackingTimer( int timeout )
+        {
+            //
+            // Do not track twice!!!
+            //
+            if(m_ackAndLifeTimeTrackingTimer == null)
+            {
+                lock(this)
+                {
+                    if(m_ackAndLifeTimeTrackingTimer != null)
+                    {
+                        Logger.Instance.LogWarning( $"***[S({this.MessageEngine.LocalEndPoint})]*** ACK timer already exists." );
                         return;
                     }
 
@@ -206,9 +113,14 @@ namespace CoAP.Server
                     // 
                     var ackTimer = new Timer( ( obj ) =>
                     {
+                        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        // Capture MessageProcessor instance that will process the ACK: it is NOT the instance 
+                        // attached to the context at the time we receive the ACK!
+                        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
                         var proc       = this;
                         var messageCtx = proc.MessageContext;
-                        var id         = messageCtx.Response.MessageId;
+                        var id         = messageCtx.ResponseAwaitingAck.MessageId;
 
                         //Debug.Assert( proc                 == this );
                         //Debug.Assert( messageCtx.Processor == this );
@@ -216,11 +128,11 @@ namespace CoAP.Server
                         //
                         // Timer may have been in fight before it got disabled, so check and bail out in case.
                         // 
-                        if(m_owner.IsAckPending( id ) == false)
+                        if(this.MessageEngine.IsAckPending( messageCtx.ResponseAwaitingAck.Context ) == false)
                         {
-                            m_ackTimer.Dispose( );
+                            m_ackAndLifeTimeTrackingTimer.Dispose( );
 
-                            Logger.Instance.Log( $"***(S)*** ACK for response with message ID '{id}' expired after reponse was not tracked." );
+                            Logger.Instance.Log( $"***[S({this.MessageEngine.LocalEndPoint})]*** ACK for response with message ID '{id}' expired after reponse was not tracked." );
 
                             return;
                         }
@@ -231,13 +143,17 @@ namespace CoAP.Server
                             // If timer exceeded number of retries, move to error state 
                             //
 
-                            m_ackTimer.Dispose( );
+                            m_ackAndLifeTimeTrackingTimer.Dispose( );
 
-                            Logger.Instance.LogError( $"***(S)*** ACK for response with message ID '{id}' was not received." );
+                            Logger.Instance.LogError( $"***[S({this.MessageEngine.LocalEndPoint})]*** ACK for response with message ID '{id}' was not received." );
 
-                            messageCtx.Error = CoAPMessage.Error.Processing__AckNotReceived;
+                            messageCtx.ProtocolError = CoAPMessage.Error.Processing__AckNotReceived;
 
-                            proc.State = MessageProcessor.ProcessingState.Create( MessageProcessor.ProcessingState.State.Error );
+                            var state = MessageProcessor.ProcessingState.Create( MessageProcessor.ProcessingState.State.Error );
+
+                            proc.State = state;
+
+                            state.SetProcessor( proc );
 
                             proc.Process( );
                         }
@@ -247,9 +163,13 @@ namespace CoAP.Server
                             // If timer timed out, re-send the message, please note that we need to 
                             // perform this action on the original MessageProcessor instance
                             //
-                            Logger.Instance.LogWarning( $"***(S)*** ACK for response with message ID '{id}' timed out, retrying..." );
+                            Logger.Instance.LogWarning( $"***[S({this.MessageEngine.LocalEndPoint})]*** ACK for response with message ID '{id}' timed out, retrying..." );
 
-                            proc.State = MessageProcessor.ProcessingState.Create( MessageProcessor.ProcessingState.State.RetransmitDelayedResponse );
+                            var state = MessageProcessor.ProcessingState.Create( MessageProcessor.ProcessingState.State.RetransmitDelayedResponse );
+
+                            proc.State = state;
+
+                            state.SetProcessor( proc );
 
                             proc.Process( );
                         }
@@ -259,17 +179,23 @@ namespace CoAP.Server
                     //
                     // Assign state and start timer
                     // 
-                    m_ackRetries = TransmissionParameters.MAX_RETRANSMIT;
-                    m_ackTimer   = ackTimer;
+                    m_ackRetries                  = TransmissionParameters.MAX_RETRANSMIT;
+                    m_ackAndLifeTimeTrackingTimer = ackTimer;
 
-                    m_ackTimer.Change( timeout, timeout );
+                    m_ackAndLifeTimeTrackingTimer.Change( timeout, Timeout.Infinite );
 
-                    Logger.Instance.Log( $"***(S)*** Started tracking ACK for response with message ID '{m_messageCtx.Response.MessageId}'." );
+                    Logger.Instance.Log( $"***[S({this.MessageEngine.LocalEndPoint})]*** Started tracking ACK for response with message ID '{this.MessageContext.ResponseAwaitingAck.MessageId}'." );
                 }
+            }
+            else
+            {
+                m_ackAndLifeTimeTrackingTimer.Change( timeout * ((TransmissionParameters.MAX_RETRANSMIT - m_ackRetries) * 2), Timeout.Infinite );
+
+                Logger.Instance.Log( $"***[S({this.MessageEngine.LocalEndPoint})]*** Started tracking ACK for response with message ID '{this.MessageContext.ResponseAwaitingAck.MessageId}'." );
             }
         }
 
-        public void StopTrackingAck( MessageContext messageCtx )
+        internal void StopAckTrackingTimer( MessageContext messageCtx )
         {
             //
             // Find the MessageContext associated with the token the ACK was sent for and 
@@ -280,36 +206,52 @@ namespace CoAP.Server
             var id = messageCtx.Message.MessageId;
 
             //
-            // Find original MessageProcessor whose ACK is beign tracked and stop the re-transmission timer
+            // Find original MessageProcessor whose ACK is being tracked and stop the re-transmission timer
             //
             MessageProcessor proc = null;
-            if(m_owner.TryRemoveAckPending( id, out proc ))
+            if(this.MessageEngine.TryRemoveAckPending( messageCtx.Message.Context, out proc ))
             {
-                Logger.Instance.Log( $"***(S)*** Stop tracking ACK for response with message ID '{id}'." );
-
-                //Debug.Assert( messageCtx != null );
+                Logger.Instance.Log( $"***[S({this.MessageEngine.LocalEndPoint})]*** Stop tracking ACK for response with message ID '{id}'." );
                 
-                proc.m_ackTimer.Dispose( );
-
-                m_state = MessageProcessor.ProcessingState.Create( MessageProcessor.ProcessingState.State.Archive );
-
-                Process( );
+                proc.m_ackAndLifeTimeTrackingTimer.Dispose( );
             }
             else
             {
-                Logger.Instance.LogWarning( $"***(S)*** Bad attempt at stop tracking ACK for response with message ID '{id}'." );
+                Logger.Instance.LogError( $"***[S({this.MessageEngine.LocalEndPoint})]*** Bad attempt at stop tracking ACK for response with message ID '{id}'." );
             }
         }
 
         //
         // Access methods
         //
+
+        internal MessageBuilder MessageBuilder
+        {
+            get
+            {
+                return m_messageBuilder;
+            }
+        }
+
+        protected ResourceHandler ResourceHandler
+        {
+            get
+            {
+                return m_resourceHandler;
+            }
+            set
+            {
+                m_resourceHandler = value;
+            }
+        }
         
+        //--//
+
         internal Timer AckTimer
         {
             get
             {
-                return m_ackTimer;
+                return m_ackAndLifeTimeTrackingTimer;
             }
         }
     }

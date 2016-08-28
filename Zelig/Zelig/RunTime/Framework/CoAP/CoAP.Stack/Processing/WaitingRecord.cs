@@ -20,6 +20,7 @@ namespace CoAP.Stack
             private          CoAPMessage    m_response;
             private          int            m_timeout;
             private          bool           m_waiting;
+            private          uint           m_error;
 
             //--//
 
@@ -101,6 +102,26 @@ namespace CoAP.Stack
                 internal set
                 {
                     m_timeout = value;
+                }
+            }
+
+            public bool Waiting
+            {
+                get
+                {
+                    return m_waiting;
+                }
+            }
+
+            public uint Error
+            {
+                get
+                {
+                    return m_error;
+                }
+                set
+                {
+                    m_error = value;
                 }
             }
         }
@@ -188,6 +209,22 @@ namespace CoAP.Stack
             set
             {
                 m_wr.Timeout = value;
+            }
+        }
+
+        public bool Waiting
+        {
+            get
+            {
+                return m_wr.Waiting;
+            }
+        }
+
+        public uint Error
+        {
+            get
+            {
+                return m_wr.Error;
             }
         }
     }

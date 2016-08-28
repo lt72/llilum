@@ -6,8 +6,10 @@ namespace CoAP.Stack.Abstractions
 {
     public interface IUniqueRandom
     {
-        byte[ ] GetBytes( int unique, byte[ ] bytes ); 
+        byte[ ] GetBytes( byte[ ] bytes ); 
 
-        ushort GetShort( int unique ); 
+        ushort GetShort( );
+
+        int GetInt( );
     }
 }

@@ -66,9 +66,8 @@ namespace CoAP.Stack
             }
         }
 
-        public abstract void SendMessageAsync( CoAPMessageRaw msg, MessageContext messageCtx );
-
-
+        public abstract void SendMessageAsync( CoAPMessageRaw msg );
+        
         public abstract void Start( );
 
         public abstract void Stop( );

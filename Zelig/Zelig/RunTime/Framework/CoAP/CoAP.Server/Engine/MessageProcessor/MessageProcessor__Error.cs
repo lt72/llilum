@@ -4,12 +4,12 @@
 
 namespace CoAP.Server
 {
+    using CoAP.Common.Diagnostics;
     using CoAP.Stack;
-    using CoAP.Stack.Abstractions;
 
-    public partial class MessageProcessor
+    internal partial class MessageProcessor
     {
-        internal class ProcessingState_Error : ProcessingState
+        internal sealed class ProcessingState_Error : ProcessingState
         {
             private ProcessingState_Error( )
             {
@@ -24,21 +24,25 @@ namespace CoAP.Server
             // Mhelper methods
             // 
 
-            public override void Process( )
+            internal override void Process( )
             {
                 var processor = this.Processor;
 
-                processor.Engine.Owner.Statistics.Errors++;
+                processor.MessageEngine.Owner.Statistics.Errors++;
 
                 var messageCtx = processor.MessageContext;
-                var msg        = messageCtx.MessageInflated;
-                var error      = messageCtx.Error;
+                var msg        = messageCtx.Message;
+                var error      = messageCtx.ProtocolError;
 
                 if(error == CoAPMessageRaw.Error.Processing__AckNotReceived)
                 {
                     //
                     // TODO: implement better handling of missed acks and ignored messages
+                    // BUG BUG BUG: TEST
                     //
+
+                    Logger.Instance.LogProtocolError( $"ACK for MessageID={msg.MessageId} was not received! (error={messageCtx.ResponseCode})" ); 
+
                     Advance( ProcessingState.State.Archive );
                 }
                 else
@@ -48,13 +52,18 @@ namespace CoAP.Server
                     // 
                     if(msg.IsConfirmable)
                     {
+                        Logger.Instance.LogProtocolError( $"ERROR processing CON MessageID={msg.MessageId}, sending response with code={messageCtx.ResponseCode}" );
+
                         Advance( ProcessingState.State.ImmediateResponseAvailable );
                     }
                     else
                     {
                         //
                         // NON messages are simply ignored
-                        // 
+                        //  BUG BUG BUG: TEST
+                        //
+                        Logger.Instance.LogProtocolError( $"ERROR processing NON MessageID={msg.MessageId} (error={messageCtx.ResponseCode}). Dropping..." );
+
                         Advance( ProcessingState.State.Archive );
                     }
                 }

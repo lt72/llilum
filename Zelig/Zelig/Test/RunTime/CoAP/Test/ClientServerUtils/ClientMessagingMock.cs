@@ -6,23 +6,19 @@ namespace Test.ClientServerUtils
 {
     using CoAP.Stack;
     using CoAP.Stack.Abstractions;
+    using CoAP.Stack.Abstractions.Messaging;
     using System.Threading;
     using CoAP.Common.Diagnostics;
-
 
     public class ClientMessagingMock : AsyncMessaging
     {
         private readonly Messaging m_messaging;
-        private          int       m_dropRequestCount;
-        private          int       m_dropResponseCount;
         
         //--//
 
         public ClientMessagingMock( Messaging messaging ) : base ( messaging.ChannelFactory, messaging.LocalEndPoint )
         {
-            m_messaging         = messaging;
-            m_dropRequestCount  = 0;
-            m_dropResponseCount = 0;
+            m_messaging = messaging;
 
             //
             // Hijack messages from the actual messaging layer
@@ -34,8 +30,8 @@ namespace Test.ClientServerUtils
         //
         // Helper methods
         // 
-        
-        public override void SendMessageAsync( CoAPMessageRaw msg, MessageContext messageCtx )
+
+        public override void SendMessageAsync( CoAPMessageRaw msg )
         {
             int dropped = this.DropRequestCount;
 
@@ -48,7 +44,7 @@ namespace Test.ClientServerUtils
                 return;
             }
 
-            m_messaging.SendMessageAsync( msg, messageCtx );
+            m_messaging.SendMessageAsync( msg );
         }
 
         public override void Start( )
@@ -68,31 +64,17 @@ namespace Test.ClientServerUtils
 
         public int DropRequestCount
         {
-            get
-            {
-                return m_dropRequestCount;
-            }
-            set
-            {
-                m_dropRequestCount = value;
-            }
+            get; set;
         }
 
         public int DropResponseCount
         {
-            get
-            {
-                return m_dropResponseCount;
-            }
-            set
-            {
-                m_dropResponseCount = value;
-            }
+            get; set;
         }
 
         //--//
 
-        private void MockMessageHandler( object sender, CoAPMessageEventArgs args )
+        private void MockMessageHandler( object sender, HandlerRole role, CoAPMessageEventArgs args )
         {
             var msgMock    = OnMessageMock;
             var msgHandler = m_messageHandler;
@@ -103,18 +85,19 @@ namespace Test.ClientServerUtils
             if(proceed.HasValue ? proceed.Value : true)
             {
                 if(msgHandler != null)
-                {                    msgHandler.Invoke( sender, mockedMessage );
+                {
+                    msgHandler.Invoke( sender, role, mockedMessage );
                 }
             }
         }
 
-        private void MockErrorHandler( object sender, CoAPMessageEventArgs args )
+        private void MockErrorHandler( object sender, HandlerRole role, CoAPMessageEventArgs args )
         {
             CoAPMessageHandler errHandler = m_errorHandler;
 
             if(errHandler != null)
             {
-                errHandler.Invoke( sender, args );
+                errHandler.Invoke( sender, role, args );
             }
         }
     }

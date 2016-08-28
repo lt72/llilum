@@ -4,15 +4,14 @@
 
 namespace Test.ClientServerUtils
 {
+    using System.Net;
     using CoAP.Stack;
     using CoAP.Stack.Abstractions;
-    using CoAP.Server;
-    using System;
+    using CoAP.Stack.Abstractions.Messaging;
 
     public class ServerMessagingMock : AsyncMessagingProxy
     {
         private readonly AsyncMessagingProxy m_messaging;
-        private          int                 m_changedMessagesCount;
 
         //--//
 
@@ -31,18 +30,18 @@ namespace Test.ClientServerUtils
         // Helper methods
         //
 
-        public event MessagingMockHandler OnMessageMock;
-       
+        public event MessagingMockHandler OnIncomingMessageMock;
+
+        public event MessagingMockHandler OnOutgoingMessageMock;
+
         public int ChangedMessagesCount
         {
-            get
-            {
-                return m_changedMessagesCount;
-            }
-            set
-            {
-                m_changedMessagesCount = value;
-            }
+            get; set;
+        }
+
+        public bool AnswerWithBadOption
+        {
+            get; set;
         }
 
         public override event CoAPProxyMessageHandler OnProxyMessage
@@ -57,9 +56,23 @@ namespace Test.ClientServerUtils
             }
         }
 
-        public override void SendMessageAsync( CoAPMessageRaw msg, MessageContext messageCtx )
+        public override void SendMessageAsync( CoAPMessageRaw msg )
         {
-            m_messaging.SendMessageAsync( msg, messageCtx );
+            var msgMock = OnOutgoingMessageMock;
+
+            var messageCtx = MessageContext.WrapWithContext( msg );
+            
+            messageCtx.Source      = msg.Context.Source;
+            messageCtx.Destination = msg.Context.Destination;
+
+            var mockedArgs = new CoAPMessageEventArgs( messageCtx );
+
+            bool? proceed  = msgMock?.Invoke( this, ref mockedArgs );
+
+            if(proceed.HasValue ? proceed.Value : true)
+            {
+                m_messaging.SendMessageAsync( mockedArgs.MessageContext.Message );
+            }
         }
 
         public override void Start( )
@@ -74,9 +87,9 @@ namespace Test.ClientServerUtils
 
         //--//
 
-        private void MockMessageHandler( object sender, CoAPMessageEventArgs args )
+        private void MockMessageHandler( object sender, HandlerRole role, CoAPMessageEventArgs args )
         {
-            var msgMock    = OnMessageMock;
+            var msgMock    = OnIncomingMessageMock;
             var msgHandler = m_messageHandler;
 
             var mockedArgs = args;
@@ -86,18 +99,18 @@ namespace Test.ClientServerUtils
             {
                 if(msgHandler != null)
                 {
-                    msgHandler.Invoke( sender, mockedArgs );
+                    msgHandler.Invoke( sender, role, mockedArgs );
                 }
             }
         }
 
-        private void MockErrorHandler( object sender, CoAPMessageEventArgs args )
+        private void MockErrorHandler( object sender, HandlerRole role, CoAPMessageEventArgs args )
         {
             CoAPMessageHandler errHandler = m_errorHandler;
 
             if(errHandler != null)
             {
-                errHandler.Invoke( sender, args );
+                errHandler.Invoke( sender, role,args );
             }
         }
     }

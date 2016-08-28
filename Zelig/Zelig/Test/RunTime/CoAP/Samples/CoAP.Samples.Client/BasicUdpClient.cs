@@ -27,9 +27,13 @@ namespace CoAP.Samples.Client
             m_client = new CoAPClient( new Messaging( new UdpChannelFactory( ), localEndPoint ), new Statistics( ) ); 
         }
 
-        internal MessageBuilder Connect( IPEndPoint intermediary, ServerCoAPUri uri )
+        internal MessageBuilder Connect( IPEndPoint intermediary, CoAPServerUri uri )
         {
-            return m_client.Connect( intermediary, uri );
+            var builder = m_client.Connect( intermediary, uri );
+
+            m_client.Start( );
+
+            return builder;
         }
 
         internal CoAPMessage MakeRequest( CoAPMessageRaw request )

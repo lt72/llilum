@@ -56,7 +56,10 @@ namespace CoAP.Stack
 
         public void Encode( NetworkOrderBinaryStream stream )
         {
-            stream.WriteBytes( m_token, 0, m_token.Length ); 
+            if(object.ReferenceEquals( m_token, Constants.EmptyBuffer ) == false)
+            {
+                stream.WriteBytes( m_token, 0, m_token.Length );
+            }
         }
 
         public override bool Equals( object obj )
@@ -86,7 +89,6 @@ namespace CoAP.Stack
             return hash;
         }
 
-#if DESKTOP
         public override string ToString( )
         {
             var sb = new StringBuilder();
@@ -103,7 +105,6 @@ namespace CoAP.Stack
 
             return $"{sb}";
         }
-#endif
 
         //--//
 

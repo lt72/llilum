@@ -2,16 +2,18 @@
 // Copyright (c) Microsoft Corporation.    All rights reserved.
 //
 
+
 namespace CoAP.Stack
 {
-    public class MessageOption_UInt : MessageOption
+    using CoAP.Common;
+
+
+    public sealed class MessageOption_Int : MessageOption
     {
 
         //
         // State
         //
-
-        private readonly uint m_value; 
 
         //--//
 
@@ -19,9 +21,8 @@ namespace CoAP.Stack
         // Contructors
         //
         
-        internal MessageOption_UInt( OptionNumber option, uint value ) : base(option)
+        internal MessageOption_Int( OptionNumber option, int value ) : base(option, Utils.ByteArrayFromInteger( value ))
         {
-            m_value = value;
         }
 
         public static MessageOption New( OptionNumber number, MessageOption.ContentFormat value )
@@ -30,14 +31,14 @@ namespace CoAP.Stack
             {
                 case OptionNumber.Accept        :
                 case OptionNumber.Content_Format:
-                    return new MessageOption_UInt( number, (uint)value );
+                    return new MessageOption_Int( number, (int)value );
 
                 default:
-                    throw new CoAP_MessageFormatException( );
+                    throw new CoAP_MessageMalformedException( );
             }
         }
 
-        public static MessageOption New( OptionNumber number, uint value )
+        public static MessageOption_Int New( OptionNumber number, int value )
         {
             switch(number)
             {
@@ -46,10 +47,10 @@ namespace CoAP.Stack
                 case OptionNumber.Max_Age       :
                 case OptionNumber.Accept        :
                 case OptionNumber.Size1         :
-                    return new MessageOption_UInt( number, value );
+                    return new MessageOption_Int( number, value );
 
                 default:
-                    throw new CoAP_MessageFormatException( );
+                    throw new CoAP_MessageMalformedException( );
             }
         }
 
@@ -59,17 +60,15 @@ namespace CoAP.Stack
 
         public override void Encode( NetworkOrderBinaryStream stream )
         {
-            base.Encode( stream ); 
-            
-            stream.WriteUInt32( m_value ); 
+            base.Encode( stream );
+
+            stream.WriteBytes( this.RawBytes, 0, this.ValueLength );
         }
 
-#if DESKTOP
         public override string ToString( )
         {
-            return $"{this.Name}({m_value})";
+            return $"{this.Name}({Utils.ByteArrayToInteger( this.RawBytes )})";
         }
-#endif
 
         //
         // Access Methods
@@ -79,7 +78,7 @@ namespace CoAP.Stack
         {
             get
             {
-                return m_value;
+                return Utils.ByteArrayToInteger( this.RawBytes );
             }
         }
 

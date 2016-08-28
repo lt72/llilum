@@ -6,19 +6,24 @@ namespace CoAP.Stack
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Text;
+    using CoAP.Common;
 
-
-    public class MessageOptions : IEncodable
+    public class MessageOptions : IEncodable, ICloneable
     {
-        internal static readonly MessageOptions EmptyOptions = new MessageOptions( );
+        internal static readonly MessageOptions       EmptyOptions = new MessageOptions( );
+        //internal static readonly MessageOption_Opaque EmptyETag    = new MessageOption_Opaque( MessageOption.OptionNumber.ETag, Constants.EmptyBuffer );
 
         //
         // State
         //
 
         private readonly LinkedList<MessageOption> m_allOptions;
-        private readonly List<string>              m_queries;
+        private          string                    m_uriPath; 
+        private          List<string>              m_uriQueries;
+        private          TimeSpan                  m_maxAge;
+        private          MessageOption_Opaque      m_etag;
 
         //--//
 
@@ -28,15 +33,49 @@ namespace CoAP.Stack
 
         public MessageOptions( )
         {
-            m_allOptions    = new LinkedList<MessageOption>( );
-            m_queries       = new List<string>             ( );
+            m_allOptions = new LinkedList<MessageOption>( );
+            m_uriQueries = new List<string>( ); 
+            m_maxAge     = Defaults.MaxAge;
+            m_etag       = null;
+            //m_etag       = EmptyETag;
+        }
+
+        public object Clone( )
+        {
+            var options = new MessageOptions();
+
+            foreach(var opt in this.m_allOptions)
+            {
+                options.Add( opt );
+            }
+
+            return options;
         }
 
         //
         // Helper Methods
         //
+        
+        public void Add( MessageOptions options )
+        {
+            if(options != null)
+            {
+                foreach(var option in options.Options)
+                {
+                    InsertInOrder( option );
+                }
+            }
+        }
 
-        internal void InsertInOrder( MessageOption option )
+        public void Add( MessageOption option )
+        {
+            if(option != null)
+            {
+                InsertInOrder( option );
+            }
+        }
+
+        private void InsertInOrder( MessageOption option )
         {
             //
             // Insert in order and preserve order of insertion
@@ -49,48 +88,83 @@ namespace CoAP.Stack
             }
             else
             {
-                for(; node != m_allOptions.Last && node.Value.Number <= option.Number; node = node.Next) ;
-
-                if(node.Value.Number <= option.Number)
+                do
                 {
-                    if(node.Value.Number == option.Number)
+                    MessageOption current = node.Value;
+
+                    if(option.Number < current.Number)
                     {
-                        //
-                        // If there is already such option, make sure it is a repeatable one or it has the same value...
-                        //
-                        if(option.IsRepeatable                     == false &&
-                           option.Value.Equals( node.Value.Value ) == false  )
-                        {
-                            throw new CoAP_MessageFormatException( );
-                        }
+                        break;
                     }
 
-                    m_allOptions.AddAfter( node, option );
-                }
-                else
+                    //
+                    // Throw on adding non-repeatable options, as it is illegal.
+                    //
+                    if(option.IsRepeatable == false && current.Number == option.Number)
+                    {
+                        throw new CoAP_MessageMalformedException( );
+                    }
+
+                    //
+                    // Skip adding repeatable options with same value.
+                    //
+                    if(option.IsRepeatable && current.Equals( option ))
+                    {
+                        return;
+                    }
+
+                    if(node == m_allOptions.Last)
+                    {
+                        break;
+                    }
+
+                    node = node.Next;
+
+                } while(true);
+                
+
+                if(option.Number < node.Value.Number)
                 {
                     m_allOptions.AddBefore( node, option );
                 }
-            }
-        }
-
-        internal void AppendToBack( MessageOption option )
-        {
-            if(m_allOptions.Last != null)
-            {
-                if(m_allOptions.Last.Value.Number > option.Number)
+                else
                 {
-                    throw new CoAP_MessageFormatException( );
+                    m_allOptions.AddAfter( node, option );
                 }
             }
 
-            m_allOptions.AddLast( option );
-
-            if(option.IsQuery)
+            //
+            // Update fast access links
+            // 
+            if(option.IsUriPath)
             {
-                m_queries.Add( (string)option.Value );
+                var path = (string)option.Value;
+
+                m_uriPath += String.IsNullOrEmpty( m_uriPath ) ? path : "/" + path;
             }
+            else if(option.IsUriQuery)
+            {
+                var query = (string)option.Value;
+
+                m_uriQueries.Add( query );
+            }
+            else if(option.IsMaxAge)
+            {
+                m_maxAge = new TimeSpan( 0, 0, (int)option.Value );
+            }
+            else if(option.IsETag)
+            {
+                m_etag = (MessageOption_Opaque)option;
+            }
+
+            ValidateList( ); 
         }
+
+        public bool Contains( MessageOption opt )
+        {
+            return m_allOptions.Find( opt ) != null; 
+        }
+
 
         public void Encode( NetworkOrderBinaryStream stream )
         {
@@ -126,7 +200,6 @@ namespace CoAP.Stack
             }
         }
 
-#if DESKTOP
         public override string ToString( )
         {
             var options = m_allOptions;
@@ -144,8 +217,7 @@ namespace CoAP.Stack
             }
             return $"[{sb}]";
         }
-#endif
-      
+        
         //
         // Access Methods
         //
@@ -157,12 +229,40 @@ namespace CoAP.Stack
                 return m_allOptions;
             }
         }
-        
-        public List<string> Queries
+
+        public string Path
         {
             get
             {
-                return m_queries;
+                return m_uriPath;
+            }
+        }
+
+        public string[ ] Queries
+        {
+            get
+            {
+                return m_uriQueries.ToArray( ); 
+            }
+        }
+
+        public TimeSpan MaxAge
+        {
+            get
+            {
+                return m_maxAge;
+            }
+        }
+
+        public MessageOption_Opaque ETag
+        {
+            get
+            {
+                return m_etag;
+            }
+            internal set
+            {
+                m_etag = value;
             }
         }
 
@@ -208,10 +308,15 @@ namespace CoAP.Stack
             }
         }
 
-        internal void Reset( )
+        internal void Clear( )
         {
             m_allOptions.Clear( );
-        }
+
+            m_uriPath = null;
+            m_uriQueries.Clear( );
+            m_maxAge = Defaults.MaxAge;
+            m_etag = null;
+    }
 
         private int ComputeOptionsLength( )
         {
@@ -253,6 +358,24 @@ namespace CoAP.Stack
             }
 
             return totalLength;
+        }
+
+        //--//
+
+        [Conditional( "DEBUG" )]
+        private void ValidateList( )
+        {
+            var node = m_allOptions.First; 
+
+            while(node != null)
+            {
+                if(node.Next != null && node.Next.Value.Number < node.Value.Number)
+                {
+                    Debug.Assert( false );
+                }
+
+                node = node.Next;
+            }
         }
     }
 }

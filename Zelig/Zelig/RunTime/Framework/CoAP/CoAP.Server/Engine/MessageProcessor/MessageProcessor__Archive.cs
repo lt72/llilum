@@ -5,12 +5,11 @@
 namespace CoAP.Server
 {
     using CoAP.Common.Diagnostics;
-    using CoAP.Stack.Abstractions;
 
 
-    public partial class MessageProcessor
+    internal partial class MessageProcessor
     {
-        internal class ProcessingState_Archive : ProcessingState
+        internal sealed class ProcessingState_Archive : ProcessingState
         {
             private ProcessingState_Archive( )
             {
@@ -25,15 +24,13 @@ namespace CoAP.Server
             // Mhelper methods
             // 
 
-            public override void Process( )
+            internal override void Process( )
             {
-                var processor = this.Processor;
+                var processor  = this.Processor;
+                var messageCtx = processor.MessageContext;
 
-                var node = processor.MessageContext;
-
-                ((MessageEngine)processor.Engine).Deregister( node ); 
-
-                Logger.Instance.Log( $">>(S)<<< Archiving transaction '{node.Message.MessageId}' from {node.Source}" );
+                ((MessageEngine)processor.MessageEngine).DeregisterLocalRequest( messageCtx );
+                Logger.Instance.Log( $">>[S({processor.MessageEngine.LocalEndPoint})]<<< Archiving transaction '{messageCtx.Message.MessageId}' from {messageCtx.Source}" );
             }
         }
     }

@@ -11,11 +11,11 @@ namespace CoAP.Stack
     using System.Net.Sockets;
     using System.Threading;
     using CoAP.Stack.Abstractions;
+    using CoAP.Stack.Abstractions.Messaging;
     using CoAP.Common;
     using CoAP.Common.Diagnostics;
 
-
-    public class Messaging : AsyncMessaging
+    public sealed class Messaging : AsyncMessaging
     {
         //
         // State 
@@ -30,7 +30,7 @@ namespace CoAP.Stack
         private volatile bool                  m_running;
         private          ICoAPChannel          m_serverChannel;
         private readonly object                m_sync;
-
+        
         //--//
 
         //
@@ -44,13 +44,15 @@ namespace CoAP.Stack
             m_wakeup         = new AutoResetEvent( false );
             m_parser         = new MessageParser( ); 
             m_sync           = new object( );
+
+            this.OwnerMessaging = this;
         }
 
         //
         // Helper methods
         // 
 
-        public override void SendMessageAsync( CoAPMessageRaw msg, MessageContext messageCtx )
+        public override void SendMessageAsync( CoAPMessageRaw msg )
         {
             lock(m_sync)
             {
@@ -60,7 +62,6 @@ namespace CoAP.Stack
             }
         }
         
-
         public override void Start( )
         {
             if(m_running == false)
@@ -127,6 +128,8 @@ namespace CoAP.Stack
         // Access methods
         //
 
+        public AsyncMessaging OwnerMessaging { get; set; }
+
         //--//
 
         private void ListenerLoop( )
@@ -136,7 +139,7 @@ namespace CoAP.Stack
 
             try
             {
-                var temp = new byte[ 256 ];
+                var buffer = new byte[ 256 ];
 
                 while(m_running)
                 {
@@ -144,7 +147,7 @@ namespace CoAP.Stack
                     int received = 0;
                     try
                     {
-                        received = channel.Receive( temp, 0, temp.Length, ref endPoint );
+                        received = channel.Receive( buffer, 0, buffer.Length, ref endPoint );
 
                         if( received == 0 )
                         {
@@ -160,23 +163,22 @@ namespace CoAP.Stack
                         break;
                     }
 
+                    //
+                    // Update length and content to match the number of bytes received
+                    // 
+                    var msg        = CoAPMessage.FromBuffer( new byte[ received ] );
+                    var messageCtx = MessageContext.WrapWithContext( msg );
+
+                    Buffer.BlockCopy( buffer, 0, msg.Buffer, 0, received );
+
+                    messageCtx.Source = (IPEndPoint)endPoint;
+                    
                     lock(m_sync)
                     {
                         if(m_running == false)
                         {
                             break;
                         }
-
-                        //
-                        // Update length and content to match the number of bytes received
-                        // 
-                        var msg        = CoAPMessage.FromBuffer( new byte[ received ] );
-                        var messageCtx = new MessageContext( msg );
-
-                        Buffer.BlockCopy( temp, 0, msg.Buffer, 0, msg.Buffer.Length );
-
-                        messageCtx.Source  = (IPEndPoint)endPoint;
-                        messageCtx.Channel = channel;
 
                         m_incomingQueue.Enqueue( msg );
 
@@ -196,8 +198,6 @@ namespace CoAP.Stack
             {
                 try
                 {
-                    CoAPMessage    msgIn  = null;
-                    CoAPMessageRaw msgOut = null;
 
                     m_wakeup.WaitOne( );
 
@@ -205,10 +205,18 @@ namespace CoAP.Stack
                     // Dispatch all events in the queue, and protect from a spourious wake up 
                     // that could happen by messeges queued while processing the queues. 
                     //
-                    int messages = m_incomingQueue.Count + m_outgoingQueue.Count;
+                    int messages = 0;
+
+                    lock(m_sync)
+                    {
+                        messages = m_incomingQueue.Count + m_outgoingQueue.Count;
+                    }
 
                     while(--messages >= 0)
                     {
+                        CoAPMessage    msgIn  = null;
+                        CoAPMessageRaw msgOut = null;
+
                         //
                         // Dequeue one event from each queue
                         //
@@ -221,7 +229,7 @@ namespace CoAP.Stack
 
                             if(m_incomingQueue.Count > 0)
                             {
-                                msgIn  = m_incomingQueue.Dequeue( );
+                                msgIn = m_incomingQueue.Dequeue( );
                             }
 
                             if(m_outgoingQueue.Count > 0)
@@ -240,24 +248,26 @@ namespace CoAP.Stack
                         //
                         if(msgIn != null)
                         {
+                            Debug.Assert( msgIn.Buffer != null          );
+                            Debug.Assert( msgIn is CoAPMessage == true  );
                             //
                             // Parse message, be careful not to use the parser for any other message until done
                             // 
+                            HandlerRole role = HandlerRole.Local;
                             try
                             {
-                                if(m_parser.Parse( msgIn, this.LocalEndPoint ))
+
+                                if(m_parser.ParseAndComputeDestination( msgIn.Buffer, this.LocalEndPoint, ref msgIn ))
                                 {
                                     var msgHandler = m_messageHandler;
 
-                                    msgHandler?.Invoke( this, new CoAPMessageEventArgs { MessageContext = msgIn.Context } );
+                                    msgHandler?.Invoke( this, role, new CoAPMessageEventArgs(msgIn.Context ) );
                                 }
                                 else
                                 {
                                     var errHandler = m_errorHandler;
 
-                                    msgIn.Context.Error = CoAPMessageRaw.Error.Parsing__OptionError;
-
-                                    errHandler?.Invoke( this, new CoAPMessageEventArgs { MessageContext = msgIn.Context } );
+                                    errHandler?.Invoke( this, role, new CoAPMessageEventArgs( msgIn.Context ) );
                                 }
                             }
                             catch(Exception ex)
@@ -266,13 +276,18 @@ namespace CoAP.Stack
 
                                 Logger.Instance.LogError( $"Caught exception: {ex}" );
 
-                                errHandler?.Invoke( this, new CoAPMessageEventArgs { MessageContext = msgIn.Context } );
+                                errHandler?.Invoke( this, role, new CoAPMessageEventArgs( msgIn.Context ) );
                             }
                         }
 
                         if(msgOut != null)
                         {
-                            m_serverChannel.Send( msgOut.Buffer, 0, msgOut.Buffer.Length, msgOut.Context.Source );
+                            Debug.Assert( msgOut.Buffer != null          );
+                            Debug.Assert( msgOut is CoAPMessage == false );
+
+                            var destination = msgOut.Context.Source;
+
+                            m_serverChannel.Send( msgOut.Buffer, 0, msgOut.Buffer.Length, destination );
                         }
                     }
 

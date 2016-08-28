@@ -4,16 +4,13 @@
 
 namespace CoAP.Server
 {
-    using System.Diagnostics;
-    using CoAP.Common;
     using CoAP.Stack;
-    using CoAP.Stack.Abstractions;
     using CoAP.Common.Diagnostics;
 
 
-    public partial class MessageProcessor
+    internal partial class MessageProcessor
     {
-        internal class ProcessingState_DelayedProcessing : ProcessingState
+        internal sealed class ProcessingState_DelayedProcessing : ProcessingState
         {
             private ProcessingState_DelayedProcessing( )
             {
@@ -28,46 +25,38 @@ namespace CoAP.Server
             // Helper methods
             // 
 
-            public override void Process( )
+            internal override void Process( )
             {
                 var processor = this.Processor;
 
                 var messageCtx = processor.MessageContext;
                 var msg        = messageCtx.MessageInflated;
-                var queries    = msg.Options.Queries;
 
                 //
                 // Send Ack
                 //
 
-                processor.Engine.Owner.Statistics.AcksSent++;
+                processor.MessageEngine.Owner.Statistics.AcksSent++;
 
-                var response = this.Processor.MessageBuilder.CreateAck( messageCtx ).BuildAndReset( );
+                var response = this.Processor.MessageBuilder.CreateAck( msg, messageCtx ).Build( );
 
-                Logger.Instance.Log( string.Format( $"<==(S)== Sending ACK response to {messageCtx.Source}: '{response}'" ) );
+                Logger.Instance.Log( string.Format( $"<==[S({this.Processor.MessageEngine.LocalEndPoint})]== Tx ACK ID={response.MessageId} response to {messageCtx.Source}: '{response}'" ) );
 
-                messageCtx.Channel.Send( response.Buffer, 0, response.Buffer.Length, messageCtx.Source );
-
-                //
-                // Query resource
-                // 
-                m_processor = (MessageProcessor)processor;
-
-                messageCtx.ResourceHandler.ExecuteMethod( msg.DetailCode_Request, queries[ 0 ], this.ResultAvailableHandler );
+                this.Processor.MessageEngine.SendMessageAsync( response );
+                
+                processor.ResourceHandler.ExecuteMethod( msg, this.DelayedResultAvailableCallback );
             }
 
             //--//
 
-            private void ResultAvailableHandler( object res, uint responseCode )
+            private void DelayedResultAvailableCallback( uint responseCode, MessagePayload payload, MessageOptions options )
             {
-                var messageCtx = m_processor.MessageContext;
+                var messageCtx = this.Processor.MessageContext;
 
-                messageCtx.ResponseCode = responseCode;
+                messageCtx.ResponseCode    = responseCode;
+                messageCtx.ResponsePayload = payload;
 
-                if(res != null && (res is string || res is int))
-                {
-                    messageCtx.ResponsePayload = Defaults.Encoding.GetBytes( res.ToString( ) );
-                }
+                messageCtx.ResponseOptions.Add( options );
 
                 Advance( ProcessingState.State.DelayedResponseAvailable );
             }

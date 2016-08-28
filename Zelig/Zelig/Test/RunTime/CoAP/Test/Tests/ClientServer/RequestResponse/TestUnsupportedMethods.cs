@@ -41,7 +41,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 ImmediateResposesSent = 3,
             };
 
-            ClearStatistics( );
+            ClearCachesAndStatistics( );
 
             var resource = TestConstants.Resource__PingForAck_Immediate;
 
@@ -57,8 +57,7 @@ namespace Microsoft.SPOT.Platform.Tests
                     .WithType       ( CoAPMessage.MessageType.Confirmable )
                     .WithTokenLength( Defaults.TokenLength )
                     .WithRequestCode( CoAPMessage.Detail_Request.POST )
-                    .WithOption     ( MessageOption_String.New( MessageOption.OptionNumber.Uri_Path, resource.Path ) )
-                    .BuildAndReset( );
+                    .Build( );
                 
                 var postResponse = m_client.MakeRequest( postRequest );
 
@@ -82,8 +81,7 @@ namespace Microsoft.SPOT.Platform.Tests
                     .WithType       ( CoAPMessage.MessageType.Confirmable )
                     .WithTokenLength( Defaults.TokenLength )
                     .WithRequestCode( CoAPMessage.Detail_Request.PUT )
-                    .WithOption     ( MessageOption_String.New( MessageOption.OptionNumber.Uri_Path, resource.Path ) )
-                    .BuildAndReset( );
+                    .Build( );
                 
                 var putResponse = m_client.MakeRequest( putRequest );
 
@@ -107,8 +105,7 @@ namespace Microsoft.SPOT.Platform.Tests
                     .WithType       ( CoAPMessage.MessageType.Confirmable )
                     .WithTokenLength( Defaults.TokenLength )
                     .WithRequestCode( CoAPMessage.Detail_Request.DELETE )
-                    .WithOption     ( MessageOption_String.New( MessageOption.OptionNumber.Uri_Path, resource.Path ) )
-                    .BuildAndReset( );
+                    .Build( );
                 
                 var deleteResponse = m_client.MakeRequest( deleteRequest );
 
@@ -127,7 +124,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 //--// 
 
                 CoApTestAsserts.Assert_Statistics( m_client.Statistics, desiredClientStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
-                CoApTestAsserts.Assert_Statistics( m_server.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
+                CoApTestAsserts.Assert_Statistics( m_localProxyServer.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
             }
             finally
             {

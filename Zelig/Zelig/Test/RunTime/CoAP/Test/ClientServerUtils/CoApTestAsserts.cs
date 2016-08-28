@@ -5,12 +5,12 @@
 namespace Test.ClientServerUtils
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using CoAP.Common.Diagnostics;
     using System.Threading;
     using CoAP.Common;
     using CoAP.Stack;
-
 
     public static class CoApTestAsserts
     {
@@ -69,150 +69,168 @@ namespace Test.ClientServerUtils
 
         public static void Assert_SameMessageId( CoAPMessageRaw request, CoAPMessage response )
         {
-            var msg = CoAPMessage.FromBuffer( request.Buffer );
-
-            using(var parser = MessageParser.CheckOutParser( ))
-            {
-                parser.Inflate( msg );
-            }
-
-            Assert( msg.MessageId == response.MessageId ); 
+            Assert( request.MessageId == response.MessageId );
         }
 
         public static void Assert_NotSameMessageId( CoAPMessageRaw request, CoAPMessage response )
         {
-            var msg = CoAPMessage.FromBuffer( request.Buffer );
-
-            using(var parser = MessageParser.CheckOutParser( ))
-            {
-                parser.Inflate( msg );
-            }
-
-            Assert( msg.MessageId != response.MessageId );
+            Assert( request.MessageId != response.MessageId );
         }
 
         public static void Assert_SameToken( CoAPMessageRaw request, CoAPMessage response )
         {
-            var msg = CoAPMessage.FromBuffer( request.Buffer );
-
-            using(var parser = MessageParser.CheckOutParser( ))
-            {
-                parser.Inflate( msg );
-            }
-
-            Assert( msg.Token.Equals( response.Token ) ); 
+            Assert( request.Token.Equals( response.Token ) );
         }
-        
-        public static void Assert_Payload( byte[ ] payload, CoAPMessage response )
+
+        public static void Assert_EmptyPayload( MessagePayload payload )
         {
-            Assert( Utils.ByteArrayCompare( response.Payload.Payload, payload ) ); 
+            Assert( Utils.ByteArrayCompare( (byte[ ])payload.Value, (byte[ ])MessagePayload.EmptyPayload.Value ) );
+        }
+
+        public static void Assert_Payload( MessagePayload payload, MessagePayload response )
+        {
+            Assert( Utils.ByteArrayCompare( (byte[ ])payload.Value, (byte[ ])response.Value ) );
+        }
+
+        public static void Assert_Payload( byte[ ] payload, MessagePayload response )
+        {
+            Assert( Utils.ByteArrayCompare( payload, (byte[ ])response.Value ) );
         }
 
         #endregion
 
         #region Statistics
 
-        public static void Assert_Statistics( Statistics target, Statistics comparand, int timeout )
+        public static void Assert_Statistics( Statistics resultStats, Statistics expectedStats, int timeout )
         {
             bool fOk = true;
 
-            var t = target   .ToArray();
-            var c = comparand.ToArray();
+            var result   = resultStats  .ValuesToArray();
+            var expected = expectedStats.ValuesToArray();
 
-            for(int i = 0; i < c.Length; ++i)
+            var statsNames = resultStats.NamesToArray();
+            var failureMessages = new List<string>();
+
+            for(int i = 0; i < expected.Length; ++i)
             {
-                bool fChecks = VerifyStat( c[ i ](), timeout, t[ i ] );
+                var res   = result  [ i ]  ; 
+                var xpctd = expected[ i ]();
+                
+                bool fChecks = VerifyStat( statsNames[ i ], xpctd, timeout, res );
 
                 if(fChecks == false)
                 {
-                    Logger.Instance.LogError( $"FAILURE: stats do not match" );
+                    failureMessages.Add( $"FAILURE: stats for '{statsNames[ i ]}' do not match! Got {res()}, expected {xpctd}" );
+                    
                     fOk = false;
                 }
             }
 
-            CoApTestAsserts.Assert( fOk ); 
+            if(fOk == false)
+            {
+                foreach(var msg in failureMessages)
+                {
+                    Logger.Instance.LogError( msg );
+                }
+
+                CoApTestAsserts.Assert( false );
+            }
         }
 
         public static void Assert_AcksSent( Statistics stats, int count, int timeout )
         {
-            CoApTestAsserts.Assert( VerifyStat( count, timeout, new Func<int>( ( ) => stats.AcksSent ) ) );
+            CoApTestAsserts.Assert( VerifyStat( "AcksSent", count, timeout, new Func<int>( ( ) => stats.AcksSent ) ) );
         }
 
         public static void Assert_AcksReceived( Statistics stats, int count, int timeout )
         {
-            CoApTestAsserts.Assert( VerifyStat( count, timeout, new Func<int>( ( ) => stats.AcksReceived ) ) );
+            CoApTestAsserts.Assert( VerifyStat( "AcksReceived", count, timeout, new Func<int>( ( ) => stats.AcksReceived ) ) );
         }
 
         public static void Assert_ResetsSent( Statistics stats, int count, int timeout )
         {
-            CoApTestAsserts.Assert( VerifyStat( count, timeout, new Func<int>( ( ) => stats.ResetsSent ) ) );
+            CoApTestAsserts.Assert( VerifyStat( "ResetsSent", count, timeout, new Func<int>( ( ) => stats.ResetsSent ) ) );
         }
 
         public static void Assert_RequestsReceived( Statistics stats, int count, int timeout )
         {
-            CoApTestAsserts.Assert( VerifyStat( count, timeout, new Func<int>( ( ) => stats.RequestsReceived ) ) );
+            CoApTestAsserts.Assert( VerifyStat( "RequestsReceived", count, timeout, new Func<int>( ( ) => stats.RequestsReceived ) ) );
         }
 
         public static void Assert_RequestsSent( Statistics stats, int count, int timeout )
         {
-            CoApTestAsserts.Assert( VerifyStat( count, timeout, new Func<int>( ( ) => stats.RequestsSent ) ) ); 
+            CoApTestAsserts.Assert( VerifyStat( "RequestsSent", count, timeout, new Func<int>( ( ) => stats.RequestsSent ) ) ); 
         }
 
         public static void Assert_ResetsReceived( Statistics stats, int count, int timeout )
         {
-            CoApTestAsserts.Assert( VerifyStat( count, timeout, new Func<int>( ( ) => stats.ResetsReceived ) ) );
+            CoApTestAsserts.Assert( VerifyStat( "ResetsReceived", count, timeout, new Func<int>( ( ) => stats.ResetsReceived ) ) );
         }
 
         public static void Assert_RequestTransmissions( Statistics stats, int count, int timeout )
         {
-            CoApTestAsserts.Assert( VerifyStat( count, timeout, new Func<int>( ( ) => stats.RequestsRetransmissions ) ) );
+            CoApTestAsserts.Assert( VerifyStat( "RequestsRetransmissions", count, timeout, new Func<int>( ( ) => stats.RequestsRetransmissions ) ) );
         }
 
         public static void Assert_ImmediateResposesSent( Statistics stats, int count, int timeout )
         {
-            CoApTestAsserts.Assert( VerifyStat( count, timeout, new Func<int>( ( ) => stats.ImmediateResposesSent ) ) );
+            CoApTestAsserts.Assert( VerifyStat( "ImmediateResposesSent", count, timeout, new Func<int>( ( ) => stats.ImmediateResposesSent ) ) );
         }
 
         public static void Assert_ImmediateResposesReceived( Statistics stats, int count, int timeout )
         {
-            CoApTestAsserts.Assert( VerifyStat( count, timeout, new Func<int>( ( ) => stats.ImmediateResposesReceived ) ) );
+            CoApTestAsserts.Assert( VerifyStat( "ImmediateResposesReceived", count, timeout, new Func<int>( ( ) => stats.ImmediateResposesReceived ) ) );
         }
 
         public static void Assert_DelayedResposesSent( Statistics stats, int count, int timeout )
         {
-            CoApTestAsserts.Assert( VerifyStat( count, timeout, new Func<int>( ( ) => stats.DelayedResponsesSent ) ) );
+            CoApTestAsserts.Assert( VerifyStat( "DelayedResponsesSent", count, timeout, new Func<int>( ( ) => stats.DelayedResponsesSent ) ) );
         }
 
         public static void Assert_DelayedResposesesReceived( Statistics stats, int count, int timeout )
         {
-            CoApTestAsserts.Assert( VerifyStat( count, timeout, new Func<int>( ( ) => stats.DelayedResposesesReceived ) ) );
+            CoApTestAsserts.Assert( VerifyStat( "DelayedResponsesReceived", count, timeout, new Func<int>( ( ) => stats.DelayedResponsesReceived ) ) );
         }
 
         public static void Assert_DelayedResposesTransmissions( Statistics stats, int count, int timeout )
         {
-            CoApTestAsserts.Assert( VerifyStat( count, timeout, new Func<int>( ( ) => stats.DelayedResposesRetransmissions ) ) );
+            CoApTestAsserts.Assert( VerifyStat( "DelayedResposesRetransmissions", count, timeout, new Func<int>( ( ) => stats.DelayedResposesRetransmissions ) ) );
+        }
+
+        public static void Assert_CacheHits( Statistics stats, int count, int timeout )
+        {
+            CoApTestAsserts.Assert( VerifyStat( "CacheHits", count, timeout, new Func<int>( ( ) => stats.CacheHits ) ) );
+        }
+
+        public static void Assert_CacheMisses( Statistics stats, int count, int timeout )
+        {
+            CoApTestAsserts.Assert( VerifyStat( "CacheMisses", count, timeout, new Func<int>( ( ) => stats.CacheMisses ) ) );
         }
 
         public static void Assert_Errors( Statistics stats, int count, int timeout )
         {
-            CoApTestAsserts.Assert( VerifyStat( count, timeout, new Func<int>( ( ) => stats.Errors ) ) );
+            CoApTestAsserts.Assert( VerifyStat( "Errors", count, timeout, new Func<int>( ( ) => stats.Errors ) ) );
         }
 
         #endregion
 
-        private static bool VerifyStat( int count, int timeout, Func<int> targetStat )
+        private static bool VerifyStat( string name, int count, int timeout, Func<int> targetStat )
         {
             int loops = timeout / 100;
 
             int loop = 0;
             bool fOk = true;
-            while(targetStat( ) < count && loop < loops)
+
+            var res = targetStat(); 
+            while(res < count && loop < loops)
             {
                 ++loop;
 
-                Logger.Instance.LogWarning( $"Stats do not match, wait..." );
+                Logger.Instance.LogWarning( $"Stat '{name}' do not match, got {res} but expected {count}, wait..." );
 
                 Thread.Sleep( 100 );
+
+                res = targetStat( ); 
             }
 
             if(targetStat( ) != count)

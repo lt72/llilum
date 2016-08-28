@@ -26,12 +26,6 @@ namespace Microsoft.SPOT.Platform.Tests
             return res;
         }
 
-        private void ClearStatistics()
-        {
-            m_client.Statistics.Clear( );
-            m_server.Statistics.Clear( );
-        }
-
         [TestMethod]
         public TestResult SendRequestWithTextContentFormat_Confirmable( )
         {
@@ -49,7 +43,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 ImmediateResposesSent = 1,
             };
 
-            ClearStatistics( );
+            ClearCachesAndStatistics( );
 
             var resource = TestConstants.Resource__EchoQuery_Immediate;
 
@@ -62,9 +56,8 @@ namespace Microsoft.SPOT.Platform.Tests
                 .WithType       ( CoAPMessage.MessageType.Confirmable )
                 .WithTokenLength( Defaults.TokenLength )
                 .WithRequestCode( CoAPMessage.Detail_Request.GET )
-                .WithOption     ( MessageOption_String.New( MessageOption.OptionNumber.Uri_Path, resource.Path ) )
-                .WithOption     ( MessageOption_UInt.New( MessageOption.OptionNumber.Accept, MessageOption.ContentFormat.Text_Plain__UTF8 ) )
-                .BuildAndReset( );
+                .WithOption     ( MessageOption_Int.New( MessageOption.OptionNumber.Accept, MessageOption.ContentFormat.Text_Plain__UTF8 ) )
+                .Build( );
 
                 var response = m_client.MakeRequest( request );
 
@@ -81,7 +74,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 CoApTestAsserts.Assert_SameToken( request, response );
 
                 CoApTestAsserts.Assert_Statistics( m_client.Statistics, desiredClientStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
-                CoApTestAsserts.Assert_Statistics( m_server.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
+                CoApTestAsserts.Assert_Statistics( m_localProxyServer.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
             }
             finally
             {
@@ -111,7 +104,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 ImmediateResposesSent = 1,
             };
 
-            ClearStatistics( );
+            ClearCachesAndStatistics( );
 
             var resource = TestConstants.Resource__EchoQuery_Immediate;
 
@@ -124,9 +117,8 @@ namespace Microsoft.SPOT.Platform.Tests
                 .WithType       ( CoAPMessage.MessageType.Confirmable )
                 .WithTokenLength( Defaults.TokenLength )
                 .WithRequestCode( CoAPMessage.Detail_Request.GET )
-                .WithOption     ( MessageOption_String.New( MessageOption.OptionNumber.Uri_Path, resource.Path ) )
-                .WithOption     ( MessageOption_UInt.New( MessageOption.OptionNumber.Accept, MessageOption.ContentFormat.Application__Json ) )
-                .BuildAndReset( );
+                .WithOption     ( MessageOption_Int.New( MessageOption.OptionNumber.Accept, MessageOption.ContentFormat.Application__Json ) )
+                .Build( );
 
                 var response = m_client.MakeRequest( request );
 
@@ -143,7 +135,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 CoApTestAsserts.Assert_SameToken( request, response );
 
                 CoApTestAsserts.Assert_Statistics( m_client.Statistics, desiredClientStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
-                CoApTestAsserts.Assert_Statistics( m_server.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
+                CoApTestAsserts.Assert_Statistics( m_localProxyServer.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
             }
             finally
             {
@@ -174,7 +166,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 ResetsSent = 1,
             };
 
-            ClearStatistics( );
+            ClearCachesAndStatistics( );
 
             var resource = TestConstants.Resource__EchoQuery_Immediate;
 
@@ -187,9 +179,8 @@ namespace Microsoft.SPOT.Platform.Tests
                 .WithType       ( CoAPMessage.MessageType.NonConfirmable )
                 .WithTokenLength( Defaults.TokenLength )
                 .WithRequestCode( CoAPMessage.Detail_Request.GET )
-                .WithOption     ( MessageOption_String.New( MessageOption.OptionNumber.Uri_Path, resource.Path ) )
-                .WithOption     ( MessageOption_UInt.New( MessageOption.OptionNumber.Accept, MessageOption.ContentFormat.Application__Json ) )
-                .BuildAndReset( );
+                .WithOption     ( MessageOption_Int.New( MessageOption.OptionNumber.Accept, MessageOption.ContentFormat.Application__Json ) )
+                .Build( );
 
                 var response = m_client.MakeRequest( request );
 
@@ -206,7 +197,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 CoApTestAsserts.Assert_SameToken( request, response );
 
                 CoApTestAsserts.Assert_Statistics( m_client.Statistics, desiredClientStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
-                CoApTestAsserts.Assert_Statistics( m_server.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
+                CoApTestAsserts.Assert_Statistics( m_localProxyServer.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
             }
             finally
             {

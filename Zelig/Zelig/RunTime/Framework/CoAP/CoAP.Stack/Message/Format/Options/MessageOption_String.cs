@@ -5,16 +5,15 @@
 namespace CoAP.Stack
 {
     using System;
+    using CoAP.Common;
 
 
-    public class MessageOption_String : MessageOption
+    public sealed class MessageOption_String : MessageOption
     {
 
         //
         // State
         //
-
-        private readonly string m_value; 
 
         //--//
 
@@ -22,31 +21,35 @@ namespace CoAP.Stack
         // Contructors
         //
         
-        internal MessageOption_String( OptionNumber option, string value ) : base(option)
+        internal MessageOption_String( OptionNumber option, string value ) : base(option, Utils.ByteArrayFromString( value ))
         {
-            if(value.Length < 1 || value.Length > 255)
-            {
-                throw new ArgumentException( ); 
-            }
-
-            m_value = value;
         }
 
-        public static MessageOption New( OptionNumber number, string value )
+        public static MessageOption_String New( OptionNumber number, string value )
         {
             switch(number)
             {
-                case OptionNumber.Uri_Host:
-                case OptionNumber.Location_Path:
                 case OptionNumber.Uri_Path:
                 case OptionNumber.Uri_Query:
+                    Validate( value );
+                    return new MessageOption_String( number, value );
+                case OptionNumber.Uri_Host:
+                case OptionNumber.Location_Path:
                 case OptionNumber.Location_Query:
                 case OptionNumber.Proxy_Uri:
                 case OptionNumber.Proxy_Scheme:
                     return new MessageOption_String( number, value );
 
                 default:
-                    throw new CoAP_MessageFormatException( );
+                    throw new CoAP_MessageMalformedException( );
+            }
+        }
+
+        private static void Validate( string value )
+        {
+            if(value.IndexOfAny( CoAPUri.AllUriDelimiters ) != - 1)
+            {
+                throw new ArgumentException( ); 
             }
         }
 
@@ -58,15 +61,13 @@ namespace CoAP.Stack
         {
             base.Encode( stream ); 
 
-            stream.WriteString( m_value, Common.Defaults.Encoding );
+            stream.WriteBytes( this.RawBytes, 0, this.ValueLength );
         }
 
-#if DESKTOP
         public override string ToString( )
         {
-            return $"{this.Name}('{m_value}')";
+            return $"{this.Name}('{Utils.ByteArrayToString( this.RawBytes )}')";
         }
-#endif
 
         //
         // Access Methods
@@ -76,15 +77,7 @@ namespace CoAP.Stack
         {
             get
             {
-                return m_value;
-            }
-        }
-
-        public override int ValueLength
-        {
-            get
-            {
-                return m_value.Length;
+                return Utils.ByteArrayToString( this.RawBytes );
             }
         }
     }

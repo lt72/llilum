@@ -32,6 +32,7 @@ namespace CoAP.Stack
         // State 
         // 
         private static MessageParser s_parser;
+        //--//
         private        CoAPMessage   m_target;
         
 
@@ -71,32 +72,30 @@ namespace CoAP.Stack
         // Helper methods
         //
         
-        public bool Parse( CoAPMessage msg, IPEndPoint localEndPoint )
+        public bool ParseAndComputeDestination( byte[ ] buffer, IPEndPoint localEndPoint, ref CoAPMessage msg )
         {
-            m_target = msg;
-
-            bool fRes = Parse( m_target.Buffer, 0, m_target.Length );
-
-            //m_target.Buffer = Constants.EmptyBuffer;
+            bool fCorrect = Parse( buffer, ref msg );
 
             msg.Context.Destination = MessageContext.ComputeDestination( msg.Options.Options, localEndPoint );
-
-            return fRes;
+            
+            return fCorrect;
         }
 
-        public bool Inflate( CoAPMessage msg )
+        public bool Parse( byte[ ] buffer, ref CoAPMessage msg )
         {
             m_target = msg;
 
-            bool fRes = Parse( m_target.Buffer, 0, m_target.Length );
-            
-            return fRes;
+            bool fCorrect = Parse( buffer, 0, buffer.Length );
+
+            m_target.KillBuffer( );
+
+            return fCorrect;
         }
 
         private bool Parse( byte[ ] buffer, int offset, int count )
         {
             //
-            // We need at least the very first 4 bytes to get us an header
+            // We need at least the very first 4 bytes to get us an header, skip null checks. 
             //
             if(buffer.Length < Constants.MinimalMessageLength || count < Constants.MinimalMessageLength)
             {
@@ -107,18 +106,26 @@ namespace CoAP.Stack
 
             stream.Encoding = Common.Defaults.Encoding;
 
-            CoAPMessage.Error error = CoAPMessageRaw.Error.None; 
-
-            m_target.Header  = MatchHeader ( stream                       );
-            m_target.Token   = MatchToken  ( stream, m_target.TokenLength );
-            m_target.Options = MatchOptions( stream, ref error            );
-            m_target.Payload = MatchPayload( stream                       );
-
-            if(m_target.Context != null)
-            {
-                m_target.Context.Error = error;
-            }
+            CoAPMessage.Error error = CoAPMessageRaw.Error.None;
             
+            try
+            {
+                m_target.Header  = MatchHeader ( stream                       );
+                m_target.Token   = MatchToken  ( stream, m_target.TokenLength );
+                m_target.Options = MatchOptions( stream, ref error            );
+                m_target.Payload = MatchPayload( stream                       );
+            }
+            catch(CoAP_MessageHeaderMalformedException)
+            {
+                error = CoAPMessageRaw.Error.Parsing__Malformed_NoHeader;
+            }
+            catch(CoAP_MessageMalformedException)
+            {
+                error = CoAPMessageRaw.Error.Parsing__Malformed;
+            }
+
+            m_target.Context.ProtocolError = error;
+
             return error == CoAPMessageRaw.Error.None;
         }
 
@@ -130,7 +137,7 @@ namespace CoAP.Stack
 
         private uint MatchHeader( NetworkOrderBinaryStream stream )
         {
-            CheckAvailableOrThrow( stream, 4 ); 
+            CheckAvailableOrThrowHeader( stream, 4 ); 
 
             return stream.ReadUInt32( );
         }
@@ -203,11 +210,11 @@ namespace CoAP.Stack
 
                 if(MessageOption.IsInteger( number ))
                 {
-                    CheckAvailableAndLengthOrThrow( stream, sizeof(uint), length ); 
+                    CheckAvailableAndLengthOrThrow( stream, sizeof(int), length ); 
 
                     var integerValue = stream.ReadUInt32(); 
 
-                    opt = MessageOption_UInt.New( number, integerValue ); 
+                    opt = MessageOption_Int.New( number, (int)integerValue ); 
 
                     if(number == MessageOption.OptionNumber.Accept)
                     {
@@ -258,8 +265,8 @@ namespace CoAP.Stack
                             // response, or piggybacked in an Acknowledgement, MUST cause the response 
                             // to be rejected ( Section 4.2 ).
                             //
-                            opt.IsBad  = true;
-                            error      = CoAPMessageRaw.Error.Parsing__OptionError;
+                            opt.IsBad = true;
+                            error     = CoAPMessageRaw.Error.Parsing__OptionError;
                         }
                         else
                         {
@@ -277,9 +284,7 @@ namespace CoAP.Stack
 
                 opt.Delta = delta;
                 
-                //
-                // Use Append, since options are in order.
-                options.AppendToBack( opt );
+                options.Add( opt );
 
                 previousDelta = delta;
             }
@@ -294,9 +299,9 @@ namespace CoAP.Stack
             //
             var remaining = m_target.Length - stream.Position;
 
-            var payload = new MessagePayload( new byte[ remaining ] );
+            var payload = MessagePayload_Opaque.New( new byte[ remaining ] );
 
-            stream.ReadBytes( payload.Payload, 0, remaining );
+            stream.ReadBytes( (byte[]) payload.Value, 0, remaining );
 
             return payload;
         }
@@ -325,7 +330,7 @@ namespace CoAP.Stack
                 }
                 else
                 {
-                    throw new CoAP_MessageFormatException( );
+                    throw new CoAP_MessageMalformedException( );
                 }
             }
 
@@ -338,11 +343,20 @@ namespace CoAP.Stack
         }
 
         [Conditional( "DEBUG_PARSER" )]
+        private static void CheckAvailableOrThrowHeader( NetworkOrderBinaryStream stream, int count )
+        {
+            if(CheckAvailable( stream, count ) == false)
+            {
+                throw new CoAP_MessageHeaderMalformedException( );
+            }
+        }
+
+        [Conditional( "DEBUG_PARSER" )]
         private static void CheckAvailableOrThrow( NetworkOrderBinaryStream stream, int count )
         {
             if(CheckAvailable( stream, count ) == false)
             {
-                throw new CoAP_MessageFormatException( ); 
+                throw new CoAP_MessageMalformedException( );
             }
         }
 
@@ -351,7 +365,7 @@ namespace CoAP.Stack
         {
             if(minimum > advertized || CheckAvailable( stream, advertized ) == false)
             {
-                throw new CoAP_MessageFormatException( ); 
+                throw new CoAP_MessageMalformedException( ); 
             }
         }
     }

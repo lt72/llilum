@@ -5,11 +5,10 @@
 namespace CoAP.Server
 {
     using CoAP.Stack;
-    using CoAP.Stack.Abstractions;
 
-    public partial class MessageProcessor
+    internal partial class MessageProcessor
     {
-        internal class MessageProcessor__BadOptions : ProcessingState
+        internal sealed class MessageProcessor__BadOptions : ProcessingState
         {
             private MessageProcessor__BadOptions( )
             {
@@ -24,11 +23,11 @@ namespace CoAP.Server
             // Mhelper methods
             // 
 
-            public override void Process( )
+            internal override void Process( )
             {
                 var processor = this.Processor;
 
-                processor.Engine.Owner.Statistics.Errors++;
+                processor.MessageEngine.Owner.Statistics.Errors++;
 
                 var messageCtx = processor.MessageContext;
                 var msg        = messageCtx.MessageInflated;
@@ -37,9 +36,9 @@ namespace CoAP.Server
                 {
                     //
                     // Unrecognized options of class "critical" that occur in a Confirmable 
-                    // request MUST cause the return of a 4.02( Bad Option ) response. 
+                    // request MUST cause the return of a 4.02 (Bad Option) response. 
                     // This response SHOULD include a diagnostic payload describing the 
-                    // unrecognized option( s ) ( see Section 5.5.2 ).
+                    // unrecognized option(s) (see Section 5.5.2).
                     // 
                     uint responseCode = CoAPMessage.RequestError_WithDetail( CoAPMessage.Detail_RequestError.BadRequest ); 
                     byte[] payload = null;
@@ -53,7 +52,7 @@ namespace CoAP.Server
                             MessageOption_Opaque badOption = (MessageOption_Opaque)opt;
                                 
                             responseCode = CoAPMessage.RequestError_WithDetail( CoAPMessage.Detail_RequestError.BadOption );
-                            payload      = (byte[ ])badOption.Value;
+                            payload      = badOption.RawBytes;
                         }
                         else if(opt.IsNotAcceptable)
                         {
@@ -62,7 +61,7 @@ namespace CoAP.Server
                     }
 
                     messageCtx.ResponseCode    = responseCode;
-                    messageCtx.ResponsePayload = payload;
+                    messageCtx.ResponsePayload = MessagePayload_Opaque.New( payload );
 
                     Advance( ProcessingState.State.ImmediateResponseAvailable );
                 }

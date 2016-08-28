@@ -23,11 +23,11 @@ namespace CoAP.Samples.Server
         {
             Logger.Instance = new ConsoleLogger( );
             
-            var uri = new ServerCoAPUri( new IPEndPoint( IPAddress.Parse( "10.0.1.28" ) , 11000 ), "res" ); 
+            var uri = new CoAPServerUri( new IPEndPoint( IPAddress.Parse( "10.0.1.28" ) , 11000 ), "res" ); 
             
             Logger.Instance.Log( $"Creating server @'{uri.Scheme}{uri.EndPoints[0]}/{uri.Path}'" ); 
 
-            s_server = new BasicUdpServer( uri );
+            s_server = new BasicUdpServer( uri.EndPoints );
             
             Logger.Instance.Log( $"Activating" ); 
 

@@ -13,32 +13,47 @@ namespace CoAP.Stack
 
     public class MessageBuilder : ICloneable
     {
-        private class Unique : IUniqueRandom
+        private class UniqueRandom : IUniqueRandom
         {
             private readonly Random m_random;
 
-            internal Unique( int seed )
+            internal UniqueRandom( int seed )
             {
                 m_random = new Random( seed );
             }
 
-            public byte[ ] GetBytes( int unique, byte[] bytes )
+            public byte[ ] GetBytes( byte[] bytes )
             {
-                if(bytes.Length >= 1)
+                if(bytes.Length > 0)
                 {
-
                     m_random.NextBytes( bytes );
-
-                    bytes[ 0 ] = (byte)unique;
                 }
 
                 return bytes;
             }
 
-            public ushort GetShort( int unique )
+            public ushort GetShort( )
             {
-                return (ushort)((m_random.Next( ) & 0x00000FFF) | (unique & 0x0000F000)); 
+                //
+                // use uniqueness on 4th byte
+                //
+                return (ushort)m_random.Next( );
             }
+
+            public int GetInt( )
+            {
+                //
+                // use uniqueness on lower 4 bytes
+                //
+                return m_random.Next( );
+            }
+        }
+
+        private enum NoOptions
+        {
+            All     , 
+            JustETag,
+            None    ,
         }
 
         //--//
@@ -52,97 +67,93 @@ namespace CoAP.Stack
         //private static readonly uint s_Header_Code_Class__Clear  = 0xFFFF1FFF;
         private static readonly uint s_Header_Code_All__Clear    = 0xFFFF00FF;
         private static readonly uint s_Header_MessageId__Clear   = 0x0000FFFF;
+        
         //--//
-        private  static          IUniqueRandom  s_UniqueRandom   = new Unique( 0x75A55A5A    );
-        private  static          int            s_DefaultUnique  = 0x0000A000;
 
-        //
+        public static readonly IUniqueRandom RandomNumberGenerator = new UniqueRandom( 0x75A55A5A );
+
+        //--//
+        
+            //
         // State 
         //
 
         private readonly IPEndPoint     m_destination;
-        private readonly int            m_unique;
         private readonly IUniqueRandom  m_uniqueRandom;
         private volatile int            m_messageId;
+
         private          uint           m_header;
         private          MessageToken   m_token;
         private          MessageOptions m_options;
         private          MessageOptions m_persistentOptions;
         private          MessagePayload m_payload;
+        private          MessageContext m_context;
+        private          NoOptions      m_doNotUseOptions;
 
         //--//
-
-        public static int DefaultUnique
-        {
-            get
-            {
-                return s_DefaultUnique;
-            }
-            set
-            {
-                s_DefaultUnique = value;
-            }
-        }
-
-        public static IUniqueRandom UniqueRandom
-        {
-            get
-            {
-                return s_UniqueRandom;
-            }
-            set
-            {
-                s_UniqueRandom = value;
-            }
-        }
 
         //
         // Contructors
         //
-
-        private MessageBuilder( IPEndPoint destination, int unique, IUniqueRandom uniqueRandom )
+        
+        private MessageBuilder( IPEndPoint destination )
         {
-            m_destination  = destination;
-            m_unique       = unique;
-            m_uniqueRandom = uniqueRandom;
-            m_header       = 0;
-            m_token        = MessageToken.EmptyToken;
-            m_options      = new MessageOptions( );
-            m_payload      = MessagePayload.EmptyPayload;
-        }
-
-        private MessageBuilder( IPEndPoint destination, int unique ) : this( destination, unique, MessageBuilder.UniqueRandom )
-        {
-        }
-
-        private MessageBuilder( IPEndPoint destination ) : this( destination, MessageBuilder.DefaultUnique, MessageBuilder.UniqueRandom )
-        {
+            m_destination       = destination;
+            m_uniqueRandom      = new UniqueRandom( RandomNumberGenerator.GetInt( ) );
+            m_header            = 0;
+            m_token             = MessageToken.EmptyToken;
+            m_options           = new MessageOptions( );
+            m_persistentOptions = new MessageOptions( );
+            m_payload           = MessagePayload.EmptyPayload;
+            m_doNotUseOptions   = NoOptions.All;
         }
 
         //--//
 
-        public static MessageBuilder Create( IPEndPoint intermediary, ServerCoAPUri uri )
+        public static MessageBuilder Create( IPEndPoint intermediary, CoAPServerUri uri )
         {
-            if(intermediary == null)
-            {
-                return Create( uri ); 
-            }
-
-            string scheme = null, host = null, path = null;
-            int port = 0;
-            var options = new MessageOptions();
+            //string scheme = null, host = null, path = null;
+            //int port = 0;
+            MessageOptions options = MessageOptions.EmptyOptions;
 
             if(uri != null)
             {
-                bool fSecure = CoAPUri.UriToComponents( uri.ToString(), intermediary, out scheme, out host, out port, out path, options );
+                options = (MessageOptions)uri.Options.Clone( );
+
+                if(intermediary == null)
+                {
+                    intermediary = uri.EndPoints[ 0 ];
+                }
+
+                //if(uri != null)
+                //{
+                //    CoAPUri.UriStringToComponents( uri.ToString(), ref intermediary, out scheme, out host, out port, out path, options );
+                //}
+
+                //
+                // To create the options to support proxying we need to check the uri 
+                // for any endpoints that are not equivalent to the intermediary. 
+                //
+                foreach(var ep in uri.EndPoints)
+                {
+                    if(ep.Equals( intermediary ) == false)
+                    {
+                        var host = new MessageOption_String( MessageOption.OptionNumber.Uri_Host, ep.Address.ToString());
+                        var port = new MessageOption_Int  ( MessageOption.OptionNumber.Uri_Port, ep.Port               );
+
+                        if(options.Contains( host ) == false)
+                        {
+                            options.Add( host );
+                        }
+                        if(options.Contains( port ) == false)
+                        {
+                            options.Add( port );
+                        }
+                    }
+                }
             }
 
             return new MessageBuilder( intermediary ).WithMessageId( ).WithPersistentOptions( options );
-        }
-
-        public static MessageBuilder Create( ServerCoAPUri uri )
-        {
-            return new MessageBuilder( uri?.EndPoints[ 0 ] ).WithMessageId( );
         }
 
         public static MessageBuilder Create( IPEndPoint destination )
@@ -152,81 +163,154 @@ namespace CoAP.Stack
         
         public object Clone( )
         {
-            return new MessageBuilder( this.Destination, this.m_unique, this.m_uniqueRandom )
-                .WithMessageId        ( m_messageId )
+            return new MessageBuilder( this.Destination )
+                .WithMessageId        ( m_messageId         )
                 .WithPersistentOptions( m_persistentOptions )
-                .WithOptions          ( m_options );
+                .WithOptions          ( m_options           );
         }
 
         //
         // Helper methods
         //
 
+        //
+        // Simple messages, no options: EMPTY request (CoAP ping), ACK, RESET
+        // 
+
         public MessageBuilder CreateEmptyRequest( )
         {
             return this
-                .WithVersion( CoAPMessage.ProtocolVersion.Version_1 )
-                .WithType( CoAPMessage.MessageType.Confirmable )
+                .WithNoOptions  ( )
+                .WithVersion    ( CoAPMessage.ProtocolVersion.Version_1 )
                 .WithTokenLength( 0 )
+                .WithType       ( CoAPMessage.MessageType.Confirmable )
                 .WithRequestCode( CoAPMessage.Detail_Request.Empty )
-                .WithMessageId( );
+                .WithMessageId  ( );
         }
 
-        public MessageBuilder CreateResponse( CoAPMessageRaw request )
+        //
+        // All responses
+        // 
+
+        private MessageBuilder CreateResponse( CoAPMessageRaw request, MessageContext ctx )
         {
-            return this
-                .WithVersion( request.Version )
+            var response = this
+                .WithVersion    ( request.Version     )
                 .WithTokenLength( request.TokenLength )
-                .WithToken( request.Token );
+                .WithToken      ( request.Token       )
+                .WithContext    ( ctx                 );
+
+            return response;
         }
 
-        public MessageBuilder CreateAck( CoAPMessage response, MessageContext messageCtx )
-        {
-            var request = messageCtx.Message;
+        //
+        // Simple messages, no options: EMPTY request (CoAP ping), ACK, RESET
+        // 
 
-            return CreateResponse( request )
-                .WithType( CoAPMessage.MessageType.Acknowledgement )
-                .WithMessageId( response.MessageId );
+        public MessageBuilder CreateAck( CoAPMessageRaw msg, MessageContext ctx )
+        {
+            return CreateResponse( msg, ctx )
+                .WithNoOptions(                                         )
+                .WithType     ( CoAPMessage.MessageType.Acknowledgement )
+                .WithMessageId( msg.MessageId                           );
         }
 
-        public MessageBuilder CreateAck( MessageContext messageCtx )
+        public MessageBuilder CreateResetResponse( CoAPMessageRaw msg, MessageContext ctx )
         {
-            var request = messageCtx.Message;
-
-            return CreateResponse( request )
-                .WithType( CoAPMessage.MessageType.Acknowledgement )
-                .WithMessageId( request.MessageId );
-        }
-
-        public MessageBuilder CreateDelayedResponse( MessageContext messageCtx )
-        {
-            var request = messageCtx.Message;
-
-            return CreateResponse( request )
-                .WithType( request.Type )
-                .WithCode( messageCtx.ResponseCode )
-                .WithMessageId( );
-        }
-
-        public MessageBuilder CreateResetResponse( MessageContext messageCtx )
-        {
-            var request = messageCtx.Message;
-
-            return CreateResponse( request )
-                .WithType( CoAPMessage.MessageType.Reset )
-                .WithMessageId( request.MessageId )
+            return CreateResponse( msg, ctx )
+                .WithNoOptions  (                                  )
+                .WithType       ( CoAPMessageRaw.MessageType.Reset )
+                .WithMessageId  ( msg.MessageId                    )
                 .WithRequestCode( CoAPMessage.Detail_Request.Empty );
         }
 
-        public MessageBuilder FromContext( MessageContext messageCtx )
+        //
+        // Immediate and delayed responses: use ETag if available
+        // 
+
+        public MessageBuilder CreateImmediateResponse( CoAPMessageRaw msg, MessageContext ctx )
         {
-            var msg = messageCtx.MessageInflated;
+            return CreateResponse( msg, ctx )
+                .WithNoOptionsButETag(                                         )
+                .WithType            ( CoAPMessage.MessageType.Acknowledgement )
+                .WithMessageId       ( msg.MessageId                           )
+                .WithCode            ( ctx.ResponseCode                        )
+                .WithPayload         ( ctx.ResponsePayload                     )
+                .WithOptions         ( ctx.ResponseOptions                     );
+        }
+
+        public MessageBuilder CreateDelayedResponse( CoAPMessageRaw msg, MessageContext ctx )
+        {
+            return CreateResponse( msg, ctx )
+                .WithNoOptionsButETag(                     )
+                .WithType            ( msg.Type            )
+                .WithMessageId       (                     )
+                .WithCode            ( ctx.ResponseCode    )
+                .WithOptions         ( ctx.ResponseOptions )
+                .WithPayload         ( ctx.ResponsePayload );
+        }
+
+        public MessageBuilder CreateOriginRequest( CoAPMessage msg )
+        {
+            var translatedOptions = new MessageOptions(); 
+
+            foreach(var opt in msg.Options.Options)
+            {
+                if(opt.Number == MessageOption.OptionNumber.Uri_Path)
+                {
+                    if(opt.Value.Equals( Defaults.ProxyDirectory))
+                    {
+                        continue;
+                    }
+                }
+
+                translatedOptions.Add( opt ); 
+            }
 
             return this
-                .WithHeader ( msg.Header )
-                .WithToken  ( msg.Token )
-                .WithOptions( msg.Options )
-                .WithPayload( msg.Payload );
+                .WithHeader     ( msg.Header           )
+                .WithTokenLength( Defaults.TokenLength )
+                .WithOptions    ( translatedOptions    )
+                .WithPayload    ( msg.Payload          );
+        }
+
+        //--//
+        //--//
+        //--//
+        
+        private MessageBuilder WithNoOptions( )
+        {
+            m_doNotUseOptions = NoOptions.None;
+
+            return this;
+        }
+
+        private MessageBuilder WithNoOptionsButETag( )
+        {
+            m_doNotUseOptions = NoOptions.JustETag;
+
+            return this;
+        }
+
+        public MessageBuilder WithETag( byte[] tag )
+        {
+            if(tag != null && tag.Length > 0)
+            {
+                var opt = MessageOption_Opaque.New( MessageOption.OptionNumber.ETag, tag );
+
+                m_options.Add( opt );
+
+                m_options.ETag = opt;
+            }
+
+            return this;
+        }
+
+        public MessageBuilder WithContext( MessageContext ctx )
+        {
+            m_context = ctx;
+
+            return this;
         }
 
         public MessageBuilder WithHeader( uint rawHeader )
@@ -325,7 +409,7 @@ namespace CoAP.Stack
             return this;
         }
 
-        private MessageBuilder WithToken( MessageToken token )
+        public MessageBuilder WithToken( MessageToken token )
         {
             if(token == null)
             {
@@ -339,8 +423,11 @@ namespace CoAP.Stack
 
         public MessageBuilder WithOption( MessageOption option )
         {
-            m_options.InsertInOrder( option );
-
+            if(option != null)
+            {
+                m_options.Add( option );
+            }
+            
             return this;
         }
 
@@ -351,21 +438,25 @@ namespace CoAP.Stack
                 options = MessageOptions.EmptyOptions;
             }
 
-            m_options = options;
+            foreach(var opt in options.Options)
+            {
+                m_options.Add( opt );
+            }
 
             return this;
         }
 
         public MessageBuilder WithPersistentOptions( MessageOptions options )
         {
-            m_persistentOptions = options;
+            if(options == null)
+            {
+                options = MessageOptions.EmptyOptions;
+            }
 
-            return this;
-        }
-
-        public MessageBuilder WithPayload( byte[ ] payload )
-        {
-            m_payload = new MessagePayload( payload );
+            foreach(var opt in options.Options)
+            {
+                m_persistentOptions.Add( opt );
+            }
 
             return this;
         }
@@ -384,89 +475,101 @@ namespace CoAP.Stack
 
         public CoAPMessageRaw Build( )
         {
-            return BuildInternal( false );
-        }
-
-        public CoAPMessageRaw BuildAndReset( )
-        {
-            return BuildInternal( true ); 
-        }
-
-        private CoAPMessageRaw BuildInternal( bool fReset )
-        {
             var msg = CoAPMessageRaw.NewBlankMessage( );
-
-            if(m_persistentOptions != null)
-            {
-                foreach(var option in m_persistentOptions.Options)
-                {
-                    m_options.InsertInOrder( option );
-                }
-            }
-
-            //
-            // encode message ID as it was selected last and then bump it up
-            //
-            int id1 = -1;
-            int id2 = -1;
-
-            do
-            {
-                id1 = m_messageId;
-
-                id2 = Interlocked.CompareExchange( ref m_messageId, id1 + 1, id1 );
-            } while(id1 != id2);
-
-            m_header &= s_Header_MessageId__Clear;
-            m_header |= CoAPMessage.EncodeMessageId( id2 );
             
-            //
-            // Set up buffer
-            //
-
-            EnsureBuffer( msg );
-
-            //
-            // Complete the message
-            //
-
-            var stream = new NetworkOrderBinaryStream( msg.Buffer );
-
-            stream.WriteUInt32( m_header );
-
-            m_token  .Encode( stream );
-            m_options.Encode( stream );
-
-            if(m_payload != null)
+            try
             {
+                if(m_doNotUseOptions == NoOptions.None)
+                {
+                    m_options = new MessageOptions( );
+                }
+                else
+                {
+                    if(m_doNotUseOptions == NoOptions.JustETag)
+                    {
+                        var etag = m_options.ETag;
+
+                        m_options = new MessageOptions( );
+
+                        if(etag != null)
+                        {
+
+                            m_options.Add( etag );
+                        }
+                    }
+                    else
+                    {
+                        foreach(var option in m_persistentOptions.Options)
+                        {
+                            m_options.Add( option );
+                        }
+                    }
+                }
+
+                //
+                // encode message ID as it was selected last and then bump it up
+                //
+                int id1 = -1;
+                int id2 = -1;
+
+                do
+                {
+                    id1 = m_messageId;
+
+                    id2 = Interlocked.CompareExchange( ref m_messageId, id1 + 1, id1 );
+                } while(id1 != id2);
+
+                m_header &= s_Header_MessageId__Clear;
+                m_header |= CoAPMessage.EncodeMessageId( id2 );
+
+                //
+                // Set up buffer
+                //
+                var count = ComputeSize( );
+
+                byte[] buffer = null;
+                if(msg.Buffer.Length < count)
+                {
+                    buffer = new byte[ count ];
+                }
+                else
+                {
+                    buffer = msg.Buffer;
+                }
+
+                //
+                // Complete the message
+                //
+
+                var stream = new NetworkOrderBinaryStream( buffer );
+
+                stream.WriteUInt32( m_header );
+
+                m_token.Encode( stream );
+                m_options.Encode( stream );
                 m_payload.Encode( stream );
-            }
 
-            if(fReset)
+                msg.Buffer  = buffer;     // Setting the buffer updates the heder in CoAPMessageRaw
+                msg.Context = m_context;
+            }
+            finally
             {
-                Reset( );
+                m_header  = 0; 
+                m_token   = MessageToken.EmptyToken;
+                m_options.Clear( );
+                m_payload = MessagePayload.EmptyPayload;
+
+                m_context         = null;
+                m_doNotUseOptions = NoOptions.All;
             }
 
             return msg;
         }
         
-        public MessageBuilder Reset()
-        {
-            m_header  = 0;
-            m_token   = MessageToken.EmptyToken;
-            m_payload = MessagePayload.EmptyPayload;
-
-            m_options.Reset( ); 
-
-            return this;
-        }
-
-#if DESKTOP
         public override string ToString( )
         {
             return $"MESSAGE[HEADER({HeaderToString( )})](TOKEN({m_token}),OPTIONS({m_options}),PAYLOAD({m_payload}))";
         }
-#endif
 
         //
         // Access methods
@@ -491,18 +594,25 @@ namespace CoAP.Stack
 
         public byte[ ] NewToken( byte[ ] bytes )
         {
-            return m_uniqueRandom.GetBytes( m_unique, bytes );
+            return m_uniqueRandom.GetBytes( bytes );
+        }
+
+        public int NewETag( )
+        {
+            return m_uniqueRandom.GetInt( );
+        }
+
+        private int NewMessageId( )
+        {
+            return m_uniqueRandom.GetShort( );
+        }
+
+        public static int NewGlobalETag( )
+        {
+            return RandomNumberGenerator.GetInt( ); 
         }
 
         //--//
-
-        private void EnsureBuffer( CoAPMessageRaw msg )
-        {
-            if(Object.ReferenceEquals( msg.Buffer, Constants.EmptyBuffer)) 
-            {
-                msg.Buffer = new byte[ ComputeSize( ) ];
-            }
-        }
 
         private string HeaderToString( )
         {
@@ -519,11 +629,6 @@ namespace CoAP.Stack
                 m_payload.Size ;
 
             return size;
-        }
-
-        private int NewMessageId()
-        {
-            return m_uniqueRandom.GetShort( m_unique ); 
         }
     }
 }

@@ -29,6 +29,7 @@ namespace CoAP.Stack
         public static readonly char   QueryDelimiter      = '&';
         public static readonly char[] UriSeparators       = new char[] { PathSeparator, PortSeparator, QuerySeparator };
         public static readonly char[] QueryDelimiters     = new char[] { QueryDelimiter };
+        public static readonly char[] AllUriDelimiters    = new char[] { PathSeparator, PortSeparator, QuerySeparator, QueryDelimiter };
 
         public static readonly int    DefaultPort         = 5683;
         public static readonly int    DefaultSecurePort   = 5684;
@@ -41,6 +42,7 @@ namespace CoAP.Stack
 
         private readonly string       m_scheme;
         private readonly IPEndPoint[] m_endPoints;
+        private MessageOptions        m_options;
         private readonly string       m_path;
 
         //--//
@@ -49,40 +51,18 @@ namespace CoAP.Stack
         // Constructors
         //
 
-        public static CoAPUri FromString( string uriString )
-        {
-            string scheme  = null;
-            string host    = null;
-            int    port    = DefaultPort;
-            string path    = null;
-            var    options = new MessageOptions();
-
-            bool fSecure = UriToComponents( uriString, null, out scheme, out host, out port, out path, options );
-
-            var endPoints = Utils.EndPointsFromHostName( host, port );
-
-            return fSecure ? new SecureServerCoAPUri( endPoints, path ) : new ServerCoAPUri( endPoints, path );
-        }
-
-        //--//
-
         protected CoAPUri( string scheme, IPEndPoint[ ] endPoint, string path )
         {
+            m_options = new MessageOptions( );
+
+            m_path = OptionsFromPath( path, ref m_options ); 
+
             m_scheme    = scheme;
             m_endPoints = endPoint;
-            m_path      = path;
         }
 
         protected CoAPUri( string scheme, IPEndPoint endPoint, string path ) : this( scheme, new IPEndPoint[] { endPoint }, path )
         {
-        }
-
-        //--//
-
-        protected CoAPUri( string scheme, string path )
-        {
-            m_scheme = scheme;
-            m_path   = path;
         }
 
         //--//
@@ -101,8 +81,66 @@ namespace CoAP.Stack
         }
 
         //--//
+        private static string OptionsFromPath( string path, ref MessageOptions options )
+        {
+            var components = path.Split( UriSeparators );
+            var fHasQuery  = path.IndexOf( QuerySeparator ) != -1;
 
-        public static bool UriToComponents( string uri, IPEndPoint destination, out string scheme, out string host, out int port, out string path, MessageOptions options )
+            int numberOfComponents = components.Length;
+
+            //
+            // Must have a host name
+            // 
+            if(numberOfComponents < 1)
+            {
+                return path;
+            }
+
+            bool fSecondPath = false;
+            var pathBuilder = new StringBuilder();
+            for(int i = 0; i < numberOfComponents; ++i)
+            {
+                var value = components[ i ];
+
+                if(String.IsNullOrEmpty( value ))
+                {
+                    continue;
+                }
+
+                if(fHasQuery && (i == numberOfComponents - 1))
+                {
+                    var queries = value.Split( QueryDelimiters );
+
+                    for(int j = 0; j < queries.Length; ++j)
+                    {
+                        var query = queries[ j ];
+
+                        options.Add(
+                                new MessageOption_String( MessageOption.OptionNumber.Uri_Query, query )
+                            );
+
+                        var delimiter = (j == queries.Length - 1) ? '\0' : QueryDelimiter;
+
+                        pathBuilder.Append( $"{query}{delimiter}" );
+                    }
+                }
+                else
+                {
+
+                    options.Add(
+                                new MessageOption_String( MessageOption.OptionNumber.Uri_Path, value )
+                            );
+                    
+                    pathBuilder.Append( fSecondPath ? "/" + value : value );
+
+                    fSecondPath = true;
+                }
+            }
+
+            return pathBuilder.ToString( );
+        }
+
+        public static void UriStringToComponents( string uri, ref IPEndPoint destination, out string scheme, out string host, out int port, out string path, MessageOptions options )
         {
             scheme = null;
             host   = null;
@@ -111,7 +149,6 @@ namespace CoAP.Stack
 
             int current  = 0;
             int length   = uri.Length;
-            bool fSecure = false;
 
             if(length < Scheme__CoAP.Length + 1)
             {
@@ -132,7 +169,6 @@ namespace CoAP.Stack
                 scheme  = Scheme__Secure_CoAP;
                 current = Scheme__Secure_CoAP.Length;
                 port    = DefaultSecurePort;
-                fSecure = true;
             }
             else
             {
@@ -164,25 +200,32 @@ namespace CoAP.Stack
             //
             var host1 = components[0];
             var ipAddress = Utils.AddressFromHostName( host1 );
-
-
-            if(ipAddress.Equals( destination.Address ) == false)
+            
+            //
+            // If there is a proposed destination (intermediary) and it does not match 
+            // the host in the URI then we need to add a Uri-Host option.
+            //
+            if(destination != null && ipAddress.Equals( destination.Address ) == false)
             {
-                options.InsertInOrder(
+                options.Add(
                     new MessageOption_String( MessageOption.OptionNumber.Uri_Host, host1 )
                 );
+
             }
 
             host = host1;
 
             //
-            // Resolve port
+            // Resolve port and Uri-Path/Uri-Query components
             // 
             if(numberOfComponents > 1)
             {
                 int second = 1;
+                int port1  = 0;
 
-                int port1 = 0;
+                //
+                // Port
+                //
                 if(fHasPort)
                 {
                     var portString = components[ second ];
@@ -199,8 +242,8 @@ namespace CoAP.Stack
                             {
                                 if(port1 != destination.Port && port1 != DefaultPort && port1 != DefaultSecurePort)
                                 {
-                                    options.InsertInOrder(
-                                        new MessageOption_UInt( MessageOption.OptionNumber.Uri_Port, (uint)port1 )
+                                    options.Add(
+                                        new MessageOption_Int( MessageOption.OptionNumber.Uri_Port, port1 )
                                     );
                                 }
                             }
@@ -216,6 +259,14 @@ namespace CoAP.Stack
                     }
                 }
 
+                if(destination == null)
+                {
+                    destination = new IPEndPoint( ipAddress, port );
+                }
+
+                //
+                // Uri-Path/Uri-Query
+                //
                 var pathBuilder = new StringBuilder();
                 for(int i = second; i < numberOfComponents; ++i)
                 {
@@ -234,7 +285,7 @@ namespace CoAP.Stack
                         {
                             var query = queries[ j ];
 
-                            options.InsertInOrder(
+                            options.Add(
                                     new MessageOption_String( MessageOption.OptionNumber.Uri_Query, query )
                                 );
 
@@ -245,7 +296,7 @@ namespace CoAP.Stack
                     }
                     else
                     {
-                        options.InsertInOrder(
+                        options.Add(
                                     new MessageOption_String( MessageOption.OptionNumber.Uri_Path, value )
                                 );
 
@@ -255,8 +306,6 @@ namespace CoAP.Stack
 
                 path = pathBuilder.ToString( );
             }
-
-            return fSecure;
         }
         
         public static IPEndPoint EndPointFromUri( string uri )
@@ -330,6 +379,22 @@ namespace CoAP.Stack
             get
             {
                 return m_path;
+            }
+        }
+
+        public MessageOptions Options
+        {
+            get
+            {
+                return m_options;
+            }
+        }
+
+        public bool IsSecure
+        {
+            get
+            {
+                return m_scheme.Equals( Scheme__Secure_CoAP );
             }
         }
     }

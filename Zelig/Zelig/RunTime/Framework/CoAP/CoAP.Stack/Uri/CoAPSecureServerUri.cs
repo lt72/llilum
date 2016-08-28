@@ -8,7 +8,7 @@ namespace CoAP.Stack
     using System.Net;
 
 
-    public class SecureServerCoAPUri : ServerCoAPUri
+    public class CoAPSecureServerUri : CoAPServerUri
     {
         //
         // State
@@ -20,11 +20,11 @@ namespace CoAP.Stack
         // Constructors
         //
 
-        public SecureServerCoAPUri( IPEndPoint[ ] endPoints, string path ) : base( Scheme__CoAP, endPoints, path )
+        public CoAPSecureServerUri( IPEndPoint[ ] endPoints, string path ) : base( Scheme__CoAP, endPoints, path )
         {
         }
 
-        public SecureServerCoAPUri( IPEndPoint endPoint, string path ) : base( Scheme__Secure_CoAP, endPoint, path )
+        public CoAPSecureServerUri( IPEndPoint endPoint, string path ) : base( Scheme__Secure_CoAP, endPoint, path )
         {
         }
 

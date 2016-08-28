@@ -18,13 +18,12 @@ namespace CoAP.Stack
         // 
 
         private CoAPMessageRaw    m_message;
-        private ICoAPChannel      m_channel;
-        private IPEndPoint        m_remoteEndPoint; 
-        private IPEndPoint        m_destinationEndPoint; 
-        private uint              m_code;
-        private IResourceHandler  m_resourceHandler;
-        private byte[ ]           m_responsePayload;
-        private CoAPMessageRaw    m_response;
+        private IPEndPoint        m_sourceEndPoint;
+        private IPEndPoint        m_destinationEndPoint;
+        private CoAPMessageRaw    m_responseAwaitingAck;
+        private uint              m_responseCode;
+        private MessageOptions    m_responseOptions;
+        private MessagePayload    m_responsePayload;
         private CoAPMessage.Error m_error;
 
         //--//
@@ -33,18 +32,36 @@ namespace CoAP.Stack
         // Contructors 
         //
 
-        public MessageContext( CoAPMessageRaw message )
+        private MessageContext( CoAPMessageRaw message )
         {
             m_message = message;
 
-            message.Context = this;
+            m_responseOptions = new MessageOptions( ); 
+        }
+        
+        //--//
+
+        public static MessageContext WrapWithContext( CoAPMessageRaw msg )
+        {
+            var ctx = new MessageContext( msg );
+            
+            ctx.Source      = msg.Context?.Source;
+            ctx.Destination = msg.Context?.Destination;
+
+            msg.Context = ctx;
+
+            return ctx;
         }
 
         //
         // Helper methods
         // 
 
-
+        public override string ToString( )
+        {
+            return $"CTX[TYPE={this.Message.Type},ID={m_message.MessageId},SRC={m_sourceEndPoint},DST={m_destinationEndPoint}]";
+        }
+        
         //
         // Access methods
         // 
@@ -61,11 +78,12 @@ namespace CoAP.Stack
                 //
                 // Create an inflated message
                 //
-                CoAPMessage msg = CoAPMessage.FromBuffer( m_message.Buffer );
+                CoAPMessage msg = CoAPMessage.FromBufferWithContext( m_message.Buffer, this );
 
+                bool fCorrect = false;
                 using(var parser = MessageParser.CheckOutParser( ))
                 {
-                    parser.Parse( msg, m_channel.LocalEndPoint );
+                    fCorrect = parser.ParseAndComputeDestination( msg.Buffer, m_destinationEndPoint, ref msg );
                 }
 
                 return msg;
@@ -85,56 +103,32 @@ namespace CoAP.Stack
                 m_message.Context = this;
             }
         }
-
-        public ICoAPChannel Channel
-        {
-            get
-            {
-                return m_channel;
-            }
-            set
-            {
-                m_channel = value;
-            }
-        }
-
+        
         public IPEndPoint Source
         {
             get
             {
-                return m_remoteEndPoint;
+                return m_sourceEndPoint;
             }
             set
             {
-                m_remoteEndPoint = (IPEndPoint)value;
+                m_sourceEndPoint = (IPEndPoint)value;
             }
         }
-        
+
         public IPEndPoint Destination
         {
             get
             {
                 return m_destinationEndPoint;
             }
-            internal set
+            set
             {
                 m_destinationEndPoint = value;
             }
         }
 
-        public IResourceHandler ResourceHandler
-        {
-            get
-            {
-                return m_resourceHandler;
-            }
-            set
-            {
-                m_resourceHandler = value;
-            }
-        }
-
-        public byte[] ResponsePayload
+        public MessagePayload ResponsePayload
         {
             get
             {
@@ -146,15 +140,15 @@ namespace CoAP.Stack
             }
         }
 
-        public CoAPMessageRaw Response
+        public CoAPMessageRaw ResponseAwaitingAck
         {
             get
             {
-                return m_response;
+                return m_responseAwaitingAck;
             }
             set
             {
-                m_response = value;
+                m_responseAwaitingAck = value;
             }
         }
 
@@ -162,19 +156,27 @@ namespace CoAP.Stack
         {
             get
             {
-                Debug.Assert( m_code <= 0xFF );
+                Debug.Assert( m_responseCode <= 0xFF );
 
-                return m_code;
+                return m_responseCode;
             }
             set
             {
                 Debug.Assert( value <= 0xFF );
 
-                m_code = value;
+                m_responseCode = value;
             }
         }
 
-        public CoAPMessage.Error Error
+        public MessageOptions ResponseOptions
+        {
+            get
+            {
+                return m_responseOptions;
+            }
+        }
+
+        public CoAPMessage.Error ProtocolError
         {
             get
             {
@@ -185,7 +187,7 @@ namespace CoAP.Stack
                 m_error = value;
             }
         }
-
+        
         //--//
 
         public static IPEndPoint ComputeDestination( LinkedList<MessageOption> options, IPEndPoint defaultEndPoint )
@@ -214,7 +216,7 @@ namespace CoAP.Stack
                 }
                 else if(opt.IsPort)
                 {
-                    port = (int)(uint)opt.Value;
+                    port = (int)opt.Value;
 
                     fOriginServer = true;
                 }

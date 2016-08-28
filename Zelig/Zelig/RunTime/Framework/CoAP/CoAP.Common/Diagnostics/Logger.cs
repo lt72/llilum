@@ -26,8 +26,9 @@ namespace CoAP.Common.Diagnostics
         }
 
         public virtual void Log( string msg ) { }
-        public virtual void LogError( string msg ) { }
         public virtual void LogSuccess( string msg ) { }
         public virtual void LogWarning( string msg ) { }
+        public virtual void LogProtocolError( string msg ) { }
+        public virtual void LogError( string msg ) { }
     }
 }

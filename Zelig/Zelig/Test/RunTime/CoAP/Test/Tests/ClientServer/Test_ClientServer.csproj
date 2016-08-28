@@ -36,6 +36,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="CoApTestBase.cs" />
+    <Compile Include="ConsoleLogger.cs" />
     <Compile Include="MultiClient\TestMultiClient.cs" />
     <Compile Include="NonIdempotent\TestNonIdempotentMethods.cs" />
     <Compile Include="Options\TestContentFormat.cs" />
@@ -45,12 +46,19 @@
     <Compile Include="RequestResponse\TestServerReset.cs" />
     <Compile Include="RequestResponse\TestDelayedResponse.cs" />
     <Compile Include="RequestResponse\TestPiggyBackedResponse.cs" />
+    <Compile Include="ProxyAndCachin\TestProxyAndCaching.cs" />
+    <Compile Include="ProxyAndCachin\TestProxyAndCachingNonIdempotentMethods.cs" />
+    <Compile Include="ProxyAndCachin\TestProxyAndCachingUnavailable.cs" />
     <Compile Include="Uri\TestUris.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\..\..\RunTime\Framework\CoAP\CoAP.Common\CoAP.Common.csproj">
       <Project>{8316dd5f-3130-423a-84a0-ddbe772b9784}</Project>
       <Name>CoAP.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\..\RunTime\Framework\CoAP\CoAP.Server\CoAP.Server.csproj">
+      <Project>{61884666-9bc2-43e9-969d-aa1f8e5cf93e}</Project>
+      <Name>CoAP.Server</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\..\..\RunTime\Framework\CoAP\CoAP.Stack\CoAP.Stack.csproj">
       <Project>{e41d342a-fe06-46c2-a3b1-acb4a6143af3}</Project>

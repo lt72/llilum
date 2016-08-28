@@ -9,10 +9,11 @@ namespace Microsoft.SPOT.Platform.Tests
     using Microsoft.Zelig.Test;
     using Test.ClientServerUtils;
     using System.Net;
+    using System.Threading;
+    using CoAP.Stack.Abstractions;
     using CoAP.Common;
     using CoAP.Common.Diagnostics;
     using CoAP.Stack;
-
 
     public class TestBadOptions : CoApTestBase
     {
@@ -21,9 +22,15 @@ namespace Microsoft.SPOT.Platform.Tests
             TestResult res = TestResult.Pass;
 
             //
+            // Upon reception, unrecognized options of class "critical" MUST be rejected and 
+            // client must bail out immediately.
+            //
+            res |= ReceiveResponseWithCriticalUnsupportedOption_Confirmable( );
+
+            //
             // Upon reception, unrecognized options of class "elective" MUST be silently ignored.
             //
-            res |= SendRequestWithElectiveUnsupportedOption_Confirmable( );
+            res |= SendRequestWithElectiveUnsupportedOption_Confirmable   ( );
             res |= SendRequestWithElectiveUnsupportedOption_NonConfirmable( );
 
             //
@@ -50,19 +57,7 @@ namespace Microsoft.SPOT.Platform.Tests
             //res |= SendResponseWithCriticalUnsupportedOption_Confirmable_Piggyback( );
             //res |= SendResponseWithCriticalUnsupportedOption_Confirmable_Delayed  ( );
 
-            res |= SendRequestWithProxyUri_SameHost                                 ( ); // SEE: https://github.com/lt72/CoAP-pr/issues/36
-            res |= SendRequestWithProxyUri_SameHost_DestinationNotNull              ( ); // SEE: https://github.com/lt72/CoAP-pr/issues/36
-            //res |= SendRequestWithProxyUri_DifferentHost_ReverseProxy_Confimable    ( );
-            //res |= SendRequestWithProxyUri_DifferentHost_ForwardProxy_Confimable    ( );
-            //res |= SendRequestWithProxyUri_DifferentHost_ForwardProxy_NonConfirmable( );
-
             return res;
-        }
-
-        private void ClearStatistics()
-        {
-            m_client.Statistics.Clear( );
-            m_server.Statistics.Clear( );
         }
 
         //~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~// 
@@ -72,7 +67,129 @@ namespace Microsoft.SPOT.Platform.Tests
         //
         // Critical/Unsupported options
         //
+
+
+        [TestMethod]
+        public TestResult ReceiveResponseWithCriticalUnsupportedOption_Confirmable( )
+        {
+            Log.Comment( "*** Send one confirmable request for a known IMMEDIATE resource with a non-standard unsupported critical option, and verify response is correct." );
+            Log.Comment( "*** Verify client sends reset and server handles it correctly." );
+
+            var desiredClientStats = new Statistics()
+            {
+                RequestsSent = 1,
+                ResetsSent   = 1,
+                Errors       = 1,
+            };
+            var desiredServerStats = new Statistics()
+            {
+                RequestsReceived      = 1,
+                ImmediateResposesSent = 1,
+                ResetsReceived        = 1,
+            };
+
+            ClearCachesAndStatistics( );
+
+            var resource = TestConstants.Resource__EchoQuery_Immediate;
+
+            try
+            {
+                m_localProxyServer.MessagingMock.OnOutgoingMessageMock += MessageMockHandler_AnswerWithBadOption;
+
+                m_localProxyServer.MessagingMock.AnswerWithBadOption = true;
+
+                var messageBuilder = m_client.Connect( null, resource );
+
+                var request = messageBuilder
+                    .WithVersion    ( CoAPMessage.ProtocolVersion.Version_1 )
+                    .WithType       ( CoAPMessage.MessageType.Confirmable )
+                    .WithTokenLength( Defaults.TokenLength )
+                    .WithRequestCode( CoAPMessage.Detail_Request.GET )
+                    .Build( );
+
+                var response = m_client.MakeRequest( request );
+
+                if(response != null)
+                {
+                    Log.Comment( "*** COMPLETED: FAIL" );
+                    return TestResult.Fail;
+                }
+
+                CoApTestAsserts.Assert_Statistics( m_client.Statistics     , desiredClientStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
+                CoApTestAsserts.Assert_Statistics( m_localProxyServer.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
+            }
+            finally
+            {
+                m_localProxyServer.MessagingMock.OnIncomingMessageMock -= MessageMockHandler_AnswerWithBadOption;
+
+                m_localProxyServer.MessagingMock.AnswerWithBadOption = false;
+
+                m_client.Disconnect( );
+            }
+
+            Log.Comment( "*** COMPLETED: PASS" );
+            Log.NewLine( );
+
+            return TestResult.Pass;
+        }
         
+        private bool MessageMockHandler_AnswerWithBadOption( object sender, ref CoAPMessageEventArgs args )
+        {
+            //
+            // Inject a bogus critical option that the client cannot possibly handle
+            // 
+            if(m_localProxyServer.MessagingMock.AnswerWithBadOption)
+            {
+                Logger.Instance.LogWarning( $"*** Request received '{args.MessageContext.Message}', injecting bad option..." );
+
+                //
+                // !!! MUST match test !!!
+                // 
+                var resource = TestConstants.Resource__EchoQuery_Immediate;
+
+                var unrecognizedOptionNumber = TestConstants.UnsupportedOption__Critical_UnSafe_NoCacheKey;
+
+                CoApTestAsserts.Assert( MessageOption.IsSupportedOption( unrecognizedOptionNumber ) == false );
+                CoApTestAsserts.Assert( MessageOption.IsCriticalOption( (byte)unrecognizedOptionNumber ) == true );
+                CoApTestAsserts.Assert( MessageOption.IsSafeOption( (byte)unrecognizedOptionNumber ) == false );
+                CoApTestAsserts.Assert( MessageOption.IsNoCacheKeyOption( (byte)unrecognizedOptionNumber ) == true );
+
+                var intercepted = args.MessageContext.Message;
+
+                CoAPMessage oldMsg = intercepted as CoAPMessage;
+
+                if(oldMsg == null)
+                {
+                    oldMsg = CoAPMessage.FromBufferWithContext( intercepted.Buffer, args.MessageContext );
+
+                    using(var parser = MessageParser.CheckOutParser( ))
+                    {
+
+                        bool fCorrect = CoAPMessage.ParseFromBuffer( intercepted.Buffer, parser, ref oldMsg );
+                    }
+                }
+
+                var msg = MessageBuilder.Create( null, resource )
+                    .WithHeader   ( oldMsg.Header  )
+                    .WithMessageId( oldMsg.MessageId )
+                    .WithToken    ( oldMsg.Token   )
+                    .WithOptions  ( oldMsg.Options )
+                    .WithPayload  ( oldMsg.Payload )
+                    .WithOption   ( MessageOption_Opaque.New( unrecognizedOptionNumber, new byte[] { 0xAA, 0xBB} ) )
+                    .Build( );
+
+                var buffer = msg.Buffer;
+
+                args.MessageContext.Message = msg;
+
+                Logger.Instance.LogWarning( $"*** New request      '{args.MessageContext.Message}'" );
+            }
+
+            return true;
+        }
+
+        //--//
+
         [TestMethod]
         public TestResult SendRequestWithElectiveUnsupportedOption_Confirmable( )
         {
@@ -90,14 +207,15 @@ namespace Microsoft.SPOT.Platform.Tests
                 ImmediateResposesSent = 1,
             };
 
-            ClearStatistics( );
+            ClearCachesAndStatistics( );
 
             var resource = TestConstants.Resource__EchoQuery_Immediate;
 
             var unrecognizedOptionNumber = TestConstants.UnsupportedOption__Elective_UnSafe_NoCacheKey;
+
             CoApTestAsserts.Assert( MessageOption.IsSupportedOption (       unrecognizedOptionNumber ) == false );
             CoApTestAsserts.Assert( MessageOption.IsCriticalOption  ( (byte)unrecognizedOptionNumber ) == false );
-            CoApTestAsserts.Assert( MessageOption.IsUnsafeOption    ( (byte)unrecognizedOptionNumber ) == true  );
+            CoApTestAsserts.Assert( MessageOption.IsSafeOption      ( (byte)unrecognizedOptionNumber ) == false );
             CoApTestAsserts.Assert( MessageOption.IsNoCacheKeyOption( (byte)unrecognizedOptionNumber ) == true  );
 
             try
@@ -109,9 +227,8 @@ namespace Microsoft.SPOT.Platform.Tests
                 .WithType       ( CoAPMessage.MessageType.Confirmable )
                 .WithTokenLength( Defaults.TokenLength )
                 .WithRequestCode( CoAPMessage.Detail_Request.GET )
-                .WithOption     ( MessageOption_String.New( MessageOption.OptionNumber.Uri_Path, resource.Path ) )
                 .WithOption     ( MessageOption_Opaque.New( unrecognizedOptionNumber, new byte[] { 0xAA, 0xBB} ) )
-                .BuildAndReset( );
+                .Build( );
 
                 var response = m_client.MakeRequest( request );
 
@@ -128,7 +245,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 CoApTestAsserts.Assert_SameToken( request, response );
 
                 CoApTestAsserts.Assert_Statistics( m_client.Statistics, desiredClientStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
-                CoApTestAsserts.Assert_Statistics( m_server.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
+                CoApTestAsserts.Assert_Statistics( m_localProxyServer.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
             }
             finally
             {
@@ -158,7 +275,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 ImmediateResposesSent = 1,
             };
 
-            ClearStatistics( );
+            ClearCachesAndStatistics( );
 
             var resource = TestConstants.Resource__EchoQuery_Immediate;
 
@@ -166,7 +283,7 @@ namespace Microsoft.SPOT.Platform.Tests
 
             CoApTestAsserts.Assert( MessageOption.IsSupportedOption (       unrecognizedOptionNumber ) == false );
             CoApTestAsserts.Assert( MessageOption.IsCriticalOption  ( (byte)unrecognizedOptionNumber ) == false );
-            CoApTestAsserts.Assert( MessageOption.IsUnsafeOption    ( (byte)unrecognizedOptionNumber ) == true  );
+            CoApTestAsserts.Assert( MessageOption.IsSafeOption      ( (byte)unrecognizedOptionNumber ) == false );
             CoApTestAsserts.Assert( MessageOption.IsNoCacheKeyOption( (byte)unrecognizedOptionNumber ) == true  );
 
             try
@@ -178,9 +295,8 @@ namespace Microsoft.SPOT.Platform.Tests
                 .WithType       ( CoAPMessage.MessageType.NonConfirmable )
                 .WithTokenLength( Defaults.TokenLength )
                 .WithRequestCode( CoAPMessage.Detail_Request.GET )
-                .WithOption     ( MessageOption_String.New( MessageOption.OptionNumber.Uri_Path, resource.Path ) )
                 .WithOption     ( MessageOption_Opaque.New( unrecognizedOptionNumber, new byte[] { 0xAA, 0xBB} ) )
-                .BuildAndReset( );
+                .Build( );
 
                 var response = m_client.MakeRequest( request );
 
@@ -197,7 +313,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 CoApTestAsserts.Assert_SameToken( request, response );
 
                 CoApTestAsserts.Assert_Statistics( m_client.Statistics, desiredClientStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
-                CoApTestAsserts.Assert_Statistics( m_server.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
+                CoApTestAsserts.Assert_Statistics( m_localProxyServer.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
             }
             finally
             {
@@ -227,16 +343,16 @@ namespace Microsoft.SPOT.Platform.Tests
                 ImmediateResposesSent = 1,
             };
 
-            ClearStatistics( );
+            ClearCachesAndStatistics( );
 
             var resource = TestConstants.Resource__EchoQuery_Immediate;
             var payload  = new byte[] { 0xAA, 0xBB }; 
 
             var unrecognizedOptionNumber = TestConstants.UnsupportedOption__Critical_UnSafe_NoCacheKey;
 
-            CoApTestAsserts.Assert( MessageOption.IsSupportedOption(        unrecognizedOptionNumber ) == false );
+            CoApTestAsserts.Assert( MessageOption.IsSupportedOption (       unrecognizedOptionNumber ) == false );
             CoApTestAsserts.Assert( MessageOption.IsCriticalOption  ( (byte)unrecognizedOptionNumber ) == true  );
-            CoApTestAsserts.Assert( MessageOption.IsUnsafeOption    ( (byte)unrecognizedOptionNumber ) == true  );
+            CoApTestAsserts.Assert( MessageOption.IsSafeOption      ( (byte)unrecognizedOptionNumber ) == false );
             CoApTestAsserts.Assert( MessageOption.IsNoCacheKeyOption( (byte)unrecognizedOptionNumber ) == true  );
 
             try
@@ -248,9 +364,8 @@ namespace Microsoft.SPOT.Platform.Tests
                 .WithType       ( CoAPMessage.MessageType.Confirmable )
                 .WithTokenLength( Defaults.TokenLength )
                 .WithRequestCode( CoAPMessage.Detail_Request.GET )
-                .WithOption     ( MessageOption_String.New( MessageOption.OptionNumber.Uri_Path, resource.Path ) )
                 .WithOption     ( MessageOption_Opaque.New( unrecognizedOptionNumber, payload ) )
-                .BuildAndReset( );
+                .Build( );
 
                 var response = m_client.MakeRequest( request );
 
@@ -265,10 +380,10 @@ namespace Microsoft.SPOT.Platform.Tests
                 CoApTestAsserts.Assert_Code( response, CoAPMessage.Class.RequestError, CoAPMessage.Detail_RequestError.BadOption );
                 CoApTestAsserts.Assert_SameMessageId( request, response );
                 CoApTestAsserts.Assert_SameToken( request, response );
-                CoApTestAsserts.Assert_Payload( payload, response );
+                CoApTestAsserts.Assert_Payload( payload, response.Payload );
 
                 CoApTestAsserts.Assert_Statistics( m_client.Statistics, desiredClientStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
-                CoApTestAsserts.Assert_Statistics( m_server.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
+                CoApTestAsserts.Assert_Statistics( m_localProxyServer.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
             }
             finally
             {
@@ -298,7 +413,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 ResetsSent = 1,
             };
 
-            ClearStatistics( );
+            ClearCachesAndStatistics( );
 
             var resource = TestConstants.Resource__EchoQuery_Immediate;
 
@@ -306,7 +421,7 @@ namespace Microsoft.SPOT.Platform.Tests
 
             CoApTestAsserts.Assert( MessageOption.IsSupportedOption (       unrecognizedOptionNumber ) == false );
             CoApTestAsserts.Assert( MessageOption.IsCriticalOption  ( (byte)unrecognizedOptionNumber ) == true  );
-            CoApTestAsserts.Assert( MessageOption.IsUnsafeOption    ( (byte)unrecognizedOptionNumber ) == true  );
+            CoApTestAsserts.Assert( MessageOption.IsSafeOption      ( (byte)unrecognizedOptionNumber ) == false );
             CoApTestAsserts.Assert( MessageOption.IsNoCacheKeyOption( (byte)unrecognizedOptionNumber ) == true  );
 
             try
@@ -318,9 +433,8 @@ namespace Microsoft.SPOT.Platform.Tests
                 .WithType       ( CoAPMessage.MessageType.NonConfirmable )
                 .WithTokenLength( Defaults.TokenLength )
                 .WithRequestCode( CoAPMessage.Detail_Request.GET )
-                .WithOption     ( MessageOption_String.New( MessageOption.OptionNumber.Uri_Path, resource.Path ) )
                 .WithOption     ( MessageOption_Opaque.New( unrecognizedOptionNumber, new byte[] { 0xAA, 0xBB} ) )
-                .BuildAndReset( );
+                .Build( );
 
                 var response = m_client.MakeRequest( request );
 
@@ -337,369 +451,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 CoApTestAsserts.Assert_SameToken( request, response );
 
                 CoApTestAsserts.Assert_Statistics( m_client.Statistics, desiredClientStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
-                CoApTestAsserts.Assert_Statistics( m_server.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
-            }
-            finally
-            {
-                m_client.Disconnect( );
-            }
-
-            Log.Comment( "*** COMPLETED: PASS" );
-            Log.NewLine( );
-
-            return TestResult.Pass;
-        }
-
-        //~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~// 
-        //~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~// 
-        //~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~o~~// 
-
-        //
-        // Proxy
-        //
-
-        [TestMethod]
-        public TestResult SendRequestWithProxyUri_SameHost( )
-        {
-            Log.Comment( "*** Send two non-confirmable requests for a known IMMEDIATE resource with Fw proxy option set to same host connection is attempted to." );
-            Log.Comment( "*** Verify client sends reset and server handles it correctly." );
-
-            var desiredClientStats = new Statistics()
-            {
-                RequestsSent              = 1,
-                ImmediateResposesReceived = 1,
-            };
-            var desiredServerStats = new Statistics()
-            {
-                RequestsReceived      = 1,
-                ImmediateResposesSent = 1,
-            };
-
-            ClearStatistics( );
-
-            var proxyUri = new ServerCoAPUri( TestConstants.EndPoint__8080, "res" );
-
-            var resource = TestConstants.Resource__EchoQuery_Immediate;
-
-            try
-            {
-                var messageBuilder = m_client.Connect( null, resource );
-
-                var request = messageBuilder
-                    .WithVersion    ( CoAPMessage.ProtocolVersion.Version_1 )
-                    .WithType       ( CoAPMessage.MessageType.NonConfirmable )
-                    .WithTokenLength( Defaults.TokenLength )
-                    .WithRequestCode( CoAPMessage.Detail_Request.GET )
-                    .WithOption     ( MessageOption_String.New( MessageOption.OptionNumber.Uri_Path , resource.Path ) )
-                    .WithOption     ( MessageOption_String.New( MessageOption.OptionNumber.Proxy_Uri, proxyUri.ToString( ) ) )
-                    .BuildAndReset( );
-
-                var response = m_client.MakeRequest( request );
-
-                if(response == null)
-                {
-                    Log.Comment( "*** COMPLETED: FAIL" );
-                    return TestResult.Fail;
-                }
-
-                CoApTestAsserts.Assert_Version( response, CoAPMessage.ProtocolVersion.Version_1 );
-                CoApTestAsserts.Assert_Type( response, CoAPMessage.MessageType.Acknowledgement );
-                CoApTestAsserts.Assert_Code( response, CoAPMessage.Class.Success, CoAPMessage.Detail_Success.Content );
-                CoApTestAsserts.Assert_SameMessageId( request, response );
-                CoApTestAsserts.Assert_SameToken( request, response );
-
-                CoApTestAsserts.Assert_Statistics( m_client.Statistics, desiredClientStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
-                CoApTestAsserts.Assert_Statistics( m_server.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
-            }
-            finally
-            {
-                m_client.Disconnect( );
-            }
-
-            Log.Comment( "*** COMPLETED: PASS" );
-            Log.NewLine( );
-
-            return TestResult.Pass;
-        }
-
-        [TestMethod]
-        public TestResult SendRequestWithProxyUri_SameHost_DestinationNotNull( )
-        {
-            Log.Comment( "*** Send two non-confirmable requests for a known IMMEDIATE resource with Fw proxy option set to same host connection is attempted to." );
-            Log.Comment( "*** Verify client sends reset and server handles it correctly." );
-
-            var desiredClientStats = new Statistics()
-            {
-                RequestsSent              = 1,
-                ImmediateResposesReceived = 1,
-            };
-            var desiredServerStats = new Statistics()
-            {
-                RequestsReceived      = 1,
-                ImmediateResposesSent = 1,
-            };
-
-            ClearStatistics( );
-
-            var proxyUri = new ServerCoAPUri( TestConstants.EndPoint__8080, "res" );
-
-            var resource = TestConstants.Resource__EchoQuery_Immediate;
-
-            try
-            {
-                var messageBuilder = m_client.Connect( proxyUri.EndPoints[0], resource );
-
-                var request = messageBuilder
-                .WithVersion    ( CoAPMessage.ProtocolVersion.Version_1 )
-                .WithType       ( CoAPMessage.MessageType.NonConfirmable )
-                .WithTokenLength( Defaults.TokenLength )
-                .WithRequestCode( CoAPMessage.Detail_Request.GET )
-                .WithOption     ( MessageOption_String.New( MessageOption.OptionNumber.Proxy_Uri, proxyUri.ToString( ) ) )
-                .BuildAndReset( );
-
-                var response = m_client.MakeRequest( request );
-
-                if(response == null)
-                {
-                    Log.Comment( "*** COMPLETED: FAIL" );
-                    return TestResult.Fail;
-                }
-
-                CoApTestAsserts.Assert_Version( response, CoAPMessage.ProtocolVersion.Version_1 );
-                CoApTestAsserts.Assert_Type( response, CoAPMessage.MessageType.Acknowledgement );
-                CoApTestAsserts.Assert_Code( response, CoAPMessage.Class.Success, CoAPMessage.Detail_Success.Content );
-                CoApTestAsserts.Assert_SameMessageId( request, response );
-                CoApTestAsserts.Assert_SameToken( request, response );
-
-                CoApTestAsserts.Assert_Statistics( m_client.Statistics, desiredClientStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
-                CoApTestAsserts.Assert_Statistics( m_server.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
-            }
-            finally
-            {
-                m_client.Disconnect( );
-            }
-
-            Log.Comment( "*** COMPLETED: PASS" );
-            Log.NewLine( );
-
-            return TestResult.Pass;
-        }
-
-        [TestMethod]
-        public TestResult SendRequestWithProxyUri_DifferentHost_ReverseProxy_Confimable( )
-        {
-            Log.Comment( "*** Send one non-confirmable request for a known IMMEDIATE resource with a non-standard critical option, and verify response is correct." );
-            Log.Comment( "*** Verify client sends reset and server handles it correctly." );
-
-            var desiredClientStats = new Statistics()
-            {
-                RequestsSent              = 2,
-                ImmediateResposesReceived = 2,
-            };
-            var desiredServerStats = new Statistics()
-            {
-                Errors                = 2,
-                ImmediateResposesSent = 2,
-            };
-
-            ClearStatistics( );
-
-            //
-            // Choose a host name we can connect to, but that does not match the test server host name ('localhost')
-            // 
-            var proxyUri = new ServerCoAPUri( TestConstants.EndPoint__8080, "res" );
-
-            var resource = TestConstants.Resource__EchoQuery_Immediate_OtherPort;
-
-            try
-            {
-                //
-                // Use explicit intermediary
-                //
-                {
-                    var messageBuilder = m_client.Connect( proxyUri.EndPoints[0], resource );
-
-                    var request = messageBuilder
-                        .WithVersion    ( CoAPMessage.ProtocolVersion.Version_1 )
-                        .WithType       ( CoAPMessage.MessageType.Confirmable )
-                        .WithTokenLength( Defaults.TokenLength )
-                        .WithRequestCode( CoAPMessage.Detail_Request.GET )
-                        .BuildAndReset( );
-
-                    var response = m_client.MakeRequest( request );
-
-                    // CON messages must be acknowledged...
-                    if(response == null)
-                    {
-                        Log.Comment( "*** COMPLETED: FAIL" );
-                        return TestResult.Fail;
-                    }
-
-                    CoApTestAsserts.Assert_Version( response, CoAPMessage.ProtocolVersion.Version_1 );
-                    CoApTestAsserts.Assert_Type( response, CoAPMessage.MessageType.Acknowledgement );
-                    CoApTestAsserts.Assert_Code( response, CoAPMessage.Class.ServerError, CoAPMessage.Detail_ServerError.ProxyingNotSupported );
-                    CoApTestAsserts.Assert_SameMessageId( request, response );
-                    CoApTestAsserts.Assert_SameToken( request, response );
-                }
-
-                //
-                // Use Uri-Host and Uri-Port
-                //
-                {
-                    m_client.Disconnect( );
-                    
-                    var messageBuilder1 = m_client.Connect( proxyUri.EndPoints[0], null );
-
-                    var request1 = messageBuilder1
-                        .WithVersion    ( CoAPMessage.ProtocolVersion.Version_1 )
-                        .WithType       ( CoAPMessage.MessageType.Confirmable )
-                        .WithTokenLength( Defaults.TokenLength )
-                        .WithRequestCode( CoAPMessage.Detail_Request.GET )
-                        .WithOption     ( MessageOption_String.New( MessageOption.OptionNumber.Uri_Host,       resource.EndPoints[0].Address.ToString( ) ) ) // use same resource 
-                        .WithOption     ( MessageOption_UInt  .New( MessageOption.OptionNumber.Uri_Port, (uint)resource.EndPoints[0].Port                ) )
-                        .WithOption     ( MessageOption_String.New( MessageOption.OptionNumber.Uri_Path,       resource.Path                            ) )
-                        .BuildAndReset( );
-
-                    var response1 = m_client.MakeRequest( request1 );
-
-                    // CON messages must be acknowledged...
-                    if(response1 == null)
-                    {
-                        Log.Comment( "*** COMPLETED: FAIL" );
-                        return TestResult.Fail;
-                    }
-
-                    CoApTestAsserts.Assert_Version( response1, CoAPMessage.ProtocolVersion.Version_1 );
-                    CoApTestAsserts.Assert_Type( response1, CoAPMessage.MessageType.Acknowledgement );
-                    CoApTestAsserts.Assert_Code( response1, CoAPMessage.Class.ServerError, CoAPMessage.Detail_ServerError.ProxyingNotSupported );
-                    CoApTestAsserts.Assert_SameMessageId( request1, response1 );
-                    CoApTestAsserts.Assert_SameToken( request1, response1 );
-                }
-
-                CoApTestAsserts.Assert_Statistics( m_client.Statistics, desiredClientStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
-                CoApTestAsserts.Assert_Statistics( m_server.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
-            }
-            finally
-            {
-                m_client.Disconnect( );
-            }
-
-            Log.Comment( "*** COMPLETED: PASS" );
-            Log.NewLine( );
-
-            return TestResult.Pass;
-        }
-
-        [TestMethod]
-        public TestResult SendRequestWithProxyUri_DifferentHost_ForwardProxy_Confimable( )
-        {
-            Log.Comment( "*** Send one non-confirmable request for a known IMMEDIATE resource with a non-standard critical option, and verify response is correct." );
-            Log.Comment( "*** Verify client sends reset and server handles it correctly." );
-
-            var desiredClientStats = new Statistics()
-            {
-                RequestsSent            = 1,
-                RequestsRetransmissions = 3,
-            };
-            var desiredServerStats = new Statistics()
-            {
-            };
-
-            ClearStatistics( );
-
-            //
-            // Choose a host name we can connect to, but that does not match the test server host name ('localhost')
-            // 
-            IPEndPoint endPoint = new IPEndPoint( Utils.AddressFromHostName( "google.com" ), 8089 );
-
-            var proxyUri = new ServerCoAPUri( endPoint, "res" );
-
-            var resource = TestConstants.Resource__EchoQuery_Immediate;
-
-            try
-            {
-                var messageBuilder = m_client.Connect( proxyUri.EndPoints[0], resource );
-
-                var request = messageBuilder
-                    .WithVersion    ( CoAPMessage.ProtocolVersion.Version_1 )
-                    .WithType       ( CoAPMessage.MessageType.Confirmable )
-                    .WithTokenLength( Defaults.TokenLength )
-                    .WithRequestCode( CoAPMessage.Detail_Request.GET )
-                    .WithOption     ( MessageOption_String.New( MessageOption.OptionNumber.Proxy_Uri, proxyUri.ToString( ) ) )
-                    .BuildAndReset( );
-
-                var response = m_client.MakeRequest( request );
-
-                // CON messages must be acknoledged, but only if there is actually a server to respond ...
-                if(response != null)
-                {
-                    Log.Comment( "*** COMPLETED: FAIL" );
-                    return TestResult.Fail;
-                }
-
-                CoApTestAsserts.Assert_Statistics( m_client.Statistics, desiredClientStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
-                CoApTestAsserts.Assert_Statistics( m_server.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
-            }
-            finally
-            {
-                m_client.Disconnect( );
-            }
-
-            Log.Comment( "*** COMPLETED: PASS" );
-            Log.NewLine( );
-
-            return TestResult.Pass;
-        }
-
-        [TestMethod]
-        public TestResult SendRequestWithProxyUri_DifferentHost_ForwardProxy_NonConfirmable( )
-        {
-            Log.Comment( "*** Send one non-confirmable request for a known IMMEDIATE resource with a non-standard critical option, and verify response is correct." );
-            Log.Comment( "*** Verify client sends reset and server handles it correctly." );
-
-            var desiredClientStats = new Statistics()
-            {
-                RequestsSent            = 1,
-                RequestsRetransmissions = 3,
-            };
-            var desiredServerStats = new Statistics()
-            {
-            };
-
-            ClearStatistics( );
-
-            //
-            // Choose a host name we can connect to, but that does not match the test server host name ('localhost')
-            // 
-            IPEndPoint endPoint = new IPEndPoint( Utils.AddressFromHostName( "google.com" ), 8089 );
-
-            var proxyUri = new ServerCoAPUri( endPoint, "res" );
-
-            var resource = TestConstants.Resource__EchoQuery_Immediate;
-
-            try
-            {
-                var messageBuilder = m_client.Connect( proxyUri.EndPoints[0], resource );
-
-                var request = messageBuilder
-                    .WithVersion    ( CoAPMessage.ProtocolVersion.Version_1 )
-                    .WithType       ( CoAPMessage.MessageType.NonConfirmable )
-                    .WithTokenLength( Defaults.TokenLength )
-                    .WithRequestCode( CoAPMessage.Detail_Request.GET )
-                    .WithOption     ( MessageOption_String.New( MessageOption.OptionNumber.Proxy_Uri, proxyUri.ToString( ) ) )
-                    .BuildAndReset( );
-
-                var response = m_client.MakeRequest( request );
-
-                // NON messages must be ignored...
-                if(response != null)
-                {
-                    Log.Comment( "*** COMPLETED: FAIL" );
-                    return TestResult.Fail;
-                }
-
-                CoApTestAsserts.Assert_Statistics( m_client.Statistics, desiredClientStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
-                CoApTestAsserts.Assert_Statistics( m_server.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
+                CoApTestAsserts.Assert_Statistics( m_localProxyServer.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
             }
             finally
             {

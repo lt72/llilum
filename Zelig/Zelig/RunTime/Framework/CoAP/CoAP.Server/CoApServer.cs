@@ -10,33 +10,42 @@ namespace CoAP.Server
     using CoAP.Stack.Abstractions;
     using CoAP.Common.Diagnostics;
 
-
-    public class CoAPServer : IServer
+    public class CoAPServer
     {
         //
         // State
         // 
         
         private readonly MessageEngine                         m_messageEngine;
-        private readonly IPEndPoint[]                          m_endPoints;
-        private readonly Dictionary<string, IResourceProvider> m_resources;
-        private          Statistics                            m_stats;
+        private readonly Dictionary<string, IResourceProvider> m_resourceProviders;
+        private readonly Statistics                            m_stats;
 
         //--//
 
-        public CoAPServer( ServerCoAPUri uri, AsyncMessaging messaging, Statistics stats )
+        internal CoAPServer( MessageEngine messageEngine, Statistics stats )
         {
-            m_messageEngine = new MessageEngine( this, messaging ); 
-            m_resources     = new Dictionary<string, IResourceProvider>( );
-            m_endPoints     = uri.EndPoints;
-            m_stats         = stats;
+            m_messageEngine     = messageEngine;
+            m_resourceProviders = new Dictionary<string, IResourceProvider>( );
+            m_stats             = stats;
+        }
+
+        //--//
+
+        public static CoAPServer CreateServer( IPEndPoint[ ] endPoints, AsyncMessaging messaging )
+        {
+            var stats  = new Statistics( );
+            var server = new CoAPServer( new MessageEngine( endPoints, messaging ), stats );
+
+            server.Engine.SetOwner( server );
+
+            return server;
         }
 
         //
         // Helper methods
         //
 
-        #region IServer
+        #region CoAPServer
 
         public void Start( )
         {
@@ -48,9 +57,19 @@ namespace CoAP.Server
             m_messageEngine.Stop( );
         }
 
-        public void AddProvider( string relativePath, IResourceProvider provider )
+        public virtual bool AddProvider( CoAPServerUri uri, IResourceProvider provider )
         {
-            m_resources.Add( relativePath, provider );
+            foreach(var ep in uri.EndPoints)
+            {
+                if(EndPointsInSet( ep, m_messageEngine.OriginEndPoints ))
+                {     
+                    m_resourceProviders.Add( uri.Path, provider );
+
+                    return true;
+                }   
+            }
+
+            return false;
         }
 
         public IResourceProvider QueryProvider( string relativePath )
@@ -60,9 +79,9 @@ namespace CoAP.Server
             //
             // Remove the query portion
             // 
-            var path = relativePath.Split( new char[] { '?' } ); 
+            var path = relativePath.Split( new char[] { '?' } );
 
-            if(m_resources.TryGetValue( path[0], out provider ))
+            if(m_resourceProviders.TryGetValue( path[ 0 ], out provider ))
             {
                 return provider;
             }
@@ -70,23 +89,10 @@ namespace CoAP.Server
             return null;
         }
 
-        public IResourceHandler CreateResourceHandler( IResourceProvider provider )
-        {
-            return new ResourceHandler( provider );
-        }
-
-        //
-        // Access methods
-        //
-
-        public IPEndPoint[ ] EndPoints
-        {
-            get
-            {
-                return m_endPoints;
-            }
-        }
-
+        #endregion
+        
+        #region IStatistics
+        
         public Statistics Statistics
         {
             get
@@ -97,7 +103,39 @@ namespace CoAP.Server
 
         #endregion
 
+        //
+        // Access methods
+        //
+
+        internal MessageEngine Engine
+        {
+            get
+            {
+                return m_messageEngine;
+            }
+        }
+
+        protected Dictionary<string, IResourceProvider> Providers
+        {
+            get
+            {
+                return m_resourceProviders;
+            }
+        }
+
         //--//
 
+        protected static bool EndPointsInSet( IPEndPoint target, IPEndPoint[ ] set )
+        {
+            for(int i = 0; i < set.Length; i++)
+            {
+                if(set[ i ].Equals( target ))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }

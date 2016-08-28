@@ -27,15 +27,21 @@ namespace Microsoft.Zelig.Test
             var tests = new List<TestBase>();
             bool testResults = true;
 
-            tests.Add( new TestUris                 ( ) );
-            tests.Add( new TestPiggyBackedResponse  ( ) );
-            tests.Add( new TestDelayedResponse      ( ) );
-            tests.Add( new TestNonIdempotentMethods ( ) );
-            tests.Add( new TestMultiClient          ( ) );
-            tests.Add( new TestUnsupportedMethods   ( ) );
-            tests.Add( new TestServerReset          ( ) );
-            tests.Add( new TestBadOptions           ( ) );
-            tests.Add( new TestContentFormat        ( ) );
+            CoAP.Common.Diagnostics.Logger.Instance = new ConsoleLogger( );
+            
+            tests.Add( new TestProxyAndCaching                    ( ) );
+            tests.Add( new TestProxyAndCachingNonIdempotentMethods( ) );
+            tests.Add( new TestProxyAndCachingUnavailable         ( ) ); 
+
+            tests.Add( new TestPiggyBackedResponse                ( ) );
+            tests.Add( new TestDelayedResponse                    ( ) );
+            tests.Add( new TestServerReset                        ( ) );
+            tests.Add( new TestBadOptions                         ( ) );
+            tests.Add( new TestNonIdempotentMethods               ( ) );
+            tests.Add( new TestUnsupportedMethods                 ( ) );
+            tests.Add( new TestMultiClient                        ( ) );
+            tests.Add( new TestContentFormat                      ( ) );
+            tests.Add( new TestUris                               ( ) );
 
             foreach(ITestInterface t in tests)
             {

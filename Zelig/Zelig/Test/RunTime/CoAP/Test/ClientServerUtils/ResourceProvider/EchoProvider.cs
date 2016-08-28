@@ -5,48 +5,39 @@
 namespace Test.ClientServerUtils
 {
     using System;
-    using CoAP.Stack.Abstractions;
     using CoAP.Stack;
-    using CoAP.Common;
+    using CoAP.Server;
 
-    internal abstract class EchoProvider : StandardResourceProvider
+    public abstract class EchoProvider : ResourceProvider
     {
         //
         // State
         //
 
         private string m_echo;
-        
+
         //
         // Contructors
         //
 
-        internal EchoProvider( )
+        public EchoProvider( bool isReadOnly, bool isProxy ) : base( isReadOnly, isProxy )
         {
-        }
-
-        public override bool IsReadOnly
-        {
-            get
-            {
-                return false;
-            }
         }
 
         //--//
 
-        protected override uint GET( string query, out object result )
+        protected override uint GET( string path, string[] query, out MessagePayload payload )
         {
             //
             // Set string to echo
             //
 
-            result = m_echo == null ? query : m_echo;
+            payload = MessagePayload_String.New( m_echo == null ? path : m_echo );
 
             return CoAPMessage.Success_WithDetail( CoAPMessage.Detail_Success.Content );
         }
 
-        protected override uint POST( string query )
+        protected override uint POST( string path, string[] query )
         {
             //
             // Set string to echo, SHOULD return the URI of the new resource in a sequence of one or more
@@ -55,7 +46,7 @@ namespace Test.ClientServerUtils
 
             var echo = m_echo;
 
-            m_echo = query.Substring( query.IndexOf( "?echo=" ) + "?echo=".Length );
+            m_echo = query[ 0 ].Substring( query[ 0 ].IndexOf( "echo=" ) + "echo=".Length );
             
             if(String.IsNullOrEmpty( m_echo ))
             {
@@ -69,7 +60,7 @@ namespace Test.ClientServerUtils
             return CoAPMessage.Success_WithDetail( CoAPMessage.Detail_Success.Changed );
         }
 
-        protected override uint PUT( string query )
+        protected override uint PUT( string path, string[] query )
         {
             //
             // Update string to echo
@@ -77,7 +68,7 @@ namespace Test.ClientServerUtils
             
             var echo = m_echo;
 
-            m_echo = query.Substring( query.IndexOf( "?echo=" ) + "?echo=".Length );
+            m_echo = query[ 0 ].Substring( query[ 0 ].IndexOf( "echo=" ) + "echo=".Length );
 
             if(echo == null && m_echo != null)
             {
@@ -87,14 +78,14 @@ namespace Test.ClientServerUtils
             return CoAPMessage.Success_WithDetail( CoAPMessage.Detail_Success.Changed );
         }
 
-        protected override uint DELETE( string query )
+        protected override uint DELETE( string path, string[ ] query )
         {
             //
             // Reset string to echo
             //
 
             m_echo = null;
-            
+
             return CoAPMessage.Success_WithDetail( CoAPMessage.Detail_Success.Deleted );
         }
     }

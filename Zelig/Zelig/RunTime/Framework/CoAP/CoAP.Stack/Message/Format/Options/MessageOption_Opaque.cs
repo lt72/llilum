@@ -5,17 +5,11 @@
 
 namespace CoAP.Stack
 {
-    using System.Text;
+    using CoAP.Common;
 
 
     public class MessageOption_Opaque : MessageOption
     {
-
-        //
-        // State
-        //
-
-        private readonly byte[] m_value; 
 
         //--//
 
@@ -23,12 +17,11 @@ namespace CoAP.Stack
         // Contructors
         //
         
-        internal MessageOption_Opaque( OptionNumber option, byte[] value ) : base(option)
+        internal MessageOption_Opaque( OptionNumber option, byte[] value ) : base(option, value)
         {
-            m_value = value;
         }
 
-        public static MessageOption New( OptionNumber number, byte[ ] value )
+        public static MessageOption_Opaque New( OptionNumber number, byte[ ] value )
         {
             switch(number)
             {
@@ -50,46 +43,17 @@ namespace CoAP.Stack
         {
             base.Encode( stream ); 
 
-            stream.WriteBytes( m_value, 0, m_value.Length );
+            stream.WriteBytes( this.RawBytes, 0, this.ValueLength );
         }
 
-#if DESKTOP
         public override string ToString( )
         {
-            var sb = new StringBuilder();
-
-            for(int i = 0; i < m_value.Length; i++)
-            {
-                sb.Append( $"0x{m_value[ i ]:X}" ); 
-                
-                if(i < m_value.Length - 1)
-                {
-                    sb.Append( "," ); 
-                }
-            }
-            
-            return $"{this.Name}({sb})";
+            return $"{this.Name}({Utils.ByteArrayPrettyPrint( this.RawBytes )})";
         }
-#endif
 
         //
         // Access Methods
         //
 
-        public override object Value
-        {
-            get
-            {
-                return m_value;
-            }
-        }
-
-        public override int ValueLength
-        {
-            get
-            {
-                return m_value.Length;
-            }
-        }
     }
 }

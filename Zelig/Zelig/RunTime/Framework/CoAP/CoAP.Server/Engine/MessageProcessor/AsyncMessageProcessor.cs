@@ -4,17 +4,11 @@
 
 namespace CoAP.Server
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Threading;
-    using CoAP.Common;
-    using CoAP.Common.Diagnostics;
     using CoAP.Stack;
-    using CoAP.Stack.Abstractions;
 
 
-    public partial class AsyncMessageProcessor : MessageProcessor
+    internal sealed class AsyncMessageProcessor : MessageProcessor
     {
         //--//
 
@@ -28,34 +22,34 @@ namespace CoAP.Server
         // Constructors 
         // 
 
-        public AsyncMessageProcessor( MessageContext node, ProcessingState state, MessageEngine owner ) : base( node, state, owner )
+        public AsyncMessageProcessor( MessageContext ctx, ProcessingState state, MessageEngine owner ) : base( ctx, state, owner )
         {
         }
 
-        public static AsyncMessageProcessor CreateMessageProcessor( MessageContext node, MessageEngine owner )
+        public static AsyncMessageProcessor CreateMessageProcessor( MessageContext ctx, MessageEngine owner )
         {
             var state     = ProcessingState.Create( ProcessingState.State.MessageReceived );
-            var processor = new AsyncMessageProcessor( node, state, owner );
+            var processor = new AsyncMessageProcessor( ctx, state, owner );
 
             state.SetProcessor( processor );
 
             return processor;
         }
 
-        public static AsyncMessageProcessor CreateErrorProcessor( MessageContext node, MessageEngine owner )
+        public static AsyncMessageProcessor CreateErrorProcessor( MessageContext ctx, MessageEngine owner )
         {
             var state     = ProcessingState.Create( ProcessingState.State.Error );
-            var processor = new AsyncMessageProcessor( node, state, owner );
+            var processor = new AsyncMessageProcessor( ctx, state, owner );
 
             state.SetProcessor( processor );
 
             return processor;
         }
 
-        public static AsyncMessageProcessor CreateOptionsErrorProcessor( MessageContext node, MessageEngine owner )
+        public static AsyncMessageProcessor CreateOptionsErrorProcessor( MessageContext ctx, MessageEngine owner )
         {
             var state     = ProcessingState.Create( ProcessingState.State.BadOptions );
-            var processor = new AsyncMessageProcessor( node, state, owner );
+            var processor = new AsyncMessageProcessor( ctx, state, owner );
 
             state.SetProcessor( processor );
 
@@ -65,8 +59,8 @@ namespace CoAP.Server
         //
         // Helper methods
         // 
-        
-        public override void Process( )
+
+        internal override void Process( )
         {
             ThreadPool.QueueUserWorkItem( o => 
                 {

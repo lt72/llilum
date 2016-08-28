@@ -73,9 +73,14 @@ namespace System.Net
                 return AddressFamily.InterNetwork;
             }
         }
+        
+        public static bool TryParse( string ipString, out IPAddress address )
+        {
+            address = Parse( ipString );
+            return address != null;
+        }
 
-
-        public static IPAddress Parse(string ipString)
+        public static IPAddress Parse( string ipString )
         {
             if (ipString == null)
                 throw new ArgumentNullException();

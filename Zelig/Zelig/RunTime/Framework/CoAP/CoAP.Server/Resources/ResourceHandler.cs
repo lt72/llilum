@@ -9,8 +9,11 @@ namespace CoAP.Server
     using System.Threading;
     using Stack;
 
-    public class ResourceHandler : IResourceHandler
+
+    public class ResourceHandler
     {
+
+        public delegate void ResultAvailable( uint responseCode, MessagePayload payload, MessageOptions options );
 
         //
         // State 
@@ -35,9 +38,9 @@ namespace CoAP.Server
 
         #region IResourceHandler 
 
-        public void ExecuteMethod( CoAPMessage.Detail_Request method, string query, ResultAvailable handler )
+        public void ExecuteMethod( CoAPMessage request, ResultAvailable handler )
         {
-            if(query == null || handler == null)
+            if(request == null || handler == null)
             {
                 throw new ArgumentException( );
             }
@@ -47,17 +50,34 @@ namespace CoAP.Server
                 //
                 // Simply forward to provider
                 // 
-                object res = null;
-                var responseCode = m_provider.ExecuteMethod( method, query, out res );
+                try
+                {
+                    MessagePayload payload = null;
+                    MessageOptions options = new MessageOptions();
 
-                handler( res, responseCode );
+                    var responseCode = m_provider.ExecuteMethod( request, ref payload, ref options );
+
+                    handler( responseCode, payload, options );
+                }
+                catch
+                {
+                    // TODO: what logging?
+                }
 
             }, null );
+        }
+
+        public IResourceProvider Provider
+        {
+            get
+            {
+                return m_provider;
+            }
         }
 
         #endregion
 
         //--//
-        
+
     }
 }

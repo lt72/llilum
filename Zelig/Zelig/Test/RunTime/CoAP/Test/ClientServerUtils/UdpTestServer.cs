@@ -3,11 +3,12 @@
 namespace Test.ClientServerUtils
 {
     using System.Net;
-    using CoAP.Server;
+    using CoAP.Stack.Abstractions;
     using CoAP.Stack;
-    using CoAP.UdpTransport;
     using CoAP.Common.Diagnostics;
-
+    using CoAP.Server;
+    using CoAP.UdpTransport;
+    using System;
 
     public class UdpTestServer
     {
@@ -17,23 +18,20 @@ namespace Test.ClientServerUtils
 
         private readonly ServerMessagingMock m_messagingMock;
         private readonly CoAPServer          m_server;
-        private readonly IPEndPoint          m_endPoint;
 
         //--//
 
-        public UdpTestServer( ServerCoAPUri uri )
+        public UdpTestServer( IPEndPoint[] endPoints )
         {
-            var endPoint  = uri.EndPoints[0]; 
-            var messaging = new ServerMessagingMock( new AsyncMessagingProxy( new Messaging( new UdpChannelFactory( ), endPoint ) ) );
-            var server    = new CoAPServer( uri, messaging, new Statistics( ) );
+            var messaging     = new Messaging( new UdpChannelFactory( ), endPoints[ 0 ] );
+            var mockMessaging = new ServerMessagingMock( new AsyncMessagingProxy( messaging ) );
 
-            server.AddProvider( TestConstants.Resource__PingForAck_Immediate.Path, new PingProvider          ( ) );
-            server.AddProvider( TestConstants.Resource__EchoQuery_Immediate .Path, new EchoProvider_Immediate( ) );
-            server.AddProvider( TestConstants.Resource__EchoQuery_Delayed   .Path, new EchoProvider_Delayed  ( ) );
+            messaging.OwnerMessaging = mockMessaging;
 
-            m_messagingMock = messaging;
+            var server = CoAPServer.CreateServer( endPoints, mockMessaging ); 
+
+            m_messagingMock = mockMessaging;
             m_server        = server;
-            m_endPoint      = endPoint;
         }
 
         public void Start()
@@ -41,17 +39,14 @@ namespace Test.ClientServerUtils
             m_server.Start( ); 
         }
 
-        public void Exit()
+        public void Stop()
         {
             m_server.Stop( );
         }
         
-        public IPEndPoint EndPoint
+        public void AddProvider( CoAPServerUri uri, ResourceProvider provider )
         {
-            get
-            {
-                return m_endPoint;
-            }
+            m_server.AddProvider( uri, provider );
         }
 
         public ServerMessagingMock MessagingMock

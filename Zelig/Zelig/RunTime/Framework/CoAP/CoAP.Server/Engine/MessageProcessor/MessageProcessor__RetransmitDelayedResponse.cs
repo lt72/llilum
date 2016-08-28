@@ -4,15 +4,12 @@
 
 namespace CoAP.Server
 {
-    using System.Diagnostics;
-    using CoAP.Stack;
-    using CoAP.Stack.Abstractions;
     using CoAP.Common.Diagnostics;
 
 
-    public partial class MessageProcessor
+    internal partial class MessageProcessor
     {
-        internal class ProcessingState_RetransmitDelayedResponse : ProcessingState
+        internal sealed class ProcessingState_RetransmitDelayedResponse : ProcessingState
         {
             private ProcessingState_RetransmitDelayedResponse( )
             {
@@ -27,22 +24,21 @@ namespace CoAP.Server
             // Helper methods
             // 
 
-            public override void Process( )
+            internal override void Process( )
             {
-                var processor = this.Processor;
-
-                processor.Engine.Owner.Statistics.DelayedResposesRetransmissions++;
-
+                var processor  = this.Processor;
                 var messageCtx = processor.MessageContext;
+
+                processor.MessageEngine.Owner.Statistics.DelayedResposesRetransmissions++;
                 
-                var response = messageCtx.Response;
+                var response = messageCtx.ResponseAwaitingAck;
 
                 //Debug.Assert( messageCtx.Message .Type == response.Type                       );
                 //Debug.Assert( messageCtx.Response.Type == CoAPMessage.MessageType.Confirmable );
 
-                Logger.Instance.Log( string.Format( $"<==(S)== Re-sending DELAYED response with Message Id '{response.MessageId}' to {messageCtx.Source}." ) );
+                Logger.Instance.Log( string.Format( $"<==[S({this.Processor.MessageEngine.LocalEndPoint})]== Re-sending DELAYED response with Message Id '{response.MessageId}' to {messageCtx.Source}." ) );
 
-                messageCtx.Channel.Send( response.Buffer, 0, response.Buffer.Length, messageCtx.Source );
+                this.Processor.MessageEngine.SendMessageAsync( response );
 
                 Advance( ProcessingState.State.AwaitingAck );
             }

@@ -34,7 +34,7 @@ namespace Microsoft.SPOT.Platform.Tests
             {
                 RequestsSent                = 1,
                 AcksReceived                = 1,
-                DelayedResposesesReceived   = 1,
+                DelayedResponsesReceived   = 1,
                 AcksSent                    = 1,
             };
             var desiredServerStats = new Statistics()
@@ -45,7 +45,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 AcksSent            = 1,
             };
 
-            ClearStatistics( );
+            ClearCachesAndStatistics( );
 
             var resource = TestConstants.Resource__EchoQuery_Delayed;
 
@@ -58,8 +58,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 .WithType       ( CoAPMessage.MessageType.Confirmable )
                 .WithTokenLength( Defaults.TokenLength )
                 .WithRequestCode( CoAPMessage.Detail_Request.GET )
-                .WithOption     ( MessageOption_String.New( MessageOption.OptionNumber.Uri_Path, resource.Path ) )
-                .BuildAndReset( );
+                .Build( );
 
                 var response = m_client.MakeRequest( request );
 
@@ -76,7 +75,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 CoApTestAsserts.Assert_SameToken( request, response );
 
                 CoApTestAsserts.Assert_Statistics( m_client.Statistics, desiredClientStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
-                CoApTestAsserts.Assert_Statistics( m_server.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
+                CoApTestAsserts.Assert_Statistics( m_localProxyServer.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
             }
             finally
             {
@@ -98,7 +97,7 @@ namespace Microsoft.SPOT.Platform.Tests
             {
                 RequestsSent              = 2,
                 AcksReceived              = 2,
-                DelayedResposesesReceived = 2,
+                DelayedResponsesReceived = 2,
                 AcksSent                  = 2,
             };
             var desiredServerStats = new Statistics()
@@ -109,7 +108,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 AcksReceived         = 2,
             };
 
-            ClearStatistics( );
+            ClearCachesAndStatistics( );
 
             var resource = TestConstants.Resource__EchoQuery_Delayed;
 
@@ -122,8 +121,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 .WithType       ( CoAPMessage.MessageType.Confirmable )
                 .WithTokenLength( Defaults.TokenLength )
                 .WithRequestCode( CoAPMessage.Detail_Request.GET )
-                .WithOption     ( MessageOption_String.New( MessageOption.OptionNumber.Uri_Path, resource.Path ) )
-                .BuildAndReset( );
+                .Build( );
 
                 var response1 = m_client.MakeRequest( request );
 
@@ -154,7 +152,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 CoApTestAsserts.Assert_SameToken( request, response2 );
 
                 CoApTestAsserts.Assert_Statistics( m_client.Statistics, desiredClientStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
-                CoApTestAsserts.Assert_Statistics( m_server.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
+                CoApTestAsserts.Assert_Statistics( m_localProxyServer.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
             }
             finally
             {

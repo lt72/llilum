@@ -1,10 +1,12 @@
 ﻿using System;
+using CoAP.Stack.Abstractions;
 using CoAP.Common;
 using CoAP.Stack;
+using CoAP.Server;
 
 namespace CoAP.Samples.Server
 {
-    internal class TemperatureProvider : StandardResourceProvider
+    internal sealed class TemperatureProvider : ResourceProvider
     {
         //
         // State
@@ -15,32 +17,21 @@ namespace CoAP.Samples.Server
         //
         // Contructors
         //
-        internal TemperatureProvider( int id )
+        internal TemperatureProvider( int id ) : base( true, false )
         {
             m_sensor = new TemperatureSensor( id ); 
         }
 
-        public override bool IsImmediate
+        public override bool CanFetchImmediateResponse( CoAPMessage request )
         {
-            get
-            {
-                return false;
-            }
-        }
-
-        public override bool IsReadOnly
-        {
-            get
-            {
-                return true;
-            }
+            return true;
         }
 
         //--//
 
-        protected override uint GET( string query, out object result )
+        protected override uint GET( string path, string[ ] query, out MessagePayload payload )
         {
-            result = m_sensor.Temperature;
+            payload = MessagePayload_Int.New( (int)m_sensor.Temperature );
 
             return CoAPMessage.Success_WithDetail( CoAPMessage.Detail_Success.Content );
         }

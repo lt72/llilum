@@ -129,9 +129,11 @@ namespace CoAP.Stack
 
         public enum Error
         {
-            None,
-            Parsing__OptionError,
-            Processing__AckNotReceived,
+            None                       ,
+            Parsing__OptionError       ,
+            Parsing__Malformed_NoHeader,
+            Parsing__Malformed         ,
+            Processing__AckNotReceived ,
         }
 
         //--//
@@ -180,28 +182,157 @@ namespace CoAP.Stack
 
         //--//
 
+        internal void KillBuffer( )
+        {
+            m_buffer = null;
+        }
+
+        //--//
+
         public static CoAPMessageRaw NewBlankMessage( )
         {
             return new CoAPMessageRaw( );
         }
 
-        //--//
-
         //
         // Helper methods
-        //
+        // 
 
-#if DESKTOP
-        public string HeaderToString( )
+        public bool IsAck
         {
-            return $"[VERSION({this.Version})+TYPE({this.Type})+TKL({this.TokenLength})+CODE({(int)this.ClassCode}.{this.DetailCode:D2})+MESSAGEID({this.MessageId})]";
+            get
+            {
+                return (this.Type == MessageType.Acknowledgement); // ACK
+            }
         }
-    
+
+        public bool IsEmptyAck
+        {
+            get
+            {
+                return (this.Type               == MessageType.Acknowledgement) && // ACK
+                       (this.ClassCode          == Class.Request) && // is a request 
+                       (this.DetailCode_Request == Detail_Request.Empty);   // is empty
+            }
+        }
+
+        public bool IsPiggyBackedResponse
+        {
+            get
+            {
+                return (this.Type               == MessageType.Acknowledgement) && // ACK
+                       (this.ClassCode          != Class.Request) && // not a request
+                       (this.DetailCode_Request != Detail_Request.Empty);   // not empty
+            }
+        }
+
+        public bool IsDelayedResponse
+        {
+            get
+            {
+                return ((this.Type               == MessageType.Confirmable)  ||
+                        (this.Type               == MessageType.NonConfirmable)) && // CON or NON (not an ACK)
+                        (this.ClassCode          != Class.Request) && // not a request
+                        (this.DetailCode_Request != Detail_Request.Empty);   // not empty
+            }
+        }
+
+        public bool IsConfirmable
+        {
+            get
+            {
+                return this.Type == MessageType.Confirmable; // CON 
+            }
+        }
+
+        public bool IsReset
+        {
+            get
+            {
+                return this.Type == MessageType.Reset;
+            }
+        }
+
+        public bool IsRequest
+        {
+            get
+            {
+                return this.ClassCode == Class.Request;
+            }
+        }
+
+        public bool IsEmpty
+        {
+            get
+            {
+                return this.IsRequest && this.DetailCode_Request == Detail_Request.Empty;
+            }
+        }
+
+        public bool IsGET
+        {
+            get
+            {
+                return this.IsRequest && this.DetailCode_Request == Detail_Request.GET;
+            }
+        }
+
+        public bool IsPOST
+        {
+            get
+            {
+                return this.IsRequest && this.DetailCode_Request == Detail_Request.POST;
+            }
+        }
+
+        public bool IsPUT
+        {
+            get
+            {
+                return this.IsRequest && this.DetailCode_Request == Detail_Request.PUT;
+            }
+        }
+
+        public bool IsDELETE
+        {
+            get
+            {
+                return this.IsRequest && this.DetailCode_Request == Detail_Request.DELETE;
+            }
+        }
+        
+        public bool IsNotGetorEmpty
+        {
+            get
+            {
+                return this.IsGET == false && this.IsEmpty == false;
+            }
+        }
+
+        public bool IsPing
+        {
+            get
+            {
+                return (this.Type               == MessageType.Confirmable) && // CON  
+                       (this.ClassCode          == Class.Request) && // is a request
+                       (this.DetailCode_Request == Detail_Request.Empty);   // is empty;
+            }
+        }
+
         public override string ToString( )
         {
-            return $"MESSAGE[HEADER({HeaderToString( )})](TOKEN({this.Token}))";
+            return ToString( true );
         }
-#endif
+
+        protected string HeaderToString( )
+        {
+            return $"VERSION({this.Version})+TYPE({this.Type})+TKL({this.TokenLength})+CODE({(int)this.ClassCode}.{this.DetailCode:D2})+MESSAGEID({this.MessageId})";
+        }
+
+        protected string ToString( bool fOptionsAndPayload )
+        {
+            return $"HEADER({HeaderToString( )}),TOKEN({this.Token})" + (fOptionsAndPayload ? $",OPTIONS_AND_PAYLOAD({Utils.ByteArrayPrettyPrint(this.RawOptionsAndPayload)})" : String.Empty);
+        }
 
         //
         // Access Methods 
@@ -233,10 +364,6 @@ namespace CoAP.Stack
             }
         }
 
-        //
-        // Access Methods 
-        //
-
         public uint Header
         {
             get
@@ -255,7 +382,7 @@ namespace CoAP.Stack
             {
                 unsafe
                 {
-                    return DecodeVersion( ReadAndValidateHeader( m_buffer ) );
+                    return DecodeVersion( m_header );
                 }
             }
         }
@@ -266,7 +393,7 @@ namespace CoAP.Stack
             {
                 unsafe
                 {
-                    return DecodeType( ReadAndValidateHeader( m_buffer ) );
+                    return DecodeType( m_header );
                 }
             }
         }
@@ -277,7 +404,18 @@ namespace CoAP.Stack
             {
                 unsafe
                 {
-                    return DecodeTokenLength( ReadAndValidateHeader( m_buffer ) );
+                    return DecodeTokenLength( m_header );
+                }
+            }
+        }
+
+        public uint Code
+        {
+            get
+            {
+                unsafe
+                {
+                    return DecodeCode( m_header );
                 }
             }
         }
@@ -288,7 +426,7 @@ namespace CoAP.Stack
             {
                 unsafe
                 {
-                    return DecodeClass( ReadAndValidateHeader( m_buffer ) );
+                    return DecodeClass( m_header );
                 }
             }
         }
@@ -299,7 +437,7 @@ namespace CoAP.Stack
             {
                 unsafe
                 {
-                    return DecodeDetail( ReadAndValidateHeader( m_buffer ) );
+                    return DecodeDetail( m_header );
                 }
             }
         }
@@ -310,7 +448,7 @@ namespace CoAP.Stack
             {
                 unsafe
                 {
-                    return Request_DecodeDetail( ReadAndValidateHeader( m_buffer ) );
+                    return Request_DecodeDetail( m_header );
                 }
             }
         }
@@ -321,7 +459,7 @@ namespace CoAP.Stack
             {
                 unsafe
                 {
-                    return Success_DecodeDetail( ReadAndValidateHeader( m_buffer ) );
+                    return Success_DecodeDetail( m_header );
                 }
             }
         }
@@ -332,7 +470,7 @@ namespace CoAP.Stack
             {
                 unsafe
                 {
-                    return RequestError_DecodeDetail( ReadAndValidateHeader( m_buffer ) );
+                    return RequestError_DecodeDetail( m_header );
                 }
             }
         }
@@ -343,7 +481,7 @@ namespace CoAP.Stack
             {
                 unsafe
                 {
-                    return ServerError_DecodeDetail( ReadAndValidateHeader( m_buffer ) );
+                    return ServerError_DecodeDetail( m_header );
                 }
             }
         }
@@ -354,10 +492,19 @@ namespace CoAP.Stack
             {
                 unsafe
                 {
-                    return (ushort)DecodeMessageId( ReadAndValidateHeader( m_buffer ) );
+                    return (ushort)DecodeMessageId( m_header );
                 }
             }
         }
+
+        public int Length
+        {
+            get
+            {
+                return m_buffer.Length;
+            }
+        }
+
         public MessageToken Token
         {
             get
@@ -370,9 +517,13 @@ namespace CoAP.Stack
                     {
                         var tokenBuffer = new byte[ this.TokenLength ];
 
-                        Array.Copy( m_buffer, 4, tokenBuffer, 0, tokenLength ); 
+                        Array.Copy( m_buffer, 4, tokenBuffer, 0, tokenLength );
 
                         m_token = new MessageToken( tokenBuffer );
+                    }
+                    else
+                    {
+                        throw new CoAP_MessageMalformedException( ); 
                     }
                 }
 
@@ -384,6 +535,22 @@ namespace CoAP.Stack
             }
         }
 
+        public byte[ ] RawOptionsAndPayload
+        {
+            get
+            {
+                var tokenBuffer = new byte[ 4 + this.TokenLength ];
+
+                int offset = 4 + m_token.Size;
+                int length = m_buffer.Length - offset;
+
+                var buffer = new byte[ length ]; 
+
+                Array.Copy( m_buffer, offset, buffer, 0, length );
+
+                return buffer;
+            }
+        }
 
         //--//
 
@@ -417,9 +584,9 @@ namespace CoAP.Stack
             return ((uint)length << c_TokenLength__Shift) & c_TokenLength__Mask;
         }
 
-        public static Class DecodeCode( uint value )
+        public static uint DecodeCode( uint value )
         {
-            return (Class)((value & c_Code__Mask) >> c_Code__Shift);
+            return ((value & c_Code__Mask) >> c_Code__Shift);
         }
         
         public static uint EncodeCode( byte value )
@@ -604,7 +771,7 @@ namespace CoAP.Stack
         {
             if(condition == false)
             {
-                throw new CoAP_MessageFormatException( );
+                throw new CoAP_MessageMalformedException( );
             }
         }
     }

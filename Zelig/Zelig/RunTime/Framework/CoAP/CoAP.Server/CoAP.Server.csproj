@@ -59,11 +59,14 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="AsyncMessagingProxy.cs" />
+    <Compile Include="CoAPProxyServer.cs" />
     <Compile Include="CoAPServer.cs" />
+    <Compile Include="Engine\MessageEngineProxy.cs" />
     <Compile Include="Engine\MessageEngine.cs" />
     <Compile Include="Engine\MessageProcessor\AsyncMessageProcessor.cs" />
+    <Compile Include="Engine\MessageProcessor\FixedMessageProcessor.cs" />
     <Compile Include="Engine\MessageProcessor\MessageProcessor.cs" />
+    <Compile Include="Engine\MessageProcessor\MessageProcessor__ReplayResponse.cs" />
     <Compile Include="Engine\MessageProcessor\MessageProcessor__AckReceived.cs" />
     <Compile Include="Engine\MessageProcessor\MessageProcessor__Archive.cs" />
     <Compile Include="Engine\MessageProcessor\MessageProcessor__AwaitingAck.cs" />
@@ -74,11 +77,15 @@
     <Compile Include="Engine\MessageProcessor\MessageProcessor__ImmediateResponseAvailable.cs" />
     <Compile Include="Engine\MessageProcessor\MessageProcessor__MessageReceived.cs" />
     <Compile Include="Engine\MessageProcessor\MessageProcessor__ResetReceived.cs" />
+    <Compile Include="Engine\MessageProcessor\MessageProcessor__SendMessageAndTrackExchangeLifetime.cs" />
     <Compile Include="Engine\MessageProcessor\MessageProcessor__RetransmitDelayedResponse.cs" />
     <Compile Include="Engine\MessageProcessor\MessageProcessor__SendReset.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Resources\ResourceCache.cs" />
+    <Compile Include="Resources\ResourceCacheEntry.cs" />
     <Compile Include="Resources\ResourceHandler.cs" />
-    <Compile Include="Resources\StandardResourceProvider.cs" />
+    <Compile Include="Resources\ResourceProvider.cs" />
+    <Compile Include="Resources\ResourceProviderProxy.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(LlilumSourceRoot)\RunTime\Framework\mscorlib\mscorlib.csproj">
@@ -89,6 +96,10 @@
     <ProjectReference Include="$(LlilumSourceRoot)\RunTime\Framework\system\system.csproj">
       <Project>{186f31a3-ef89-4a25-b2d5-20070702aa01}</Project>
       <Name>system</Name>
+    </ProjectReference>
+    <ProjectReference Include="$(LlilumSourceRoot)\RunTime\Framework\CoAP\CoAP.Client\CoAP.Client.csproj">
+      <Project>{7018cb11-072e-4f1f-9b38-8d1326dd9433}</Project>
+      <Name>CoAP.Client</Name>
     </ProjectReference>
     <ProjectReference Include="$(LlilumSourceRoot)\RunTime\Framework\CoAP\CoAP.Common\CoAP.Common.csproj">
       <Project>{8316dd5f-3130-423a-84a0-ddbe772b9784}</Project>

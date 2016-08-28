@@ -5,15 +5,14 @@
 namespace CoAP.Server
 {
     using System.Diagnostics;
-    using CoAP.Common;
     using CoAP.Stack;
     using CoAP.Stack.Abstractions;
     using CoAP.Common.Diagnostics;
     using System;
 
-    public partial class MessageProcessor
+    internal partial class MessageProcessor
     {
-        internal class ProcessingState_MessageReceived : ProcessingState
+        internal sealed class ProcessingState_MessageReceived : ProcessingState
         {
             private ProcessingState_MessageReceived( )
             {
@@ -28,118 +27,38 @@ namespace CoAP.Server
             // Helper methods
             // 
 
-            public override void Process( )
+            internal override void Process( )
             {
                 var processor = this.Processor;
 
-                var stats = processor.Engine.Owner.Statistics;
-
+                var engine     = processor.MessageEngine;
+                var stats      = engine.Owner.Statistics;
                 var messageCtx = processor.MessageContext;
-                var msg        = messageCtx.MessageInflated;                
-                var queries    = msg.Options.Queries;
-                var proc       = (MessageProcessor)processor;
+                var msg        = messageCtx.MessageInflated;
+                var proc       = processor;
 
                 ProcessingState.State state = State.ImmediateResponseAvailable;
 
-                Logger.Instance.Log( string.Format( $"==(S)==> Received message from {messageCtx.Source}: '{msg}'" ) ); 
+                Logger.Instance.Log( string.Format( $"==[S({engine.LocalEndPoint})]==> Rx ID={msg.MessageId} from {messageCtx.Source}: '{msg}'" ) );
 
-                if(queries.Count > 0)
-                {
-                    stats.RequestsReceived++;
+                //
+                // Check if this is a query or anything else
+                //
+                string path = msg.Options.Path;
 
-                    if(queries.Count == 1)
-                    {
-                        var server = processor.Engine.Owner;
-
-                        IResourceProvider provider = server.QueryProvider( queries[0] );
-
-                        if(provider == null)
-                        {
-                            stats.Errors++;
-
-                            //
-                            // There is no resource associated with this query => send 404 'Not Found'
-                            // 
-                            messageCtx.ResponseCode = CoAPMessage.RequestError_WithDetail( CoAPMessage.Detail_RequestError.NotFound );
-
-                            state = State.ImmediateResponseAvailable;
-                        }
-                        else
-                        {
-                            //
-                            // check if provider only supports GET
-                            //
-                            if(provider.IsReadOnly && msg.IsGET == false)
-                            {
-                                //
-                                // Unsupported request method
-                                // 
-
-                                stats.Errors++;
-
-                                Logger.Instance.LogWarning( "==(S)==> Server received unsupported method request." );
-
-                                messageCtx.ResponseCode = CoAPMessage.RequestError_WithDetail( CoAPMessage.Detail_RequestError.MethodNotAllowed );
-
-                                state = State.ImmediateResponseAvailable;
-                            }
-                            else
-                            {
-                                if(provider.IsImmediate)
-                                {
-                                    //
-                                    // There is a resource associated with this query and it is immediately available 
-                                    // 
-                                    object res = null;
-                                    uint responseCode = CoAPMessage.RequestError_WithDetail(CoAPMessage.Detail_RequestError.MethodNotAllowed );
-
-                                    messageCtx.ResponseCode = provider.ExecuteMethod( msg.DetailCode_Request, queries[ 0 ], out res );
-                                    if(res != null)
-                                    {
-                                        messageCtx.ResponsePayload = Defaults.Encoding.GetBytes( res.ToString( ) );
-                                    }
-                                    
-                                    state = State.ImmediateResponseAvailable;
-                                }
-                                else
-                                {
-                                    //
-                                    // There is a resource associated with this query but it is not immediately available => send 000 'Ack'
-                                    // 
-                                    messageCtx.ResourceHandler = proc.Engine.Owner.CreateResourceHandler( provider );
-
-                                    state = State.DelayedProcessing;
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        //
-                        // Multiple queries, Not supported => Send BadRequest
-                        // 
-
-                        stats.Errors++;
-
-                        Logger.Instance.LogWarning( "==(S)==> Server received unsupported multiple query or no query..." );
-
-                        messageCtx.ResponseCode = CoAPMessage.RequestError_WithDetail( CoAPMessage.Detail_RequestError.BadRequest );
-
-                        state = State.ImmediateResponseAvailable;
-                    }
-                }
-                else
+                if(String.IsNullOrEmpty( path ))
                 {
                     //
                     // Not a query...
                     // 
+
                     if(msg.IsReset)
                     {
                         //
                         // Client sent a reset...
                         // 
 
-                        Logger.Instance.LogWarning( "==(S)==> Server received a RESET..." );
+                        Logger.Instance.LogWarning( $"==[S({engine.LocalEndPoint})]==> Rx RESET ID={msg.MessageId}..." );
 
                         state = State.ResetReceived;
                     }
@@ -149,7 +68,7 @@ namespace CoAP.Server
                         // Client sent a ACK...
                         // 
 
-                        Logger.Instance.Log( $"==(S)==> Server received a ACK for Message ID '{msg.MessageId}'" );
+                        Logger.Instance.Log( $"==[S({engine.LocalEndPoint})]==> Rx ACK ID={msg.MessageId}" );
 
                         state = State.AckReceived;
                     }
@@ -159,19 +78,108 @@ namespace CoAP.Server
                         // CoAP ping, sending reset
                         // 
 
-                        Logger.Instance.LogWarning( "==(S)==> Server received CoAP Ping, sending a RESET..." );
+                        Logger.Instance.LogWarning( $"==[S({engine.LocalEndPoint})]==> Rx ID={msg.MessageId} (CoAP Ping), sending a RESET..." );
 
                         state = State.SendReset;
                     }
                     else
                     {
                         //
-                        // Bogus query, sending reset
+                        // Bogus message, sending reset
                         // 
 
-                        Logger.Instance.LogWarning( "==(S)==> Server received bad query, sending a RESET..." );
+                        Logger.Instance.LogWarning( $"==[S({engine.LocalEndPoint})]==> ID={msg.MessageId} bad message, sending a RESET..." );
 
                         state = State.SendReset;
+                    }
+                }
+                else
+                {
+                    stats.RequestsReceived++;
+                    
+                    //
+                    // Find a provider, whether a local one or a proxy...
+                    //
+
+                    IResourceProvider provider = this.Processor.MessageEngine.Owner.QueryProvider( path );
+
+                    if(provider == null)
+                    {
+                        stats.Errors++;
+
+                        //
+                        // There is no resource associated with this query => send 404 'Not Found'
+                        // 
+                        messageCtx.ResponseCode = CoAPMessage.RequestError_WithDetail( CoAPMessage.Detail_RequestError.NotFound );
+
+                        state = State.ImmediateResponseAvailable;
+                    }
+                    else
+                    {
+                        //
+                        // check if provider only supports GET, which is by far the most common case
+                        //
+                        if(provider.IsReadOnly && msg.IsGET == false)
+                        {
+                            //
+                            // Unsupported request method
+                            // 
+
+                            stats.Errors++;
+
+                            Logger.Instance.LogWarning( $"==[S({this.Processor.MessageEngine.LocalEndPoint})]==> Server received unsupported method request." );
+
+                            messageCtx.ResponseCode = CoAPMessage.RequestError_WithDetail( CoAPMessage.Detail_RequestError.MethodNotAllowed );
+
+                            state = State.ImmediateResponseAvailable;
+                        }
+                        else
+                        {
+                            //
+                            // Check if we can send the response as a Piggybacked response or if we need to Ack: a local provider 
+                            // can be 'immediate' or 'delayed', a proxied provider will be treated as 'delayed' if there is no 
+                            // fresh and valid represensation in the cache. Since the proxy provider handles the cache, there is no 
+                            // difference between proxy and local providers at this level. 
+                            //
+                            if(provider.CanFetchImmediateResponse( msg ))
+                            {
+                                MessagePayload payload = null;
+                                MessageOptions options = new MessageOptions();
+
+                                //
+                                // There is a resource associated with this query and it is immediately available 
+                                // 
+                                messageCtx.ResponseCode = provider.ExecuteMethod( msg, ref payload, ref options );
+
+                                if(msg.IsGET && messageCtx.ResponseCode != CoAPMessageRaw.Success_WithDetail( CoAPMessageRaw.Detail_Success.Valid ))
+                                {
+                                    messageCtx.ResponsePayload = payload;
+                                }
+                                else
+                                {
+                                    //
+                                    // Get-Valid (2.03) or any non-idempotent methods should not generate a payload
+                                    //
+                                    if(payload != null)
+                                    {
+                                        Debug.Assert( false, "Responses for non-idempotent methods or GET with a Valid (2.03) response should not carry a payload." );
+                                    }
+                                }
+
+                                messageCtx.ResponseOptions.Add( options );
+
+                                state = State.ImmediateResponseAvailable;
+                            }
+                            else
+                            {
+                                //
+                                // There is a resource associated with this query but it is not immediately available.
+                                // 
+                                processor.ResourceHandler = new ResourceHandler( provider );
+
+                                state = State.DelayedProcessing;
+                            }
+                        }
                     }
                 }
 

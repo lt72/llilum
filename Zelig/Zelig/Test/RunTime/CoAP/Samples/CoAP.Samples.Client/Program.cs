@@ -24,7 +24,8 @@ namespace CoAP.Samples.Client
 
         static void Main( string[ ] args )
         {
-            
+            Logger.Instance = new ConsoleLogger( );
+
             new Thread( IssueRequest100 ).Start( );
             new Thread( IssueRequest200 ).Start( );
 
@@ -38,17 +39,17 @@ namespace CoAP.Samples.Client
         {
             var targetEndPoint = new IPEndPoint( IPAddress.Parse("10.0.1.3"), 8080 );
 
-            IssueRequest( new ServerCoAPUri( targetEndPoint, "res/temperature/100" ), 8081 ); 
+            IssueRequest( new CoAPServerUri( targetEndPoint, "res/temperature/100" ), 8081 ); 
         }
         
         private static void IssueRequest200( )
         {
             var targetEndPoint = new IPEndPoint( Utils.AddressFromHostName( "localhost" ), 8080 );
 
-            IssueRequest( new ServerCoAPUri( targetEndPoint, "res/temperature/200" ), 8082 );
+            IssueRequest( new CoAPServerUri( targetEndPoint, "res/temperature/200" ), 8082 );
         }
 
-        private static void IssueRequest( ServerCoAPUri uri, int localPort )
+        private static void IssueRequest( CoAPServerUri uri, int localPort )
         {
             var localEndPoint = new IPEndPoint( IPAddress.Loopback, localPort );
 
@@ -70,10 +71,9 @@ namespace CoAP.Samples.Client
                     .WithType       ( CoAPMessage.MessageType.Confirmable )
                     .WithTokenLength( Defaults.TokenLength )
                     .WithRequestCode( CoAPMessage.Detail_Request.GET )
-                    .WithOption     ( MessageOption_String.New( MessageOption.OptionNumber.Uri_Path, uri.Path ) )
-                    .WithOption     ( MessageOption_UInt.New( MessageOption.OptionNumber.Max_Age , 30 ) )
-                    .WithPayload    ( new byte[] { 0x01, 0x02, 0x03, 0x04 } )
-                    .BuildAndReset( );
+                    .WithOption     ( MessageOption_Int.New( MessageOption.OptionNumber.Max_Age , 30 ) )
+                    .WithPayload    ( MessagePayload_Opaque.New( new byte[] { 0x01, 0x02, 0x03, 0x04 } ) )
+                    .Build( );
                 
                 var response = client.MakeRequest( request );
 
@@ -86,11 +86,11 @@ namespace CoAP.Samples.Client
         {
             if(response == null)
             {
-                Logger.LogError( String.Format( $"***(C)*** Request was not fullfilled" ) );
+                Logger.Instance.LogError( String.Format( $"***(C)*** Request was not fullfilled" ) );
             }
             else
             {
-                Logger.Log( String.Format( $"== Request 'ID:{response.MessageId}' completed with result '{Defaults.Encoding.GetString( response.Payload.Payload )}' ==" ) );
+                Logger.Instance.Log( String.Format( $"== Request 'ID:{response.MessageId}' completed with result '{response.Payload}' ==" ) );
             }
         }
     }

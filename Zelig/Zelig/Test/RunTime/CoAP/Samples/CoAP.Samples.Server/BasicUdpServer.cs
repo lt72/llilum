@@ -4,11 +4,12 @@
 
 namespace CoAP.Samples.Server
 {
+    using System.Net;
+    using CoAP.Stack.Abstractions;
     using CoAP.Common.Diagnostics;
     using CoAP.Server;
     using CoAP.Stack;
     using CoAP.UdpTransport;
-
 
     internal class BasicUdpServer
     {
@@ -20,12 +21,12 @@ namespace CoAP.Samples.Server
 
         //--//
 
-        internal BasicUdpServer( ServerCoAPUri uri )
+        internal BasicUdpServer( IPEndPoint[] endPoints )
         {
-            var server = new CoAPServer( uri, new Messaging( new UdpChannelFactory( ), uri.EndPoints[0] ), new Statistics( ) );  
-            
-            server.AddProvider( "temperature/100", new TemperatureProvider( 100 ) );
-            server.AddProvider( "temperature/200", new TemperatureProvider( 200 ) );
+            var server = CoAPServer.CreateServer( endPoints, new Messaging( new UdpChannelFactory( ), endPoints[0] ) );
+
+            server.AddProvider( new CoAPServerUri( new IPEndPoint( IPAddress.Loopback, 8080 ), "temperature/100" ), new TemperatureProvider( 100 ) );
+            server.AddProvider( new CoAPServerUri( new IPEndPoint( IPAddress.Loopback, 8080 ), "temperature/200" ), new TemperatureProvider( 200 ) );
 
             m_server = server;
         }

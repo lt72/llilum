@@ -46,7 +46,7 @@ namespace Microsoft.Zelig.Test.mbed.SimpleNet
 
             var targetEndPoint = new IPEndPoint( Utils.AddressFromHostName( "localhost" ), 8080 );
 
-            IssueCoAPRequest( new ServerCoAPUri( targetEndPoint, "res/temperature/100" ), 8081 );
+            IssueCoAPRequest( new CoAPServerUri( targetEndPoint, "res/temperature/100" ), 8081 );
 
             // NOTE: Be sure to change this to your local machine IP that is running the NetworkTest app
             IPEndPoint endPoint = new IPEndPoint( IPAddress.Parse("10.0.1.28"), 11000);
@@ -84,7 +84,7 @@ namespace Microsoft.Zelig.Test.mbed.SimpleNet
             }
         }
 
-        private static void IssueCoAPRequest( CoAP.Stack.ServerCoAPUri uri, int localPort )
+        private static void IssueCoAPRequest( CoAP.Stack.CoAPServerUri uri, int localPort )
         {
             var localEndPoint = new IPEndPoint( IPAddress.Loopback, localPort );
 
@@ -108,9 +108,9 @@ namespace Microsoft.Zelig.Test.mbed.SimpleNet
                         .WithTokenLength( CoAP.Common.Defaults.TokenLength )
                         .WithRequestCode( CoAP.Stack.CoAPMessage.Detail_Request.GET )
                         .WithOption     ( CoAP.Stack.MessageOption_String.New( CoAP.Stack.MessageOption.OptionNumber.Uri_Path, uri.Path ) )
-                        .WithOption     ( CoAP.Stack.MessageOption_UInt.New( CoAP.Stack.MessageOption.OptionNumber.Max_Age , 30 ) )
-                        .WithPayload    ( new byte[] { 0x01, 0x02, 0x03, 0x04 } )
-                        .BuildAndReset( );
+                        .WithOption     ( CoAP.Stack.MessageOption_Int.New( CoAP.Stack.MessageOption.OptionNumber.Max_Age , 30 ) )
+                        .WithPayload    ( CoAP.Stack.MessagePayload_Opaque.New( new byte[] { 0x01, 0x02, 0x03, 0x04 }  ))
+                        .Build( );
 
                 var response = client.SendReceive( request );
 
@@ -126,7 +126,7 @@ namespace Microsoft.Zelig.Test.mbed.SimpleNet
             }
             else
             {
-                System.Console.WriteLine( String.Format( $"== Request 'ID:{response.MessageId}' completed with result '{CoAP.Common.Defaults.Encoding.GetString( response.Payload.Payload )}' ==" ) );
+                System.Console.WriteLine( String.Format( $"== Request 'ID:{response.MessageId}' completed with result '{CoAP.Common.Defaults.Encoding.GetString( (byte[])response.Payload.Value )}' ==" ) );
             }
         }
     }

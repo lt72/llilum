@@ -5,13 +5,12 @@
 
 namespace CoAP.Server
 {
-    using CoAP.Stack.Abstractions;
-    using CoAP.Common.Diagnostics;
+    using CoAP.Common;
 
 
-    public partial class MessageProcessor
+    internal partial class MessageProcessor
     {
-        internal class ProcessingState_ImmediateResponseAvailable : ProcessingState
+        internal sealed class ProcessingState_ImmediateResponseAvailable : ProcessingState
         {
             private ProcessingState_ImmediateResponseAvailable( )
             {
@@ -26,24 +25,16 @@ namespace CoAP.Server
             // Helper methods
             // 
 
-            public override void Process( )
+            internal override void Process( )
             {
-                var processor = this.Processor;
-
-                processor.Engine.Owner.Statistics.ImmediateResposesSent++;
-
+                var processor  = this.Processor;
                 var messageCtx = processor.MessageContext;
 
-                var response = this.Processor.MessageBuilder.CreateAck( messageCtx )
-                        .WithCode   ( messageCtx.ResponseCode    )
-                        .WithPayload( messageCtx.ResponsePayload )
-                        .BuildAndReset( );
+                processor.MessageEngine.Owner.Statistics.ImmediateResposesSent++;
 
-                Logger.Instance.Log( string.Format( $"<==(S)== Sending IMMEDIATE (piggybacked) response to {messageCtx.Source}: '{response}'" ) );
-
-                messageCtx.Channel.Send( response.Buffer, 0, response.Buffer.Length, messageCtx.Source );
-
-                Advance( ProcessingState.State.Archive );
+                messageCtx.ResponseAwaitingAck = this.Processor.MessageBuilder.CreateImmediateResponse( messageCtx.Message, messageCtx ).Build( );
+                
+                Advance( ProcessingState.State.SendMessageAndTrackExchangeLifetime );
             }
         }
     }

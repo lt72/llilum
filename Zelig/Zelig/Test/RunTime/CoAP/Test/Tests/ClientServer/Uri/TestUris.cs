@@ -6,11 +6,11 @@
 
 namespace Microsoft.SPOT.Platform.Tests
 {
+    using System;
     using Microsoft.Zelig.Test;
     using System.Net;
     using CoAP.Common;
     using CoAP.Stack;
-
 
     public class TestUris : CoApTestBase
     {
@@ -152,7 +152,7 @@ namespace Microsoft.SPOT.Platform.Tests
 
                 Log.Comment( $"URI: '{uri}" );
 
-                CoAPUri.UriToComponents( uri, testEndpoint, out scheme, out host, out port, out path, options );
+                CoAPUri.UriStringToComponents( uri, ref testEndpoint, out scheme, out host, out port, out path, options );
 
                 Log.Comment( $"SCHEME: {scheme}, HOST: '{host}', PORT: '{port}', PATH: {path}, OPTIONS: {options}" );
                 Log.Comment( "" );
@@ -166,7 +166,7 @@ namespace Microsoft.SPOT.Platform.Tests
 
                 Log.Comment( $"URI: '{uri}" );
 
-                CoAPUri.UriToComponents( uri, testEndpointDifferent, out scheme, out host, out port, out path, options );
+                CoAPUri.UriStringToComponents( uri, ref testEndpointDifferent, out scheme, out host, out port, out path, options );
 
                 Log.Comment( $"SCHEME: {scheme}, HOST: '{host}', PORT: '{port}', PATH: {path}, OPTIONS: {options}" );
                 Log.Comment( "" );
@@ -185,7 +185,7 @@ namespace Microsoft.SPOT.Platform.Tests
 
                 Log.Comment( $"URI: '{uri}" );
 
-                CoAPUri.UriToComponents( uri, testSecureEndpoint, out scheme, out host, out port, out path, options );
+                CoAPUri.UriStringToComponents( uri, ref testSecureEndpoint, out scheme, out host, out port, out path, options );
 
                 Log.Comment( $"SCHEME: {scheme}, HOST: '{host}', PORT: '{port}', PATH: {path}, OPTIONS: {options}" );
                 Log.Comment( "" );
@@ -199,7 +199,7 @@ namespace Microsoft.SPOT.Platform.Tests
 
                 Log.Comment( $"URI: '{uri}" );
 
-                CoAPUri.UriToComponents( uri, testSecureEndpointDifferent, out scheme, out host, out port, out path, options );
+                CoAPUri.UriStringToComponents( uri, ref testSecureEndpointDifferent, out scheme, out host, out port, out path, options );
 
                 Log.Comment( $"SCHEME: {scheme}, HOST: '{host}', PORT: '{port}', PATH: {path}, OPTIONS: {options}" );
                 Log.Comment( "" );
@@ -218,7 +218,7 @@ namespace Microsoft.SPOT.Platform.Tests
                     string scheme = null, host = null, path = null;
                     int port = 0;
                     var options = new MessageOptions();
-                    CoAPUri.UriToComponents( uri, testEndpoint, out scheme, out host, out port, out path, options );
+                    CoAPUri.UriStringToComponents( uri, ref testEndpoint, out scheme, out host, out port, out path, options );
 
                     Log.Comment( $"FAILURE: The following URI '{uri}' should have thrown exception" );
 
@@ -227,6 +227,14 @@ namespace Microsoft.SPOT.Platform.Tests
                 catch(CoAP_UriFormatException)
                 {
 
+                }
+                catch(Exception e)
+                {
+                    Log.Comment( $"FAILURE: The following URI '{uri}' throw an unexpected exception: " );
+                    Log.Comment( $"FAILURE: exception: " + e.ToString( ) );
+                    Log.Comment( $"FAILURE: \r\n" + e.StackTrace );
+
+                    throw;
                 }
             }
 

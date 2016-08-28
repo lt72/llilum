@@ -4,11 +4,9 @@
 
 namespace CoAP.Server
 {
-    using CoAP.Stack.Abstractions;
-
-    public partial class MessageProcessor
+    internal partial class MessageProcessor
     {
-        internal class ProcessingState__AckReceived : ProcessingState
+        internal sealed class ProcessingState__AckReceived : ProcessingState
         {
             private ProcessingState__AckReceived( )
             {
@@ -23,15 +21,15 @@ namespace CoAP.Server
             // Mhelper methods
             // 
 
-            public override void Process( )
+            internal override void Process( )
             {
                 var processor = this.Processor;
 
-                processor.Engine.Owner.Statistics.AcksReceived++;
+                processor.MessageEngine.Owner.Statistics.AcksReceived++;
                 
                 var messageCtx = processor.MessageContext;
 
-                processor.StopTrackingAck( messageCtx );
+                processor.StopAckTrackingTimer( messageCtx );
 
                 Advance( State.Archive );
             }

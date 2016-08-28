@@ -26,47 +26,6 @@ namespace Microsoft.SPOT.Platform.Tests
             return res;
         }
 
-        private void ClearStatistics()
-        {
-            m_client.Statistics.Clear( );
-            m_server.Statistics.Clear( );
-        }
-
-        private bool MessageMockHandler_ChangeMessageId( object sender, ref CoAPMessageEventArgs args )
-        {
-            //
-            // Drop first message received
-            // 
-            int changedIds = m_server.MessagingMock.ChangedMessagesCount;
-
-            if(Interlocked.Decrement( ref changedIds ) >= 0)
-            {
-                Logger.Instance.LogWarning( $"*** Request received '{args.MessageContext.Message}', changing message ID..." );
-                
-                var resource = TestConstants.Resource__EchoQuery_Immediate;
-
-                var msg = MessageBuilder.Create( resource )
-                    .FromContext( args.MessageContext )
-                    .WithMessageId( (ushort)(args.MessageContext.Message.MessageId + 42) )
-                    .Build( );
-
-                CoAPMessage msgInflated = CoAPMessage.FromBuffer( msg.Buffer );
-
-                using(var parser = MessageParser.CheckOutParser( ))
-                {
-                    parser.Inflate( msgInflated );
-                }
-
-                args.MessageContext.Message = msgInflated;
-
-                Logger.Instance.LogWarning( $"*** New request '{args.MessageContext.Message}'" );
-
-                m_server.MessagingMock.ChangedMessagesCount = changedIds; 
-            }
-
-            return true;
-        }
-
         [TestMethod]
         public TestResult ServerBogusResponseWrongmessageId( )
         {
@@ -87,16 +46,16 @@ namespace Microsoft.SPOT.Platform.Tests
                 ImmediateResposesSent   = 2,
             };
 
-            ClearStatistics( );
+            ClearCachesAndStatistics( );
 
             try
             {
                 //
                 // Setup mock, undo at the end of test
                 // 
-                m_server.MessagingMock.OnMessageMock += MessageMockHandler_ChangeMessageId;
+                m_localProxyServer.MessagingMock.OnIncomingMessageMock += MessageMockHandler_ChangeMessageId;
 
-                m_server.MessagingMock.ChangedMessagesCount = 1;
+                m_localProxyServer.MessagingMock.ChangedMessagesCount = 1;
 
                 var resource = TestConstants.Resource__EchoQuery_Immediate;
 
@@ -107,8 +66,7 @@ namespace Microsoft.SPOT.Platform.Tests
                     .WithType       ( CoAPMessage.MessageType.Confirmable )
                     .WithTokenLength( Defaults.TokenLength )
                     .WithRequestCode( CoAPMessage.Detail_Request.GET )
-                    .WithOption     ( MessageOption_String.New( MessageOption.OptionNumber.Uri_Path, resource.Path ) )
-                    .BuildAndReset( );
+                    .Build( );
 
                 var response = m_client.MakeRequest( request );
 
@@ -125,13 +83,13 @@ namespace Microsoft.SPOT.Platform.Tests
                 CoApTestAsserts.Assert_SameToken( request, response );
 
                 CoApTestAsserts.Assert_Statistics( m_client.Statistics, desiredClientStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
-                CoApTestAsserts.Assert_Statistics( m_server.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
+                CoApTestAsserts.Assert_Statistics( m_localProxyServer.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
             }
             finally
             {
-                m_server.MessagingMock.OnMessageMock -= MessageMockHandler_ChangeMessageId;
+                m_localProxyServer.MessagingMock.OnIncomingMessageMock -= MessageMockHandler_ChangeMessageId;
 
-                m_server.MessagingMock.ChangedMessagesCount = 0;
+                m_localProxyServer.MessagingMock.ChangedMessagesCount = 0;
 
                 m_client.Disconnect( ); 
             }
@@ -141,5 +99,49 @@ namespace Microsoft.SPOT.Platform.Tests
 
             return TestResult.Pass;
         }
+
+        private bool MessageMockHandler_ChangeMessageId( object sender, ref CoAPMessageEventArgs args )
+        {
+            //
+            // Drop first message received
+            // 
+            int changedIds = m_localProxyServer.MessagingMock.ChangedMessagesCount;
+
+            if(Interlocked.Decrement( ref changedIds ) >= 0)
+            {
+                Logger.Instance.LogWarning( $"*** Request received '{args.MessageContext.Message}', changing message ID..." );
+
+                var resource = TestConstants.Resource__EchoQuery_Immediate;
+
+                var intercepted = args.MessageContext.Message;
+
+                CoAPMessage oldMsg = intercepted as CoAPMessage;
+
+                if(oldMsg == null)
+                {
+                    using(var parser = MessageParser.CheckOutParser( ))
+                    {
+                        bool fCorrect = CoAPMessage.ParseFromBuffer( intercepted.Buffer, parser, ref oldMsg );
+                    }
+                }
+
+                var newMsg = MessageBuilder.Create( null, resource )
+                    .WithHeader   ( oldMsg.Header )
+                    .WithToken    ( oldMsg.Token )
+                    .WithOptions  ( oldMsg.Options )
+                    .WithPayload  ( oldMsg.Payload )
+                    .WithMessageId( (ushort)(args.MessageContext.Message.MessageId + 42) )
+                    .Build( );
+
+                args.MessageContext.Message = newMsg;
+
+                Logger.Instance.LogWarning( $"*** New request      '{args.MessageContext.Message}'" );
+
+                m_localProxyServer.MessagingMock.ChangedMessagesCount = changedIds;
+            }
+
+            return true;
+        }
+
     }
 }

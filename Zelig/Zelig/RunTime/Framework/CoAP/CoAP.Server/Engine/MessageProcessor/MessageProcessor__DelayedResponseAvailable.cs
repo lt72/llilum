@@ -4,14 +4,12 @@
 
 namespace CoAP.Server
 {
-    using System.Diagnostics;
-    using CoAP.Stack.Abstractions;
     using CoAP.Common.Diagnostics;
 
 
-    public partial class MessageProcessor
+    internal partial class MessageProcessor
     {
-        internal class ProcessingState_DelayedResponseAvailable : ProcessingState
+        internal sealed class ProcessingState_DelayedResponseAvailable : ProcessingState
         {
             private ProcessingState_DelayedResponseAvailable( )
             {
@@ -26,32 +24,33 @@ namespace CoAP.Server
             // Helper methods
             // 
 
-            public override void Process( )
+            internal override void Process( )
             {
-                var processor = this.Processor;
-
-                processor.Engine.Owner.Statistics.DelayedResponsesSent++;
-
+                var processor  = this.Processor;
                 var messageCtx = processor.MessageContext;
+
+                processor.MessageEngine.Owner.Statistics.DelayedResponsesSent++;
                 
-                var response = this.Processor.MessageBuilder.CreateDelayedResponse( messageCtx )
-                    .WithPayload( messageCtx.ResponsePayload )
-                    .BuildAndReset( );
+                var response = this.Processor.MessageBuilder.CreateDelayedResponse( messageCtx.Message, messageCtx ).Build( );
 
                 //Debug.Assert( messageCtx.Message.Type == response.Type );
 
-                Logger.Instance.Log( string.Format( $"<==(S)== Sending DELAYED response to {messageCtx.Source}: '{response}'" ) );
-
-                messageCtx.Channel.Send( response.Buffer, 0, response.Buffer.Length, messageCtx.Source );
-
-                if(messageCtx.MessageInflated.IsConfirmable)
+                //
+                // If the message is confirmable we need to send the response and start tracking the ACK atomically, so 
+                // we will send the message in a different state. If it is not confirmable we just send the response.
+                //
+                if(messageCtx.Message.IsConfirmable)
                 {
-                    messageCtx.Response = response;
+                    messageCtx.ResponseAwaitingAck = response;
 
                     Advance( ProcessingState.State.AwaitingAck );
                 }
                 else
                 {
+                    Logger.Instance.Log( string.Format( $"<==[S({this.Processor.MessageEngine.LocalEndPoint})]== Sending NON DELAYED response to {messageCtx.Source}: '{response}'" ) );
+
+                    this.Processor.MessageEngine.SendMessageAsync( response );
+
                     Advance( ProcessingState.State.Archive );
                 }
             }

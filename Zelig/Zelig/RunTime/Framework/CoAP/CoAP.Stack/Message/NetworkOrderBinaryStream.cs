@@ -169,7 +169,6 @@ namespace CoAP.Stack
             }
         }
 
-#if DESKTOP
         public override string ToString( )
         {
             var sb = new StringBuilder();
@@ -186,7 +185,6 @@ namespace CoAP.Stack
 
             return $"STREAM({sb})";
         }
-#endif
 
         //
         // Access methods

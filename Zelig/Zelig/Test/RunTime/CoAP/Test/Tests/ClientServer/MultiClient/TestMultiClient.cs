@@ -24,12 +24,6 @@ namespace Microsoft.SPOT.Platform.Tests
             return res;
         }
 
-        private void ClearStatistics( )
-        {
-            m_client.Statistics.Clear( );
-            m_server.Statistics.Clear( );
-        }
-
         [TestMethod]
         public TestResult OpenCloseTwice( )
         {
@@ -47,7 +41,7 @@ namespace Microsoft.SPOT.Platform.Tests
                 ImmediateResposesSent = 2,
             };
 
-            ClearStatistics( );
+            ClearCachesAndStatistics( );
 
             var resource = TestConstants.Resource__EchoQuery_Immediate;
 
@@ -60,12 +54,11 @@ namespace Microsoft.SPOT.Platform.Tests
                 //
 
                 var request = messageBuilder
-                .WithVersion    ( CoAPMessage.ProtocolVersion.Version_1 )
-                .WithType       ( CoAPMessage.MessageType.Confirmable )
-                .WithTokenLength( Defaults.TokenLength )
-                .WithRequestCode( CoAPMessage.Detail_Request.GET )
-                .WithOption     ( MessageOption_String.New( MessageOption.OptionNumber.Uri_Path, resource.Path ) )
-                .BuildAndReset( );
+                    .WithVersion    ( CoAPMessage.ProtocolVersion.Version_1 )
+                    .WithType       ( CoAPMessage.MessageType.Confirmable )
+                    .WithTokenLength( Defaults.TokenLength )
+                    .WithRequestCode( CoAPMessage.Detail_Request.GET )
+                    .Build( );
 
                 //
                 // 1st request
@@ -79,11 +72,11 @@ namespace Microsoft.SPOT.Platform.Tests
                     return TestResult.Fail;
                 }
 
-                CoApTestAsserts.Assert_Version( response, CoAPMessage.ProtocolVersion.Version_1 );
-                CoApTestAsserts.Assert_Type( response, CoAPMessage.MessageType.Acknowledgement );
-                CoApTestAsserts.Assert_Code( response, CoAPMessage.Class.Success, CoAPMessage.Detail_Success.Content );
+                CoApTestAsserts.Assert_Version      ( response, CoAPMessage.ProtocolVersion.Version_1 );
+                CoApTestAsserts.Assert_Type         ( response, CoAPMessage.MessageType.Acknowledgement );
+                CoApTestAsserts.Assert_Code         ( response, CoAPMessage.Class.Success, CoAPMessage.Detail_Success.Content );
                 CoApTestAsserts.Assert_SameMessageId( request, response );
-                CoApTestAsserts.Assert_SameToken( request, response );
+                CoApTestAsserts.Assert_SameToken    ( request, response );
 
                 //
                 // 2nd request, re-use previous builder and request
@@ -92,7 +85,14 @@ namespace Microsoft.SPOT.Platform.Tests
                 m_client.Disconnect( );
                 m_client.Connect( null, resource );
 
-                var response1 = m_client.MakeRequest( request );
+                var request1 = messageBuilder
+                    .WithVersion    ( CoAPMessage.ProtocolVersion.Version_1 )
+                    .WithType       ( CoAPMessage.MessageType.Confirmable )
+                    .WithTokenLength( Defaults.TokenLength )
+                    .WithRequestCode( CoAPMessage.Detail_Request.GET )
+                    .Build( );
+
+                var response1 = m_client.MakeRequest( request1 );
 
                 if(response1 == null)
                 {
@@ -100,14 +100,14 @@ namespace Microsoft.SPOT.Platform.Tests
                     return TestResult.Fail;
                 }
 
-                CoApTestAsserts.Assert_Version( response1, CoAPMessage.ProtocolVersion.Version_1 );
-                CoApTestAsserts.Assert_Type( response1, CoAPMessage.MessageType.Acknowledgement );
-                CoApTestAsserts.Assert_Code( response1, CoAPMessage.Class.Success, CoAPMessage.Detail_Success.Content );
-                CoApTestAsserts.Assert_SameMessageId( request, response1 );
-                CoApTestAsserts.Assert_SameToken( request, response1 );
+                CoApTestAsserts.Assert_Version      ( response1, CoAPMessage.ProtocolVersion.Version_1 );
+                CoApTestAsserts.Assert_Type         ( response1, CoAPMessage.MessageType.Acknowledgement );
+                CoApTestAsserts.Assert_Code         ( response1, CoAPMessage.Class.Success, CoAPMessage.Detail_Success.Content );
+                CoApTestAsserts.Assert_SameMessageId( request1, response1 );
+                CoApTestAsserts.Assert_SameToken    ( request1, response1 );
 
-                CoApTestAsserts.Assert_Statistics( m_client.Statistics, desiredClientStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
-                CoApTestAsserts.Assert_Statistics( m_server.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
+                CoApTestAsserts.Assert_Statistics( m_client          .Statistics, desiredClientStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
+                CoApTestAsserts.Assert_Statistics( m_localProxyServer.Statistics, desiredServerStats, TransmissionParameters.default_EXCHANGE_LIFETIME );
             }
             finally
             {

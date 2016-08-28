@@ -5,13 +5,12 @@
 
 namespace CoAP.Server
 {
-    using System.Diagnostics;
     using CoAP.Common;
-    using CoAP.Stack.Abstractions;
+    using CoAP.Common.Diagnostics;
 
-    public partial class MessageProcessor
+    internal partial class MessageProcessor
     {
-        internal class ProcessingState_AwaitingAck : ProcessingState
+        internal sealed class ProcessingState_AwaitingAck : ProcessingState
         {
             private ProcessingState_AwaitingAck( )
             {
@@ -26,18 +25,24 @@ namespace CoAP.Server
             // Helper methods
             // 
 
-            public override void Process( )
+            internal override void Process( )
             {
-                var processor = this.Processor;
-
+                var processor  = this.Processor;
                 var messageCtx = processor.MessageContext;
-                var id         = messageCtx.Response.MessageId;
+                var id         = messageCtx.ResponseAwaitingAck.MessageId;
 
                 //Debug.Assert( processor.Engine.IsAckPending( id ) == false );
 
-                processor.Engine.RegisterAckPending( id, processor ); 
+                if(processor.MessageEngine.RegisterAckPending( messageCtx.ResponseAwaitingAck.Context, processor ))
+                {
+                    Logger.Instance.Log( string.Format( $"<==[S({this.Processor.MessageEngine.LocalEndPoint})]== Sending CON DELAYED response to {messageCtx.Source}: '{messageCtx.ResponseAwaitingAck}'" ) );
 
-                processor.StartTrackingAck( TransmissionParameters.InitialTimeout );
+                    processor.StartAckTrackingTimer( TransmissionParameters.InitialTimeout );
+
+                    this.Processor.MessageEngine.SendMessageAsync( messageCtx.ResponseAwaitingAck );
+                    
+                    Advance( ProcessingState.State.Archive );
+                }
             }
 
             //--//

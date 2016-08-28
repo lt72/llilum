@@ -44,14 +44,22 @@ namespace CoAP.Common
         {
             get
             {
+                //
+                // Use pre-computed value when possible 
+                //
+                if( MAX_RETRANSMIT    == default_MAX_RETRANSMIT     &&
+                    ACK_TIMEOUT       == default_ACK_TIMEOUT        && 
+                    ACK_RANDOM_FACTOR == default_ACK_RANDOM_FACTOR   )
+                {
+                    return default_MAX_TRANSMIT_SPAN;
+                }
+
                 int res = 0;
 
                 for(int i = 0; i < MAX_RETRANSMIT; ++i)
                 {
                     res += ACK_TIMEOUT << i;
                 }
-
-                res -= 1; 
 
                 return (int)(res * ACK_RANDOM_FACTOR); 
             }
@@ -67,14 +75,22 @@ namespace CoAP.Common
         {
             get
             {
+                //
+                // Use pre-computed value when possible 
+                //
+                if( MAX_RETRANSMIT    == default_MAX_RETRANSMIT     &&
+                    ACK_TIMEOUT       == default_ACK_TIMEOUT        && 
+                    ACK_RANDOM_FACTOR == default_ACK_RANDOM_FACTOR   )
+                {
+                    return default_MAX_TRANSMIT_WAIT;
+                }
+
                 int res = 0;
 
                 for(int i = 0; i < MAX_RETRANSMIT + 1; ++i)
                 {
                     res += ACK_TIMEOUT << i;
                 }
-
-                res -= 1;
 
                 return (int)(res * ACK_RANDOM_FACTOR);
             }

@@ -5,8 +5,10 @@
 
 namespace CoAP.Stack
 {
+    using System;
+    using System.Diagnostics;
+    using System.Net;
     using CoAP.Common;
-
 
     public class CoAPMessage : CoAPMessageRaw
     {
@@ -16,7 +18,6 @@ namespace CoAP.Stack
         
         private MessageOptions m_options;
         private MessagePayload m_payload;
-        private bool           m_badOptions;
 
         //--//
 
@@ -26,145 +27,53 @@ namespace CoAP.Stack
 
         private CoAPMessage( byte[ ] buffer ) : base( buffer )
         {
+            this.Buffer = buffer;
         }
 
         private CoAPMessage( ) : this( Constants.EmptyBuffer )
         {
         }
-        
+
         //--//
 
-        public static CoAPMessage FromBuffer( byte[ ] buffer )
+        internal static CoAPMessage FromBuffer( byte[ ] buffer )
         {
-            return new CoAPMessage( buffer == null ? Constants.EmptyBuffer : buffer ); 
+            Debug.Assert( buffer != null && buffer.Length >= 4 ); 
+
+            return new CoAPMessage( buffer );
+        }
+
+        public static CoAPMessage FromBufferWithContext( byte[ ] buffer, MessageContext ctx )
+        {
+            var msg = new CoAPMessage( buffer == null ? Constants.EmptyBuffer : buffer );
+
+            msg.Context = ctx;
+
+            return msg;
+        }
+
+        public static bool ParseFromBuffer( byte[ ] buffer, MessageParser parser, ref CoAPMessage msg )
+        {
+            return parser.Parse( buffer, ref msg );
+        }
+
+        public static bool ParseFromBufferWithDestination( byte[ ] buffer, MessageParser parser, IPEndPoint ep, ref CoAPMessage msg )
+        {
+            return parser.ParseAndComputeDestination( buffer, ep, ref msg );
         }
 
         //
         // Helper methods
         //
 
-        public bool IsAck
-        {
-            get
-            {
-                return (this.Type == MessageType.Acknowledgement); // ACK
-            }
-        }
-
-        public bool IsEmptyAck
-        {
-            get
-            {
-                return (this.Type               == MessageType.Acknowledgement) && // ACK
-                       (this.ClassCode          == Class.Request              ) && // is a request 
-                       (this.DetailCode_Request == Detail_Request.Empty       );   // is empty
-            }
-        }
-
-        public bool IsPiggyBackedResponse
-        {
-            get
-            {
-                return (this.Type               == MessageType.Acknowledgement) && // ACK
-                       (this.ClassCode          != Class.Request              ) && // not a request
-                       (this.DetailCode_Request != Detail_Request.Empty       );   // not empty
-            }
-        }
-
-        public bool IsDelayedResponse
-        {
-            get
-            {
-                return ((this.Type               == MessageType.Confirmable   )  ||
-                        (this.Type               == MessageType.NonConfirmable)) && // CON or NON (not an ACK)
-                        (this.ClassCode          != Class.Request              ) && // not a request
-                        (this.DetailCode_Request != Detail_Request.Empty       );   // not empty
-            }
-        }
-
-        public bool IsConfirmable
-        {
-            get
-            {
-                return this.Type == MessageType.Confirmable; // CON 
-            }
-        }
-
-        public bool IsReset
-        {
-            get
-            {
-                return this.Type == MessageType.Reset;
-            }
-        }
-
-        public bool IsRequest
-        {
-            get
-            {
-                return this.ClassCode == Class.Request;
-            }
-        }
-
-        public bool IsEmpty
-        {
-            get
-            {
-                return this.IsRequest && this.DetailCode_Request == Detail_Request.Empty;
-            }
-        }
-
-        public bool IsGET
-        {
-            get
-            {
-                return this.IsRequest && this.DetailCode_Request == Detail_Request.GET;
-            }
-        }
-
-        public bool IsPOST
-        {
-            get
-            {
-                return this.IsRequest && this.DetailCode_Request == Detail_Request.POST;
-            }
-        }
-
-        public bool IsPUT
-        {
-            get
-            {
-                return this.IsRequest && this.DetailCode_Request == Detail_Request.PUT;
-            }
-        }
-
-        public bool IsDELETE
-        {
-            get
-            {
-                return this.IsRequest && this.DetailCode_Request == Detail_Request.DELETE;
-            }
-        }
-
-        public bool IsPing
-        {
-            get
-            {
-                return (this.Type               == MessageType.Confirmable) && // CON  
-                       (this.ClassCode          == Class.Request          ) && // is a request
-                       (this.DetailCode_Request == Detail_Request.Empty   );   // is empty;
-            }
-        }
-
-
-#if DESKTOP
         public override string ToString( )
         {
-            return $"{base.ToString( )},OPTIONS({this.Options}),PAYLOAD({this.Payload}))";
+            return $"MESSAGE[{base.ToString( false )},OPTIONS({this.Options}),PAYLOAD({this.Payload}))]";
         }
-#endif
 
-        //--//
+        //
+        // Access methods
+        //
 
         public MessageOptions Options
         {
@@ -189,27 +98,14 @@ namespace CoAP.Stack
                 m_payload = value;
             }
         }
-
-        public int Length
+        
+        public bool IsTagged
         {
             get
             {
-                return m_buffer.Length;
+                //return Object.ReferenceEquals( m_options.ETag, MessageOptions.EmptyETag ) == false;
+                return m_options.ETag != null;
             }
         }
-
-        public bool HasBadOptions
-        {
-            get
-            {
-                return m_badOptions;
-            }
-            set
-            {
-                m_badOptions = value;
-            }
-        }
-
-        //--//
     }
 }

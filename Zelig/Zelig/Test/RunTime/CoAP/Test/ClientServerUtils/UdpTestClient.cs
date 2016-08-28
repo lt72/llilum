@@ -20,26 +20,34 @@ namespace Test.ClientServerUtils
 
         private readonly ClientMessagingMock m_messagingMock;
         private readonly CoAPClient          m_client;
-        private readonly Statistics          m_stats;
 
         //--//
 
         public UdpTestClient( IPEndPoint localEndPoint )
         {
-            var messaging = new ClientMessagingMock( new Messaging( new UdpChannelFactory( ), localEndPoint ) );
+            var messaging     = new Messaging( new UdpChannelFactory( ), localEndPoint );
+            var mockMessaging = new ClientMessagingMock( messaging );
+            
+            messaging.OwnerMessaging = mockMessaging;
 
-            m_stats         = new Statistics( ); 
-            m_client        = new CoAPClient( messaging, m_stats );
-            m_messagingMock = messaging;
+            var client = new CoAPClient( mockMessaging, new Statistics( ) );
+            
+            m_client        = client;
+            m_messagingMock = mockMessaging;
         }
 
-        public MessageBuilder Connect( IPEndPoint intermediary, ServerCoAPUri uri )
+        public MessageBuilder Connect( IPEndPoint intermediary, CoAPServerUri uri )
         {
-            return m_client.Connect( intermediary, uri );
+            var builder = m_client.Connect( intermediary, uri );
+
+            m_client.Start( );
+
+            return builder;
         }
 
         public void Disconnect( )
         {
+            m_client.Stop      ( );
             m_client.Disconnect( );
         }
 

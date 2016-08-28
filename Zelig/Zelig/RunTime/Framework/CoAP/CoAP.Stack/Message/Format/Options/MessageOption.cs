@@ -2,8 +2,13 @@
 // Copyright (c) Microsoft Corporation.    All rights reserved.
 //
 
+
 namespace CoAP.Stack
 {
+    using System;
+    using CoAP.Common;
+    using System.Text;
+
     public abstract class MessageOption : IEncodable
     {
         // +--------------------------+----------+----+------------------------+
@@ -75,20 +80,25 @@ namespace CoAP.Stack
         }
 
         //--//
-        
+
         private const byte c_Delta__13  = 0x0D;
         private const byte c_Delta__14  = 0x0E;
         private const byte c_Length__13 = 0xD0;
         private const byte c_Length__14 = 0xE0;
 
+        //--//
+
+        private static readonly int           SupportedOptions = 15;
+        private static readonly OptionEntry[] OptionMap;
+
+        //--//
+
         //
         // State
         //
 
-        private static readonly int           SupportedOptions = 15;
-        private static readonly OptionEntry[] OptionMap;
-        //--//
-        private readonly OptionNumber m_option;
+        private readonly OptionNumber m_number;
+        private readonly byte[]       m_bytes;
         private          bool         m_badOption;
         private          bool         m_notAcceptable;
         private          bool         m_ignoreOption;
@@ -121,7 +131,7 @@ namespace CoAP.Stack
         // Contructors
         //
 
-        static MessageOption()
+        static MessageOption( )
         {
             OptionMap = new OptionEntry[ SupportedOptions + 1 ];
             
@@ -143,14 +153,57 @@ namespace CoAP.Stack
             OptionMap[ OptionNumberToIndex( OptionNumber.Unknown        ) ] = new OptionEntry( 255, false, false, false, false,  5, "UNK"           , null );
         }
         
-        internal MessageOption( OptionNumber option )
+        internal MessageOption( OptionNumber option, byte[ ] value )
         {
-            m_option = option;
+            m_number = option;
+            m_bytes  = value;
         }
 
         //
         // Helper Methods
         // 
+
+        public override bool Equals( object obj )
+        {
+            if(obj == null)
+            {
+                return false;
+            }
+
+            MessageOption option = obj as MessageOption;
+
+            if(option == null)
+            {
+                return false;
+            }
+
+            return this.m_number == option.m_number && Utils.ByteArrayCompare( this.m_bytes, option.m_bytes );
+        }
+
+        public override int GetHashCode( )
+        {
+            return (int)((int)m_number ^ Utils.ByteArrayToHash( m_bytes ));
+        }
+
+        public static bool operator ==( MessageOption optA, MessageOption optB )
+        {
+            if((object)optA == null && (object)optB == null)
+            {
+                return true;
+            }
+
+            if((object)optA != null && (object)optB != null)
+            {
+                return optA.Equals( optB );
+            }
+
+            return false;
+        }
+        public static bool operator !=( MessageOption optA, MessageOption optB )
+        {
+            return !(optA == optB);
+        }
+
 
         public virtual void Encode( NetworkOrderBinaryStream stream )
         {
@@ -180,9 +233,9 @@ namespace CoAP.Stack
             var delta  = this.Delta;
             var length = this.ValueLength;
 
-            var delta1  = delta - 13; 
+            var delta1  = delta  - 13;
             var length1 = length - 13;
-            
+
             if(delta <= 12)
             {
                 //
@@ -202,7 +255,7 @@ namespace CoAP.Stack
                 else
                 {
                     delta1 -= 256;
-                    stream.UpdateByteNoAdvance( (byte) (c_Delta__14) );
+                    stream.UpdateByteNoAdvance( (byte)(c_Delta__14) );
                 }
             }
 
@@ -225,11 +278,11 @@ namespace CoAP.Stack
                 else
                 {
                     length1 -= 256;
-                    stream.UpdateByteNoAdvance( (byte) (c_Length__14) );
+                    stream.UpdateByteNoAdvance( (byte)(c_Length__14) );
                 }
             }
 
-            stream.Advance( 1 ); 
+            stream.Advance( 1 );
 
             //
             // Complete option delta remainder
@@ -248,15 +301,15 @@ namespace CoAP.Stack
                 {
                     delta1 -= 256;
                     stream.WriteByte( (byte)((delta1 & 0x0000FF00) >> 8) );
-                    stream.WriteByte( (byte) (delta1 & 0x000000FF)       );
+                    stream.WriteByte( (byte)((delta1 & 0x000000FF)     ) );
                 }
             }
 
             //
             // Complete option length remainder
             // 
-            
-            if(length > 12) 
+
+            if(length > 12)
             {
                 //
                 // we need one or two additional bytes
@@ -270,19 +323,39 @@ namespace CoAP.Stack
                 {
                     length1 -= 256;
                     stream.WriteByte( (byte)((length1 & 0x0000FF00) >> 8) );
-                    stream.WriteByte( (byte) (length1 & 0x000000FF)       );
+                    stream.WriteByte( (byte)((length1 & 0x000000FF)     ) );
                 }
             }
         }
         
-        public abstract object Value { get; }
-
-        public abstract int ValueLength { get; }
-        
         //
         // Access Methods
         //
-        
+
+        public byte[ ] RawBytes
+        {
+            get
+            {
+                return m_bytes;
+            }
+        }
+
+        public virtual object Value
+        {
+            get
+            {
+                return this.RawBytes;
+            }
+        }
+
+        public virtual int ValueLength
+        {
+            get
+            {
+                return m_bytes.Length;
+            }
+        }
+
         internal int Delta
         {
             get; set;
@@ -292,7 +365,7 @@ namespace CoAP.Stack
         {
             get
             {
-                return m_option;
+                return m_number;
             }
         }
 
@@ -300,16 +373,16 @@ namespace CoAP.Stack
         {
             get
             {
-                return IsCriticalOption( (byte)m_option ); 
+                return IsCriticalOption( (byte)m_number ); 
                 //return OptionMap[ OptionNumberToIndex( m_option ) ].IsCritical;
             }
         }
 
-        public bool IsUnsafe
+        public bool IsSafeToForward
         {
             get
             {
-                return IsUnsafeOption( (byte)m_option );
+                return IsSafeOption( (byte)m_number );
                 //return OptionMap[ OptionNumberToIndex( m_option ) ].IsUnsafe;
             }
         }
@@ -318,7 +391,7 @@ namespace CoAP.Stack
         {
             get
             {
-                return IsNoCacheKeyOption( (byte)m_option );
+                return IsNoCacheKeyOption( (byte)m_number );
                 //return OptionMap[ OptionNumberToIndex( m_option ) ].NoCacheKey;
             }
         }
@@ -327,9 +400,9 @@ namespace CoAP.Stack
         {
             get
             {
-                if(IsSupportedOption( m_option ))
+                if(IsSupportedOption( m_number ))
                 {
-                    return OptionMap[ OptionNumberToIndex( m_option ) ].IsRepeatable;
+                    return OptionMap[ OptionNumberToIndex( m_number ) ].IsRepeatable;
                 }
 
                 return OptionMap[ OptionNumberToIndex( OptionNumber.Unknown ) ].IsRepeatable;
@@ -340,9 +413,9 @@ namespace CoAP.Stack
         {
             get
             {
-                if(IsSupportedOption( m_option ))
+                if(IsSupportedOption( m_number ))
                 {
-                    return OptionMap[ OptionNumberToIndex( m_option ) ].Name;
+                    return OptionMap[ OptionNumberToIndex( m_number ) ].Name;
                 }
                 
                 return OptionMap[ OptionNumberToIndex( OptionNumber.Unknown ) ].Name;
@@ -353,9 +426,9 @@ namespace CoAP.Stack
         {
             get
             {
-                if(IsSupportedOption( m_option ))
+                if(IsSupportedOption( m_number ))
                 {
-                    return OptionMap[ OptionNumberToIndex( m_option ) ].NameLength;
+                    return OptionMap[ OptionNumberToIndex( m_number ) ].NameLength;
                 }
 
                 return OptionMap [OptionNumberToIndex( OptionNumber.Unknown )].NameLength;
@@ -367,20 +440,44 @@ namespace CoAP.Stack
         {
             get
             {
-                if(IsSupportedOption( m_option ))
+                if(IsSupportedOption( m_number ))
                 {
-                    return OptionMap[ OptionNumberToIndex( m_option ) ].Default;
+                    return OptionMap[ OptionNumberToIndex( m_number ) ].Default;
                 }
 
                 return OptionMap[ OptionNumberToIndex( OptionNumber.Unknown ) ].Default;
             }
         }
 
-        public bool IsQuery
+        public bool IsUriPath
         {
             get
             {
                 if(this.Number == OptionNumber.Uri_Path)
+                {
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        public bool IsUriQuery
+        {
+            get
+            {
+                if(this.Number == OptionNumber.Uri_Query)
+                {
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        public bool IsMaxAge
+        {
+            get
+            {
+                if(this.Number == OptionNumber.Max_Age)
                 {
                     return true;
                 }
@@ -425,6 +522,18 @@ namespace CoAP.Stack
             get
             {
                 if(this.Number == OptionNumber.Uri_Port)
+                {
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        public bool IsETag
+        {
+            get
+            {
+                if(this.Number == OptionNumber.ETag)
                 {
                     return true;
                 }
@@ -526,9 +635,9 @@ namespace CoAP.Stack
             return (number & 0x01) == 0x01;
         }
 
-        public static bool IsUnsafeOption( byte number )
+        public static bool IsSafeOption( byte number )
         {
-            return (number & 0x02) == 0x02;
+            return !((number & 0x02) == 0x02);
         }
 
         public static bool IsNoCacheKeyOption( byte number )

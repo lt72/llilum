@@ -2,14 +2,21 @@
 // Copyright (c) Microsoft Corporation.    All rights reserved.
 //
 
+
 namespace CoAP.Stack.Abstractions
 {
+    using System;
+    using CoAP.Common;
+    using CoAP.Stack;
+
     public interface IResourceProvider
     {
-        bool IsImmediate { get; }
+        bool CanFetchImmediateResponse( CoAPMessage request );
 
-        bool IsReadOnly { get; }
+        uint ExecuteMethod( CoAPMessage request, ref MessagePayload payload, ref MessageOptions options );
 
-        uint ExecuteMethod( CoAPMessage.Detail_Request method, string query, out object result );        
+        bool IsReadOnly { get; } 
+
+        bool IsProxy { get; } 
     }
 }
