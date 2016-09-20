@@ -3,7 +3,7 @@
 //
 
 // Enable this macro to shift object pointers from the beginning of the header to the beginning of the payload.
-#define CANONICAL_OBJECT_POINTERS
+//#define CANONICAL_OBJECT_POINTERS
 
 namespace Microsoft.Zelig.CodeGeneration.IR.CompilationSteps.Handlers
 {

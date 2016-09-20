@@ -3,7 +3,7 @@
 //
 
 // Enable this macro to run LLVM-specific transforms prior to generating the image.
-#define LLVM
+//#define LLVM
 
 namespace Microsoft.Zelig.CodeGeneration.IR.CompilationSteps.Phases
 {

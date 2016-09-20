@@ -2,8 +2,6 @@
 // Copyright (c) Microsoft Corporation.    All rights reserved.
 //
 
-//#define ENABLE_LOW_LEVEL_OPTIMIZATIONS
-
 namespace Microsoft.Zelig.Configuration.Environment.Abstractions.Architectures
 {
     using System;
@@ -39,9 +37,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions.Architectures
             //--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
             //--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//--//
 
-#if ENABLE_LOW_LEVEL_OPTIMIZATIONS
             [ZeligIR.CompilationSteps.OptimizationHandler(RunOnce=false, RunInSSAForm=true)]
-#endif // ENABLE_LOW_LEVEL_OPTIMIZATIONS
             private void OptimizeIndirectOperators( ZeligIR.CompilationSteps.PhaseExecution.NotificationContext nc )
             {
                 CompactIndirectOperators            ( nc ); if(nc.CanContinue == false) return;

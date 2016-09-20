@@ -61,13 +61,13 @@ namespace Microsoft.Zelig.MetaData.Importer
 
         Normalized.MetaDataObject IMetaDataNormalize.AllocateNormalizedObject( MetaDataNormalizationContext context )
         {
-            // LT72: added normalization for metadatafile; not necessary with previous implementation on fraemwork 3.5
+            // LT72: added normalization for metadatafile; not necessary with previous implementation on framework 3.5
             //throw context.InvalidPhase( this );
 
             Normalized.MetaDataFile file = new Normalized.MetaDataFile( this.Token );
-            file.m_flags = this.m_flags;
-            file.m_name = this.m_name;
-            file.m_hashValue = this.m_hashValue;
+            file.m_flags                 = this.m_flags;
+            file.m_name                  = this.m_name;
+            file.m_hashValue             = this.m_hashValue;
 
             return file;
         }

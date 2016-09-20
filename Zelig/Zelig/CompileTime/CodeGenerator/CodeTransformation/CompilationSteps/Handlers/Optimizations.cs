@@ -6,16 +6,18 @@
 
 // LLVM translation doesn't yet recognize SSA format, and will not produce correct code.
 // TODO: Remove this tag when that issue has been resolved.
-//#define ALLOW_SSA_FORM
+#define ALLOW_SSA_FORM
 
 // Enable optimizations that only work for direct ARM translation (non-LLVM legacy path).
 // TODO: Remove this tag when comparison is no longer needed.
-//#define ENABLE_LOW_LEVEL_OPTIMIZATIONS
+#define ENABLE_LOW_LEVEL_OPTIMIZATIONS
 
 // Enable more advanced optimizations which look for non-equivalent comparisons. This appears to be
 // overly aggressive when not in SSA form, resulting in incorrect code.
 // TODO: Remove this tag when this issue is resolved.
-//#define ENABLE_ADVANCED_COMPARES
+#define ENABLE_ADVANCED_COMPARES
+
+#define FUTURE
 
 namespace Microsoft.Zelig.CodeGeneration.IR.CompilationSteps.Handlers
 {
@@ -225,7 +227,7 @@ namespace Microsoft.Zelig.CodeGeneration.IR.CompilationSteps.Handlers
 
                     if(ex != null)
                     {
-                        if(ProveNonZero( defLookup, ex ) == ProveResult.True)
+                        if(ProveNonZero( ex, defLookup, useChains ) == ProveResult.AlwaysTrue)
                         {
                             UnconditionalControlOperator opNewCtrl = UnconditionalControlOperator.New( controlOp.DebugInfo, fNotEqual ? controlOp.TargetBranchTaken : controlOp.TargetBranchNotTaken );
                             controlOp.SubstituteWithOperator( opNewCtrl, Operator.SubstitutionFlags.Default );
@@ -460,10 +462,10 @@ namespace Microsoft.Zelig.CodeGeneration.IR.CompilationSteps.Handlers
                 {
                     var binOp = (BinaryOperator)def;
 
-                    ConstantExpression exConst;
+                    ConstantExpression exConst1;
                     bool               fConstOnRight;
  
-                    var varSrc = binOp.IsBinaryOperationAgainstConstant( out exConst, out fConstOnRight );
+                    var varSrc = binOp.IsBinaryOperationAgainstConstant( out exConst1, out fConstOnRight );
                     if(varSrc != null)
                     {
                         //
@@ -478,13 +480,13 @@ namespace Microsoft.Zelig.CodeGeneration.IR.CompilationSteps.Handlers
                                     //
                                     // Adding/removing a constant from a non-null value doesn't change its nullness.
                                     //
-                                    return ProveNonZero( defLookup, history, varSrc );
+                                    return ProveNonZero( varSrc, defLookup, useChains, history );
 
                                 case BinaryOperator.ALU.OR:
                                     //
                                     // OR'ing with a non-zero constant ensures the results are not null.
                                     //
-                                    if(!exConst.IsEqualToZero())
+                                    if(!exConst1.IsEqualToZero())
                                     {
                                         return ProveResult.AlwaysTrue;
                                     }

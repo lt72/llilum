@@ -3,7 +3,7 @@
 //
 
 // This macro enables transformation from exception blocks to landing pad form.
-#define ENABLE_LANDING_PADS
+//#define ENABLE_LANDING_PADS
 
 namespace Microsoft.Zelig.CodeGeneration.IR.CompilationSteps.Phases
 {

@@ -60,7 +60,7 @@ namespace Microsoft.Zelig.CodeGeneration.IR.CompilationSteps.Phases
                     // Inling can fail if the target method doesn't have an implementation.
                     // For now, just proceed, it will be caught at a later stage.
                     //
-                    //CHECKS.ASSERT( false, "Unexpected failure to force inlining" );
+                    CHECKS.ASSERT( false, "Unexpected failure to force inlining" );
                 }
             }
 

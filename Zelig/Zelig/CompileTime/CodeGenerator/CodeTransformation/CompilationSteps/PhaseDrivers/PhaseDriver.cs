@@ -150,12 +150,12 @@ namespace Microsoft.Zelig.CodeGeneration.IR.CompilationSteps
 
                 if(attrib != null && attrib.Level < maxLevel)
                 {
-                    // LT72: mask inconsistencies to cope with missign optimizations
-                    // throw TypeConsistencyErrorException.Create("Found operator at level {0} when limit was {1}", maxLevel, attrib.Level);
+                    //LT72: mask inconsistencies to cope with missign optimizations
+                    throw TypeConsistencyErrorException.Create("Found operator at level {0} when limit was {1}", maxLevel, attrib.Level);
 
                     // LT72: log instead of throwing exception
-                    Console.WriteLine(String.Format("Found operator at level {0} when limit was {1}", maxLevel, attrib.Level));
-                    Console.WriteLine();
+                    //Console.WriteLine(String.Format("Found operator at level {0} when limit was {1}", maxLevel, attrib.Level));
+                    //Console.WriteLine();
                 }
 
                 phase = phase.PreviousPhase;
@@ -196,11 +196,11 @@ namespace Microsoft.Zelig.CodeGeneration.IR.CompilationSteps
                 if(level > limit)
                 {
                     // LT72: mask inconsistencies to cope with missign optimizations
-                    // throw TypeConsistencyErrorException.Create( "Found operator at level {0} when limit was {1}: {2}", level, limit, op );
+                    throw TypeConsistencyErrorException.Create( "Found operator at level {0} when limit was {1}: {2}", level, limit, op );
                 
                     // LT72: log instead of throwing exception
-                    Console.WriteLine(String.Format("Found operator at level {0} when limit was {1}: {2}", level, limit, op));
-                    Console.WriteLine();
+                    //Console.WriteLine(String.Format("Found operator at level {0} when limit was {1}: {2}", level, limit, op));
+                    //Console.WriteLine();
 
 }
             }

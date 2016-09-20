@@ -2,8 +2,6 @@
 // Copyright (c) Microsoft Corporation.    All rights reserved.
 //
 
-//#define ENABLE_LOW_LEVEL_OPTIMIZATIONS
-
 namespace Microsoft.Zelig.Configuration.Environment.Abstractions
 {
     using System;
@@ -22,9 +20,8 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         // Helper Methods
         //
 
-#if ENABLE_LOW_LEVEL_OPTIMIZATIONS
+
         [ZeligIR.CompilationSteps.OptimizationHandler(RunOnce=false, RunInSSAForm=true)]
-#endif // ENABLE_LOW_LEVEL_OPTIMIZATIONS
         private static void InferBitMaskConditionals( ZeligIR.CompilationSteps.PhaseExecution.NotificationContext nc )
         {
             ZeligIR.ControlFlowGraphStateForCodeTransformation cfg = nc.CurrentCFG;

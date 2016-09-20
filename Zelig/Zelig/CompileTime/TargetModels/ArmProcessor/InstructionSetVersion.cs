@@ -41,10 +41,10 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
         //
         // Platform VFP Version
         //
-        public const uint Platform_VFP__NoVFP       = 0x00010000;
-        public const uint Platform_VFP__SoftVFP     = 0x00020000;
-        public const uint Platform_VFP__HardVFP     = 0x00040000;
-        public const uint Platform_VFP__Mask        = 0x00FF0000;
+        public const uint Platform_VFP__NoVFP       	= 0x00010000;
+        public const uint Platform_VFP__SoftVFP     	= 0x00020000;
+        public const uint Platform_VFP__HardVFP     	= 0x00040000;
+        public const uint Platform_VFP__Mask        	= 0x00FF0000;
         
         //--//
 
