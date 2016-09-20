@@ -51,6 +51,8 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Abstractions\ARM\ArchitectureVersions\ArmV7_Optimizations.cs" />
+    <Compile Include="Abstractions\ARM\ArchitectureVersions\ArmV7.cs" />
     <Compile Include="Abstractions\ARM\ArchitectureVersions\ArmV5.cs" />
     <Compile Include="Abstractions\ARM\ArchitectureVersions\ArmV5_VFP.cs" />
     <Compile Include="Abstractions\ARM\ArchitectureVersions\ArmV4.cs" />

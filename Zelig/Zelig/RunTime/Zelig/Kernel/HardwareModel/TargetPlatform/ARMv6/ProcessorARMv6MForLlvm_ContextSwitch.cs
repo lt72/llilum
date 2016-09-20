@@ -552,7 +552,7 @@ namespace Microsoft.Zelig.Runtime.TargetPlatform.ARMv6
             //
             // All overridable exceptions for Ctx switch
             //
-            [RT.CapabilitiesFilter( RequiredCapabilities=TargetModel.ArmProcessor.InstructionSetVersion.Platform_Version__ARMv6M)]
+            [RT.CapabilitiesFilter( RequiredCapabilities = TargetModel.ArmProcessor.InstructionSetVersion.Platform_Version__ARMv6M )]
             [RT.HardwareExceptionHandler( RT.HardwareException.Service )]
             [RT.ExportedMethod]
             private static unsafe void SVC_Handler_Zelig( uint* args )
@@ -571,26 +571,26 @@ namespace Microsoft.Zelig.Runtime.TargetPlatform.ARMv6
                         LongJumpForRetireThread( );
                         break;
                     case SVC_Code.SupervisorCall__SnapshotProcessModeRegisters:
-                        UpdateFrame( ref ProcessorARMv6MForLlvm.Snapshot, CUSTOM_STUB_FetchSoftwareFrameSnapshot( ) ); 
+                        UpdateFrame( ref ProcessorARMv6MForLlvm.Snapshot, CUSTOM_STUB_FetchSoftwareFrameSnapshot( ) );
                         break;
                     default:
                         BugCheck.Assert( false, BugCheck.StopCode.Impossible );
                         break;
                 }
             }
-            
-            [RT.CapabilitiesFilter( RequiredCapabilities=TargetModel.ArmProcessor.InstructionSetVersion.Platform_Version__ARMv6M)]
+
+            [RT.CapabilitiesFilter( RequiredCapabilities = TargetModel.ArmProcessor.InstructionSetVersion.Platform_Version__ARMv6M )]
             [RT.HardwareExceptionHandler( RT.HardwareException.Interrupt )]
             [RT.ExportedMethod]
             private static UIntPtr PendSV_Handler_Zelig( UIntPtr stackPtr )
             {
                 using(SmartHandles.InterruptStateARMv6M.Disable( ))
                 {
-                    return ContextSwitch(ThreadManager.Instance, stackPtr );
+                    return ContextSwitch( ThreadManager.Instance, stackPtr );
                 }
             }
-            
-            [RT.CapabilitiesFilter( RequiredCapabilities=TargetModel.ArmProcessor.InstructionSetVersion.Platform_VFP__SoftVFP )]
+
+            [RT.CapabilitiesFilter( RequiredCapabilities = TargetModel.ArmProcessor.InstructionSetVersion.Platform_VFP__SoftVFP )]
             [RT.HardwareExceptionHandler( RT.HardwareException.Interrupt )]
             [RT.ExportedMethod]
             private static void AnyInterrupt( UIntPtr stackPtr )
@@ -617,7 +617,7 @@ namespace Microsoft.Zelig.Runtime.TargetPlatform.ARMv6
         //--//
 
         [RT.CapabilitiesFilter(RequiredCapabilities = TargetModel.ArmProcessor.InstructionSetVersion.Platform_Version__ARMv6M)]
-        [ExportedMethod]
+        [RT.ExportedMethod]
         private static unsafe void CUSTOM_STUB_NotifySoftwareFrameSnapshot( void* frame, int size )
         {
             BugCheck.Assert( size * sizeof( uint ) == Context.RegistersOnStack.TotalFrameSize, BugCheck.StopCode.StackCorruptionDetected ); 

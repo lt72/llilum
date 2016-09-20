@@ -649,18 +649,18 @@ namespace Microsoft.Zelig.Runtime.TargetPlatform.ARMv7
                 // TODO: 
                 //SetRegister( EncDef.c_register_r1, new UIntPtr( ptr ) );
             }
-            
+
             //
             // All overridable exceptions for Ctx Switch
             //
 
-            [RT.CapabilitiesFilter( RequiredCapabilities=TargetModel.ArmProcessor.InstructionSetVersion.Platform_VFP__HardVFP )]
+            [RT.CapabilitiesFilter( RequiredCapabilities = TargetModel.ArmProcessor.InstructionSetVersion.Platform_VFP__HardVFP )]
             [RT.HardwareExceptionHandler( RT.HardwareException.Interrupt )]
             [RT.ExportedMethod]
             private static unsafe void SVC_Handler_Zelig_VFP_NoFPContext( uint* args )
             {
                 SVC_Code svc_number = (SVC_Code)((byte*)args[6])[-2]; // svc number is at stacked PC offset - 2 bytes
-                
+
                 switch(svc_number)
                 {
                     case SVC_Code.SupervisorCall__LongJump:
@@ -680,11 +680,11 @@ namespace Microsoft.Zelig.Runtime.TargetPlatform.ARMv7
                         break;
                 }
             }
-            
-            
-            [RT.CapabilitiesFilter( RequiredCapabilities=TargetModel.ArmProcessor.InstructionSetVersion.Platform_VFP__HardVFP )]
+
+
+            [RT.CapabilitiesFilter( RequiredCapabilities = TargetModel.ArmProcessor.InstructionSetVersion.Platform_VFP__HardVFP )]
             [RT.HardwareExceptionHandler( RT.HardwareException.Interrupt )]
-            [RT.ExportedMethod]
+            //[RT.ExportedMethod]
             private static UIntPtr PendSV_Handler_Zelig_VFP( UIntPtr stackPointer, uint isParitalStack )
             {
                 using(RT.SmartHandles.InterruptState.Disable( ))
@@ -692,10 +692,10 @@ namespace Microsoft.Zelig.Runtime.TargetPlatform.ARMv7
                     return ContextSwitch( ThreadManager.Instance, stackPointer, isParitalStack == 0 );
                 }
             }
-            
-            [RT.CapabilitiesFilter( RequiredCapabilities=TargetModel.ArmProcessor.InstructionSetVersion.Platform_VFP__HardVFP )]
+
+            [RT.CapabilitiesFilter( RequiredCapabilities = TargetModel.ArmProcessor.InstructionSetVersion.Platform_VFP__HardVFP )]
             [RT.HardwareExceptionHandler( RT.HardwareException.Interrupt )]
-            [RT.ExportedMethod]
+            //[RT.ExportedMethod]
             private static void AnyInterrupt( UIntPtr stackPtr )
             {
                 using(RT.SmartHandles.InterruptState.Disable( ))

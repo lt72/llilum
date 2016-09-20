@@ -11,9 +11,10 @@
 namespace Microsoft.Zelig.Runtime
 {
     using System;
-    using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
-    using Microsoft.Zelig.Runtime.TypeSystem;
+
+    using RT = Microsoft.Zelig.Runtime;
+    using TS = Microsoft.Zelig.Runtime.TypeSystem;
 
     public static class Unwind
     {
@@ -81,7 +82,7 @@ namespace Microsoft.Zelig.Runtime
 
         internal const ulong ExceptionClass = 0x000023435446534d; // "MSFTC#\0\0"
 
-        [ExportedMethod]
+        [RT.ExportedMethod]
         static public unsafe UnwindReasonCode LLOS_Unwind_Personality(
             UnwindActions actions,
             UInt64 exceptionClass,
@@ -193,7 +194,7 @@ namespace Microsoft.Zelig.Runtime
                     // This is a catch clause. Get the associated vtable and see if it matches the thrown exception.
                     bool foundMatch = false;
 
-                    VTable entryVTable = GetEntryVTable(typeIndex, typeEncoding, classInfo);
+                    TS.VTable entryVTable = GetEntryVTable(typeIndex, typeEncoding, classInfo);
                     if (entryVTable == null)
                     {
                         // Null clause means we should match anything.
@@ -253,7 +254,7 @@ namespace Microsoft.Zelig.Runtime
             }
         }
 
-        private static unsafe VTable GetEntryVTable(
+        private static unsafe TS.VTable GetEntryVTable(
             ulong typeIndex,
             DwarfEncoding typeEncoding,
             UIntPtr classInfo)
@@ -275,7 +276,7 @@ namespace Microsoft.Zelig.Runtime
 
             // Note: We need to adjust the VTable pointer past the object header due to the LLVM bug cited
             // in Translate_LandingPadOperator. When this issue is resolved we can remove the adjustment.
-            return (VTable)(object)ObjectHeader.CastAsObjectHeader(vtablePointer).Pack();
+            return (TS.VTable)(object)ObjectHeader.CastAsObjectHeader(vtablePointer).Pack();
         }
 
         // Decode an unsigned leb128 value and advance the data pointer.

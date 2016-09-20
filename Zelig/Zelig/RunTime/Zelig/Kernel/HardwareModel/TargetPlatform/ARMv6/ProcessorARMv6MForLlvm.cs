@@ -218,17 +218,17 @@ namespace Microsoft.Zelig.Runtime.TargetPlatform.ARMv6
         /// Hard Fault is caused by Bus Fault, Memory Management Fault, or Usage Fault if their handler 
         /// cannot be executed.
         /// </summary>
-        [RT.CapabilitiesFilter(RequiredCapabilities = TargetModel.ArmProcessor.InstructionSetVersion.Platform_Version__ARMv6M)]
+        [RT.CapabilitiesFilter( RequiredCapabilities = TargetModel.ArmProcessor.InstructionSetVersion.Platform_Version__ARMv6M )]
         [RT.HardwareExceptionHandler( RT.HardwareException.Fault )]
         [RT.ExportedMethod]
         private static void HardFault_Handler_Zelig( uint sp )
         {
             while(true)
             {
-                Peripherals.Instance.WaitForInterrupt();
+                Peripherals.Instance.WaitForInterrupt( );
             }
         }
-        
+
         //--//
 
         [DllImport( "C" )]

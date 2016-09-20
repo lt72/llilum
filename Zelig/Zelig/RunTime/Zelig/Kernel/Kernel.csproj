@@ -137,6 +137,8 @@
     <Compile Include="HardwareModel\TargetPlatform\ARMv6\ProcessorARMv6M.cs" />
     <Compile Include="HardwareModel\TargetPlatform\ARMv6\ProcessorARMv6MForLlvm_ContextSwitch.cs" />
     <Compile Include="HardwareModel\TargetPlatform\ARMv7\InterruptsSafeHandleARMv7M.cs" />
+    <Compile Include="HardwareModel\TargetPlatform\ARMv7\ProcessorARMv7MForZelig.cs" />
+    <Compile Include="HardwareModel\TargetPlatform\ARMv7\ProcessorARMv7MForZelig_ContextSwitch.cs" />
     <Compile Include="HardwareModel\TargetPlatform\ARMv7\ProcessorARMv7MForLlvm_ContextSwitch.cs" />
     <Compile Include="HardwareModel\TargetPlatform\ARMv7\ProcessorARMv7MForLlvm.cs" />
     <Compile Include="HardwareModel\TargetPlatform\ARMv7\ProcessorARMv7M.cs" />

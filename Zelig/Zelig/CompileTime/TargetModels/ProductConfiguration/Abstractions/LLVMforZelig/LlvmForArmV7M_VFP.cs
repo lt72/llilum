@@ -99,21 +99,6 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions.Architectures
 
         public override bool HasRegisterContextArgument( MethodRepresentation md )
         {
-            //////if(md.ThisPlusArguments.Length > 1)
-            //////{
-            //////    TypeRepresentation td = md.ThisPlusArguments[1];
-
-            //////    if(td is PointerTypeRepresentation)
-            //////    {
-            //////        td = td.UnderlyingType;
-
-            //////        if(td == m_typeSystem.GetWellKnownType( "Microsoft_Zelig_ProcessorARMv7M_RegistersOnStack" ))
-            //////        {
-            //////            return true;
-            //////        }
-            //////    }
-            //////}
-
             return false;
         }
 

@@ -1875,7 +1875,7 @@ namespace Microsoft.Zelig.CodeGeneration.IR
 
         //--//
 
-        public bool IsSealedType( TypeRepresentation target,
+        public bool IsSealedType(     TypeRepresentation target       ,
                                   out TypeRepresentation targetSealed )
         {
             if( ( target.Flags & TypeRepresentation.Attributes.Sealed ) != 0 )
@@ -1907,11 +1907,11 @@ namespace Microsoft.Zelig.CodeGeneration.IR
 
         //--//
 
-        public override ControlFlowGraphState CreateControlFlowGraphState( MethodRepresentation md,
-                                                                               TypeRepresentation[] localVars,
-                                                                               string[] localVarNames,
-                                                                           out VariableExpression[] arguments,
-                                                                           out VariableExpression[] locals )
+        public override ControlFlowGraphState CreateControlFlowGraphState(     MethodRepresentation md           ,
+                                                                               TypeRepresentation[] localVars    ,
+                                                                               string[]             localVarNames,
+                                                                           out VariableExpression[] arguments    ,
+                                                                           out VariableExpression[] locals       )
         {
             var cfg = new ControlFlowGraphStateForCodeTransformation( this, md );
 

@@ -291,13 +291,13 @@ namespace Microsoft.Zelig.Runtime.TargetPlatform.ARMv7
             if(IsMemFaultAddressValid( ))
             {
                 BugCheck.Log( "Mem Fault Address=0x%08x", (int)CUSTOM_STUB_SCB__get_MMFAR( ) );
-                Breakpoint( CUSTOM_STUB_SCB__get_MMFAR( ) );
             }
             else
             {
                 BugCheck.Log( "Invalid Mem Fault Address" );
-                Breakpoint( CFSR );
             }
+
+            Breakpoint( 0x3 );
         }
 
         /// <summary>
@@ -328,13 +328,13 @@ namespace Microsoft.Zelig.Runtime.TargetPlatform.ARMv7
             if(IsBusFaultAddressValid( ) && IsBusFaultAddressPrecise( ))
             {
                 BugCheck.Log( "Bus Fault Address=0x%08x", (int)CUSTOM_STUB_SCB__get_BFAR( ) );
-                Breakpoint( CUSTOM_STUB_SCB__get_BFAR( ) );
             }
             else
             {
                 BugCheck.Log( "Invalid or imprecise Bus Fault Address" );
-                Breakpoint( CFSR );
             }
+
+            Breakpoint( 0x4 );
         }
 
         /// <summary>

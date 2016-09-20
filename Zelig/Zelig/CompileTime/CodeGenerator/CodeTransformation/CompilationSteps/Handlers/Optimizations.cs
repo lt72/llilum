@@ -200,6 +200,8 @@ namespace Microsoft.Zelig.CodeGeneration.IR.CompilationSteps.Handlers
                 }
             }
 
+            cfg.AssertNoCacheRefreshSinceCheckpoint( );
+
 #if ENABLE_LOW_LEVEL_OPTIMIZATIONS
             foreach(var controlOp in cfg.FilterOperators< ConditionCodeConditionalControlOperator >())
             {
@@ -255,8 +257,6 @@ namespace Microsoft.Zelig.CodeGeneration.IR.CompilationSteps.Handlers
                 }
             }
 #endif // ENABLE_LOW_LEVEL_OPTIMIZATIONS
-
-            cfg.AssertNoCacheRefreshSinceCheckpoint( );
 
             return fRunSimplify;
         }

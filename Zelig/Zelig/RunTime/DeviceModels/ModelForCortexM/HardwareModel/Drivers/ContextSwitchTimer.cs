@@ -188,12 +188,12 @@ namespace Microsoft.DeviceModels.Chipset.CortexM.Drivers
         }
 
         //--//
-        
+
         [RT.HardwareExceptionHandler( RT.HardwareException.Interrupt )]
         [RT.ExportedMethod]
         private static void SysTick_Handler_Zelig( )
         {
-            using(RT.SmartHandles.InterruptState.Disable())
+            using(RT.SmartHandles.InterruptState.Disable( ))
             {
                 RT.ThreadManager.Instance.TimeQuantumExpired( );
             }

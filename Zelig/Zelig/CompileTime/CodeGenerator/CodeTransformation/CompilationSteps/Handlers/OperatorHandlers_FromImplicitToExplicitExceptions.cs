@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft Corporation.    All rights reserved.
 //
 
-//#define ENABLE_OVERFLOW_CHECKS
+#define ENABLE_OVERFLOW_CHECKS
 
 namespace Microsoft.Zelig.CodeGeneration.IR.CompilationSteps.Handlers
 {

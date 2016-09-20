@@ -130,9 +130,16 @@ namespace Microsoft.Zelig.CodeGeneration.IR.ImageBuilders
         protected virtual bool EmitCodeForBasicBlock_ShouldSkip( Operator op )
         {
             //
-            // Skip any meta-operators.
-            //
-            if(op.IsMetaOperator && !(op is InitialValueOperator))
+            // Skip any meta-operators Zelig codegen, but do not skip any InitialValueOperator for LLVM codegen, 
+            // because those are not substituted before teh low level optimizations that LLVM codegen bypasses.             
+            // 
+            var codeGen = m_owner.TypeSystem.PlatformAbstraction.CodeGenerator;
+            if((codeGen == TargetModel.ArmProcessor.InstructionSetVersion.CodeGenerator_LLVM) && (op is InitialValueOperator))
+            {
+                return false;
+            }
+                   
+            if(op.IsMetaOperator)
             {
                 return true;
             }

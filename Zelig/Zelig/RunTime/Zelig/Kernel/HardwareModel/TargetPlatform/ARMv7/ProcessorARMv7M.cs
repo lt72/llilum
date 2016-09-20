@@ -434,7 +434,7 @@ namespace Microsoft.Zelig.Runtime.TargetPlatform.ARMv7
 
         public override void Breakpoint( )
         {
-            Breakpoint( 0xa5a5a5a5 );
+            Breakpoint( 0x9 );
         }
 
         //--//
@@ -832,7 +832,7 @@ namespace Microsoft.Zelig.Runtime.TargetPlatform.ARMv7
         // Utility methods 
         //
 
-        [TS.WellKnownMethod( "ProcessorARMv7_Breakpoint" )]
+        [TS.WellKnownMethod( "ProcessorARMv7M_Breakpoint" )]
 
         [DllImport( "C" )]
         public static extern void Breakpoint( uint value );

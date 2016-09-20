@@ -12,7 +12,7 @@ namespace Microsoft.Llilum.K64F
     using ChipsetModel = Microsoft.CortexM4OnMBED;
 
 
-    [RT.ProductFilter( "Microsoft.Llilum.BoardConfigurations.K64FMBED" )]
+    [RT.ProductFilter( "Microsoft.Llilum.BoardConfigurations.K64F" )]
     public sealed class Processor : Microsoft.CortexM4OnMBED.Processor
     {
         public new class Context : ChipsetModel.Processor.Context

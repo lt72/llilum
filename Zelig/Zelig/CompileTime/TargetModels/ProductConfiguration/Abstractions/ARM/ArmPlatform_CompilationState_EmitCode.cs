@@ -291,6 +291,10 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
             {
                 EmitCode_ARM_VectorHack_Cleanup( (ARM.VectorHack_Cleanup)op );
             }
+            else if(op is InitialValueOperator)
+            {
+                Console.WriteLine( $"Method {op.BasicBlock.Owner.Method} has InitValueOperator!" ); 
+            }
             else
             {
                 throw NotImplemented();

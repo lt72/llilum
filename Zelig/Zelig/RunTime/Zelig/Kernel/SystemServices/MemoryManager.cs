@@ -8,6 +8,7 @@ namespace Microsoft.Zelig.Runtime
     using System.Runtime.CompilerServices;
 
     using TS = Microsoft.Zelig.Runtime.TypeSystem;
+    using RT = Microsoft.Zelig.Runtime;
 
     [ImplicitInstance]
     [ForceDevirtualization]
@@ -126,7 +127,7 @@ namespace Microsoft.Zelig.Runtime
 
         public abstract bool RefersToMemory( UIntPtr address );
 
-        [ExportedMethod]
+        [RT.ExportedMethod]
         public static UIntPtr AllocateFromManagedHeap( uint size )
         {
             // Force all heap allocations to be multiples of 8-bytes so that we guarantee 
@@ -159,7 +160,7 @@ namespace Microsoft.Zelig.Runtime
 
         }
 
-        [ExportedMethod]
+        [RT.ExportedMethod]
         public static void FreeFromManagedHeap( UIntPtr address )
         {
             if(address != UIntPtr.Zero)

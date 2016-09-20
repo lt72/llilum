@@ -50,12 +50,10 @@ namespace Microsoft.Zelig.CodeGeneration.IR.CompilationSteps
                     }
 
                     // LT72FORZELIG: was:
-					//bb.AddOperator( InstanceCallOperator.New( null, CallOperator.CallKind.OverriddenNoCheck, mdParent, rhs, true ) );
+                    //bb.AddOperator( InstanceCallOperator.New( null, CallOperator.CallKind.OverriddenNoCheck, mdParent, rhs, true ) );
 
                     // Wrap the IntPtr param in a CodePointer struct and call the parent constructor.
-                    rhs[2] = cfg.AllocateLocal( wkt.Microsoft_Zelig_Runtime_TypeSystem_CodePointer, null );
-                    bb.AddOperator( StoreInstanceFieldOperator.New( null, wkf.CodePointer_Target, rhs[2], cfg.Arguments[2], false ) );
-                    bb.AddOperator( InstanceCallOperator.New( null, CallOperator.CallKind.Overridden, mdParent, rhs, true ) );
+                    bb.AddOperator( InstanceCallOperator.New( null, CallOperator.CallKind.OverriddenNoCheck, mdParent, rhs, true ) );
                 }
                 else if(md.Name == "Invoke")
                 {
@@ -173,12 +171,9 @@ namespace Microsoft.Zelig.CodeGeneration.IR.CompilationSteps
                     //  }
                     //
 
-                    NormalBasicBlock bbInstance = new NormalBasicBlock(cfg);
-                    NormalBasicBlock bbStatic = new NormalBasicBlock(cfg);
 
                     bbNull.AddOperator(LoadInstanceFieldOperator.New(null, fdTarget, exTarget, exThis, true));
                     bbNull.AddOperator(LoadInstanceFieldOperator.New(null, fdCodePtr, exCodePtr, exThis, true));
-                    bbNull.FlowControl = BinaryConditionalControlOperator.New(null, exTarget, bbStatic, bbInstance);
 
                     rhs = new Expression[cfg.Arguments.Length + 1];
                     rhs[0] = exCodePtr;
@@ -188,11 +183,9 @@ namespace Microsoft.Zelig.CodeGeneration.IR.CompilationSteps
                         rhs[i+1] = cfg.Arguments[i];
                     }
 
-                    bbInstance.AddOperator(IndirectCallOperator.New(null, md, VariableExpression.ToArray(exReturnValue), rhs, true, false));
-                    bbInstance.AddOperator(UnconditionalControlOperator.New(null, bbExit));
+                    bbNull.AddOperator( IndirectCallOperator.New( null, md, VariableExpression.ToArray( exReturnValue ), rhs, false, false ) );
 
-                    bbStatic.AddOperator(IndirectCallOperator.New(null, md, VariableExpression.ToArray(exReturnValue), rhs, false, false));
-                    bbStatic.AddOperator(UnconditionalControlOperator.New(null, bbExit));
+                    bbNull.AddOperator( UnconditionalControlOperator.New( null, bbExit ) );
 
                     //
                     //  <NotNullBranch>
@@ -210,12 +203,9 @@ namespace Microsoft.Zelig.CodeGeneration.IR.CompilationSteps
 
                     NormalBasicBlock bbNotNullCheck = new NormalBasicBlock(cfg);
                     NormalBasicBlock bbNotNullInner = new NormalBasicBlock(cfg);
-                    NormalBasicBlock bbNotNullInstance = new NormalBasicBlock(cfg);
-                    NormalBasicBlock bbNotNullStatic = new NormalBasicBlock(cfg);
-                    NormalBasicBlock bbNotNullPost = new NormalBasicBlock(cfg);
 
                     bbNotNull.AddOperator(ArrayLengthOperator.New(null, exLen, exInvocationList));
-                    bbNotNull.AddOperator(SingleAssignmentOperator.New(null, exPos, m_typeSystem.CreateConstant(0)));
+                    bbNotNull.AddOperator( SingleAssignmentOperator    .New( null, exPos, m_typeSystem.CreateConstant( (int)0 ) ) );
                     bbNotNull.AddOperator(UnconditionalControlOperator.New(null, bbNotNullCheck));
 
                     bbNotNullCheck.AddOperator(CompareConditionalControlOperator.New(null, CompareAndSetOperator.ActionCondition.LT, true, exPos, exLen, bbExit, bbNotNullInner));
@@ -232,16 +222,12 @@ namespace Microsoft.Zelig.CodeGeneration.IR.CompilationSteps
                         rhs[i+1] = cfg.Arguments[i];
                     }
 
-                    bbNotNullInner.FlowControl = BinaryConditionalControlOperator.New(null, exTarget, bbNotNullStatic, bbNotNullInstance);
 
-                    bbNotNullInstance.AddOperator(IndirectCallOperator.New(null, md, VariableExpression.ToArray(exReturnValue), rhs, true, false));
-                    bbNotNullInstance.AddOperator(UnconditionalControlOperator.New(null, bbNotNullPost));
+                    bbNotNullInner.AddOperator( IndirectCallOperator.New( null, md, VariableExpression.ToArray( exReturnValue ), rhs, false, false ) );
 
-                    bbNotNullStatic.AddOperator(IndirectCallOperator.New(null, md, VariableExpression.ToArray(exReturnValue), rhs, false, false));
-                    bbNotNullStatic.AddOperator(UnconditionalControlOperator.New(null, bbNotNullPost));
+                    bbNotNullInner.AddOperator( BinaryOperator.New( null, BinaryOperator.ALU.ADD, true, false, exPos, exPos, m_typeSystem.CreateConstant( (int)1 ) ) );
 
-                    bbNotNullPost.AddOperator(BinaryOperator.New(null, BinaryOperator.ALU.ADD, true, false, exPos, exPos, m_typeSystem.CreateConstant(1)));
-                    bbNotNullPost.AddOperator(UnconditionalControlOperator.New(null, bbNotNullCheck));
+                    bbNotNullInner.AddOperator( UnconditionalControlOperator.New( null, bbNotNullCheck ) );
                 }
                 else
                 {

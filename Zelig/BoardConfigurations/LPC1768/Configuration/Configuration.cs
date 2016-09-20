@@ -6,20 +6,20 @@ namespace Microsoft.Llilum.BoardConfigurations
 {
     using Microsoft.Zelig.Runtime;
     using Microsoft.Zelig.Configuration.Environment;
-    
 
-    [DisplayName("LPC1768")]
+
+    [DisplayName( "LPC1768" )]
     public sealed class LPC1768SoC : ProcessorCategory
     {
-        [DependsOn(typeof(LPC1768SoC))]
-        [DisplayName("Internal 32KB Static RAM")]
-        [Defaults    ( "BaseAddress"    , 0x10000000                              )]
-        [Defaults    ( "SizeInBytes"    , 32 * 1024                               )]
-        [Defaults    ( "WordSize"       , 32                                      )]
-        [Defaults    ( "WaitStates"     , 0                                       )]
-        [EnumDefaults( "Characteristics", MemoryAttributes.RAM                    |
-                                          MemoryAttributes.RandomAccessMemory     |
-                                          MemoryAttributes.InternalMemory         |
+        [DependsOn( typeof( LPC1768SoC ) )]
+        [DisplayName( "Internal 32KB Static RAM" )]
+        [Defaults( "BaseAddress", 0x10000000 )]
+        [Defaults( "SizeInBytes", 32 * 1024 )]
+        [Defaults( "WordSize", 32 )]
+        [Defaults( "WaitStates", 0 )]
+        [EnumDefaults( "Characteristics", MemoryAttributes.RAM |
+                                          MemoryAttributes.RandomAccessMemory |
+                                          MemoryAttributes.InternalMemory |
                                           MemoryAttributes.ConfiguredAtEntryPoint )]
         public sealed class InternalRAM32KB : RamMemoryCategory
         {
@@ -30,21 +30,21 @@ namespace Microsoft.Llilum.BoardConfigurations
         [DisplayName( "Internal 512KB FLASH" )]
         [Defaults( "BaseAddress", 0x00000000 )]
         [Defaults( "SizeInBytes", 512 * 1024 )]
-        [Defaults( "WordSize"   , 32 )]
-        [Defaults( "WaitStates" , 0 )]
-        [EnumDefaults( "Characteristics", MemoryAttributes.FLASH                    |
-                                          MemoryAttributes.RandomAccessMemory       |
-                                          MemoryAttributes.InternalMemory           |
-                                          MemoryAttributes.ConfiguredAtEntryPoint   )]
+        [Defaults( "WordSize", 32 )]
+        [Defaults( "WaitStates", 0 )]
+        [EnumDefaults( "Characteristics", MemoryAttributes.FLASH |
+                                          MemoryAttributes.RandomAccessMemory |
+                                          MemoryAttributes.InternalMemory |
+                                          MemoryAttributes.ConfiguredAtEntryPoint )]
         public sealed class InternalFlash512KB : FlashMemoryCategory
         {
         }
     }
-    
+
     //--//
     //--//
     //--//
-        
+
     [DisplayName( "Memory Map for LPC1768" )]
     public sealed class LPC1768MemoryMap : MemoryMapCategory
     {
@@ -73,12 +73,12 @@ namespace Microsoft.Llilum.BoardConfigurations
         [Defaults( "BaseAddress", 0x00000000U )]
         public FlashMemoryCategory InternalFlashChip;
     }
-    
+
     //--//
     //--//
     //--//
 
-    [DisplayName("LPC1768 MBED")]
+    [DisplayName( "LPC1768 MBED" )]
     public sealed class LPC1768 : ProductCategory
     {
         [AllowedOptions(typeof(LPC1768SoC))]
@@ -89,7 +89,7 @@ namespace Microsoft.Llilum.BoardConfigurations
         public LPC1768SoC Processor;
 
         //--//
-        
+
         [AllowedOptions( typeof( LPC1768SoC.InternalRAM32KB ) )]
         [Defaults( "BaseAddress", 0x10000000U )]
         public RamMemoryCategory InternalRam;
@@ -98,16 +98,16 @@ namespace Microsoft.Llilum.BoardConfigurations
         [Defaults( "BaseAddress", 0x00000000U )]
         public FlashMemoryCategory InternalFlashChip;
     }
-    
+
     //--//
     //--//
     //--//
 
-    [DisplayName("LLVM Compilation for LPC1768")]
-    [Defaults("Platform", typeof(Microsoft.Zelig.Configuration.Environment.Abstractions.Architectures.LlvmForArmV7M))]
-    [Defaults("CallingConvention", typeof(Microsoft.Zelig.Configuration.Environment.Abstractions.Architectures.LlvmForArmV7MCallingConvention))]
-    [Defaults("Product", typeof(LPC1768))]
-    [Defaults("MemoryMap", typeof(LPC1768MemoryMap))]
+    [DisplayName( "LLVM Compilation for LPC1768" )]
+    [Defaults( "Platform", typeof( Microsoft.Zelig.Configuration.Environment.Abstractions.Architectures.ArmV7 ) )]
+    [Defaults( "CallingConvention", typeof( Microsoft.Zelig.Configuration.Environment.Abstractions.ArmCallingConvention ) )]
+    [Defaults( "Product", typeof( LPC1768 ) )]
+    [Defaults( "MemoryMap", typeof( LPC1768MemoryMap ) )]
     public sealed class LPC1768MBEDCompilationSetup : CompilationSetupCategory
     {
     }
