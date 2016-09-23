@@ -9,7 +9,7 @@ namespace Microsoft.Zelig.Support.mbed
 
     //--//
 
-    public class UsTicker
+    internal class UsTicker
     {
         [DllImport("C")]
         public static extern uint us_ticker_read();

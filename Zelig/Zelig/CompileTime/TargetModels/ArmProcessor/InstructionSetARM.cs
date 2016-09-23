@@ -134,9 +134,9 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
                 switch(kind)
                 {
                     case EncDef.c_halfwordkind_SWP: return "SWP";
-                    case EncDef.c_halfwordkind_U2: return "H";
-                    case EncDef.c_halfwordkind_I1: return "SB";
-                    case EncDef.c_halfwordkind_I2: return "SH";
+                    case EncDef.c_halfwordkind_U2 : return "H";
+                    case EncDef.c_halfwordkind_I1 : return "SB";
+                    case EncDef.c_halfwordkind_I2 : return "SH";
                 }
 
                 return "??";
@@ -193,10 +193,12 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
         public override bool Equals(object obj)
         {
             var match = obj as InstructionSetARM;
+
             if(match != null)
             {
                 return m_version == match.Version;
             }
+
             return false;
         }
 

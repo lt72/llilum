@@ -37,7 +37,6 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
         /////////////////////////////////////////
 
         //////////////////////////////////////////
-
         public const uint c_register_lst_r0  = 1U << (int)c_register_r0 ;
         public const uint c_register_lst_r1  = 1U << (int)c_register_r1 ;
         public const uint c_register_lst_r2  = 1U << (int)c_register_r2 ;
@@ -57,6 +56,28 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
         public const uint c_register_lst_sp  = 1U << (int)c_register_sp ;
         public const uint c_register_lst_lr  = 1U << (int)c_register_lr ;
         public const uint c_register_lst_pc  = 1U << (int)c_register_pc ;
+        ///////////////////////////////////////////
+
+        //--//
+
+        ///////////////////////////////////////////
+        public const uint c_operation_AND = 0x0; // operand1 AND operand2
+        public const uint c_operation_EOR = 0x1; // operand1 EOR operand2
+        public const uint c_operation_SUB = 0x2; // operand1 - operand2
+        public const uint c_operation_RSB = 0x3; // operand2 - operand1
+        public const uint c_operation_ADD = 0x4; // operand1 + operand2
+        public const uint c_operation_ADC = 0x5; // operand1 + operand2 + carry
+        public const uint c_operation_SBC = 0x6; // operand1 - operand2 + carry - 1
+        public const uint c_operation_RSC = 0x7; // operand2 - operand1 + carry - 1
+        public const uint c_operation_TST = 0x8; // as AND, but result is not written
+        public const uint c_operation_TEQ = 0x9; // as EOR, but result is not written
+        public const uint c_operation_CMP = 0xA; // as SUB, but result is not written
+        public const uint c_operation_CMN = 0xB; // as ADD, but result is not written
+        public const uint c_operation_ORR = 0xC; // operand1 OR operand2
+        public const uint c_operation_MOV = 0xD; // operand2(operand1 is ignored)
+        public const uint c_operation_BIC = 0xE; // operand1 AND NOT operand2(Bit clear)
+        public const uint c_operation_MVN = 0xF; // NOT operand2(operand1 is ignored)
+        ///////////////////////////////////////////
 
         //--//
 
@@ -98,9 +119,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
         public const uint c_cond_UNUSED = 0xF; //
         /////////////////////////////////////////
         public const uint c_cond_NUM    = 0x10;
-
-        //--//
-
+        
         public enum Format
         {
             MRS                    ,
@@ -130,6 +149,44 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
             LAST_FORMAT    = SoftwareInterrupt,
             NUM_OF_FORMATS = (SoftwareInterrupt - MRS + 1)
         };
+
+        //--//
+
+        //
+        // State
+        //
+
+        private readonly InstructionSetVersion m_version;
+
+        public EncodingDefinition( InstructionSetVersion isv )
+        {
+            m_version = isv;
+        }
+
+        public override bool Equals( object obj )
+        {
+            var match = obj as EncodingDefinition;
+
+            if(match != null)
+            {
+                return m_version == match.Version;
+            }
+
+            return false;
+        }
+
+        public override int GetHashCode( )
+        {
+            return base.GetHashCode( );
+        }
+
+        public InstructionSetVersion Version
+        {
+            get
+            {
+                return m_version;
+            }
+        }
 
         //--//
 

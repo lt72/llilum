@@ -115,28 +115,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
         public const uint c_psr_mode_SYS   = 0x0000001F;
 
         //--//
-
-        ///////////////////////////////////////////
-        public const uint c_operation_AND = 0x0; // operand1 AND operand2
-        public const uint c_operation_EOR = 0x1; // operand1 EOR operand2
-        public const uint c_operation_SUB = 0x2; // operand1 - operand2
-        public const uint c_operation_RSB = 0x3; // operand2 - operand1
-        public const uint c_operation_ADD = 0x4; // operand1 + operand2
-        public const uint c_operation_ADC = 0x5; // operand1 + operand2 + carry
-        public const uint c_operation_SBC = 0x6; // operand1 - operand2 + carry - 1
-        public const uint c_operation_RSC = 0x7; // operand2 - operand1 + carry - 1
-        public const uint c_operation_TST = 0x8; // as AND, but result is not written
-        public const uint c_operation_TEQ = 0x9; // as EOR, but result is not written
-        public const uint c_operation_CMP = 0xA; // as SUB, but result is not written
-        public const uint c_operation_CMN = 0xB; // as ADD, but result is not written
-        public const uint c_operation_ORR = 0xC; // operand1 OR operand2
-        public const uint c_operation_MOV = 0xD; // operand2(operand1 is ignored)
-        public const uint c_operation_BIC = 0xE; // operand1 AND NOT operand2(Bit clear)
-        public const uint c_operation_MVN = 0xF; // NOT operand2(operand1 is ignored)
-        ///////////////////////////////////////////
-
-        //--//
-
+        
         /////////////////////////////////////////
         public const uint c_psr_field_c   = 0x1; // the control field   PSR[ 7: 0]
         public const uint c_psr_field_x   = 0x2; // the extension field PSR[15: 8]
@@ -153,9 +132,14 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
         //////////////////////////////////////////
         public const uint c_register_cpsr = 16; //
         public const uint c_register_spsr = 17; //
+
         //////////////////////////////////////////
 
         //--//
+
+        public EncodingDefinition_ARMv4( InstructionSetVersion isv ) : base ( isv )
+        {
+        }
 
         override public uint get_ConditionCodes     ( uint op  ) { return OPCODE_DECODE_EXTRACTFIELD( op , 28, 4 ); }
         override public uint set_ConditionCodes     ( uint val ) { return OPCODE_DECODE_INSERTFIELD ( val, 28, 4 ); }

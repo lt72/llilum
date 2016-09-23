@@ -61,7 +61,14 @@ namespace Microsoft.Zelig.Debugger.ArmProcessor
 
         private DirectoryInfo GetDataPath()
         {
-            return new DirectoryInfo( Path.Combine( Application.UserAppDataPath, c_file_Sessions ) );
+            var di = new DirectoryInfo( Path.Combine( Environment.ExpandEnvironmentVariables( @"%TEMP%" ), c_file_Sessions ) );
+
+            if(!di.Exists)
+            {
+                di.Create( ); di.Refresh( ); 
+            }
+
+            return di;
         }
 
         public void SaveSessions()
@@ -135,6 +142,7 @@ namespace Microsoft.Zelig.Debugger.ArmProcessor
             }
 
             var di = GetDataPath();
+
             if(di.Exists)
             {
                 foreach(var fi in di.GetFiles( c_file_SearchPattern ))

@@ -616,7 +616,7 @@ namespace Microsoft.Zelig.Debugger.ArmProcessor
 
             m_configurationManager = new Cfg.Manager();
 
-            m_configurationManager.AddAllAssemblies( null );
+            m_configurationManager.AddAllAssemblies( Environment.ExpandEnvironmentVariables( Properties.Settings.Default.ProductConfigurationPath ) );
             m_configurationManager.ComputeAllPossibleValuesForFields();
 
             //--//

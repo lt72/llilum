@@ -14,23 +14,16 @@ namespace Microsoft.Zelig.Debugger.ArmProcessor
     using System.Windows.Forms;
     using System.Threading;
     
-    using                          Microsoft.Zelig.TargetModel.ArmProcessor;
-    using EncDef                 = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition_ARMv4;
-    using EncDef_VFP             = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition_VFP_ARMv5;
-    using InstructionSetARMv4         = Microsoft.Zelig.TargetModel.ArmProcessor.InstructionSetARMv4;
-    using IR                     = Microsoft.Zelig.CodeGeneration.IR;
-    using RT                     = Microsoft.Zelig.Runtime;
-    using TS                     = Microsoft.Zelig.Runtime.TypeSystem;
-    using Cfg                    = Microsoft.Zelig.Configuration.Environment;
-    using Microsoft.Zelig.CodeGeneration.IR;
+    using              Microsoft.Zelig.TargetModel.ArmProcessor;
+    using EncDef     = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition;
+    using EncDef_VFP = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition_VFP;
+    using IR         = Microsoft.Zelig.CodeGeneration.IR;
+    using TS         = Microsoft.Zelig.Runtime.TypeSystem;
+    using Cfg        = Microsoft.Zelig.Configuration.Environment;
 
 
     public class ImageInformation
     {
-        private static EncDef s_Encoding = (EncodingDefinition_ARMv4)CurrentInstructionSetEncoding.GetEncoding();
-
-        //--//
-
         private class TypeSystemForExecution : IR.TypeSystemForCodeTransformation
         {
             internal TypeSystemForExecution() : base( null )
@@ -1378,7 +1371,7 @@ namespace Microsoft.Zelig.Debugger.ArmProcessor
                             {
                                 if((opcode_SUBSP & c_SUBSP_Mask) == c_SUBSP_Opcode)
                                 {
-                                    stackAdjustment = s_Encoding.get_DataProcessing_ImmediateValue( opcode_SUBSP );
+                                    stackAdjustment = CurrentInstructionSetEncoding.GetEncoding( ).get_DataProcessing_ImmediateValue( opcode_SUBSP );
                                 }
                                 else
                                 {
@@ -1400,7 +1393,7 @@ namespace Microsoft.Zelig.Debugger.ArmProcessor
                             {
                                 if(( opcode_SUBSP & c_SUBSP_Mask ) == c_SUBSP_Opcode)
                                 {
-                                    stackAdjustment = s_Encoding.get_DataProcessing_ImmediateValue( opcode_SUBSP );
+                                    stackAdjustment = CurrentInstructionSetEncoding.GetEncoding( ).get_DataProcessing_ImmediateValue( opcode_SUBSP );
                                 }
                             }
                         }

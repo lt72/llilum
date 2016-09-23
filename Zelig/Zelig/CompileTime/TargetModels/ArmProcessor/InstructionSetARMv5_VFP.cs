@@ -18,7 +18,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
         //
 
         private Opcode_VFP_DataTransfer            m_DataTransfer;
-        private Opcode_VFP_BlockDataTransfer       m_BlockDataTransfer;
+        private Opcode_VFP_BlockDataTransfer       m_BlockDataTransfer_VFP;
         private Opcode_VFP_ConditionCodeTransfer   m_ConditionCodeTransfer;
         private Opcode_VFP_SystemRegisterTransfer  m_SystemRegisterTransfer;
         private Opcode_VFP_64bitRegisterTransfer   m_64bitRegisterTransfer;
@@ -37,7 +37,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
         public InstructionSetARMv5_VFP( InstructionSetVersion version ) : base( version )
         {
             m_DataTransfer            = new Opcode_VFP_DataTransfer           ();
-            m_BlockDataTransfer       = new Opcode_VFP_BlockDataTransfer      ();
+            m_BlockDataTransfer_VFP   = new Opcode_VFP_BlockDataTransfer      ();
             m_ConditionCodeTransfer   = new Opcode_VFP_ConditionCodeTransfer  ();
             m_SystemRegisterTransfer  = new Opcode_VFP_SystemRegisterTransfer ();
             m_64bitRegisterTransfer   = new Opcode_VFP_64bitRegisterTransfer  ();
@@ -57,7 +57,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
         //
 
         public Opcode_VFP_DataTransfer            PrepareForVFP_DataTransfer            { get { return m_DataTransfer           ; } }
-        public Opcode_VFP_BlockDataTransfer       PrepareForVFP_BlockDataTransfer       { get { return m_BlockDataTransfer      ; } }
+        public Opcode_VFP_BlockDataTransfer       PrepareForVFP_BlockDataTransfer       { get { return m_BlockDataTransfer_VFP  ; } }
         public Opcode_VFP_ConditionCodeTransfer   PrepareForVFP_ConditionCodeTransfer   { get { return m_ConditionCodeTransfer  ; } }
         public Opcode_VFP_SystemRegisterTransfer  PrepareForVFP_SystemRegisterTransfer  { get { return m_SystemRegisterTransfer ; } }
         public Opcode_VFP_64bitRegisterTransfer   PrepareForVFP_64bitRegisterTransfer   { get { return m_64bitRegisterTransfer  ; } }
@@ -86,7 +86,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
             else if((op & EncDef.opmask_ConvertFloatToFloat    ) == EncDef.op_ConvertFloatToFloat    ) opcode = m_ConvertFloatToFloat    ;
             else if((op & EncDef.opmask_UnaryDataOperation     ) == EncDef.op_UnaryDataOperation     ) opcode = m_UnaryDataOperation     ;
             else if((op & EncDef.opmask_BinaryDataOperation    ) == EncDef.op_BinaryDataOperation    ) opcode = m_BinaryDataOperation    ;
-            else if((op & EncDef.opmask_BlockDataTransfer      ) == EncDef.op_BlockDataTransfer      ) opcode = m_BlockDataTransfer      ;
+            else if((op & EncDef.opmask_BlockDataTransfer      ) == EncDef.op_BlockDataTransfer      ) opcode = m_BlockDataTransfer_VFP  ;
 
             if(opcode != null)
             {

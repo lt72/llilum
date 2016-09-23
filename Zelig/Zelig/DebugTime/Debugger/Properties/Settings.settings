@@ -1,7 +1,12 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)">
-  <Profiles>
-    <Profile Name="(Default)" />
-  </Profiles>
-  <Settings />
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Microsoft.Zelig.Debugger.ArmProcessor.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="LocalData" Type="System.String" Scope="User">
+      <Value Profile="(Default)">%TEMP%</Value>
+    </Setting>
+    <Setting Name="ProductConfigurationPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">%LLILUM_ROOT%\Zelig\ZeligBuild\Host\bin\Debug\Microsoft.Llilum.BoardConfigurations.LPC1768.dll</Value>
+    </Setting>
+  </Settings>
 </SettingsFile>

@@ -2983,7 +2983,11 @@ namespace Microsoft.Zelig.Runtime.TypeSystem
 
         public T GetEnvironmentService< T >()
         {
-            return (T)m_environmentProvider.GetService( typeof(T) );
+            if(m_environmentProvider != null)
+            {
+                return (T)m_environmentProvider.GetService( typeof( T ) );
+            }
+            return default(T);
         }
 
         public TypeRepresentation GetWellKnownType( string name )

@@ -312,9 +312,28 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
         public const uint c_fpscr_C            = 1U << c_fpscr_bit_C;
         public const uint c_fpscr_Z            = 1U << c_fpscr_bit_Z;
         public const uint c_fpscr_N            = 1U << c_fpscr_bit_N;
+
+
         ///////////////////////////////////////////
 
-        //--//
+        //
+        // State
+        //
+
+        private readonly InstructionSetVersion m_version;
+
+        public EncodingDefinition_VFP( InstructionSetVersion isv )
+        {
+            m_version = isv;
+        }
+
+        public InstructionSetVersion Version
+        {
+            get
+            {
+                return m_version;
+            }
+        }
 
         abstract public uint get_Rn( uint op  );
         abstract public uint set_Rn( uint val );

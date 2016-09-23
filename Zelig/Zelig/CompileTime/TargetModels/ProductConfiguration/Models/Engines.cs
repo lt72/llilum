@@ -15,7 +15,13 @@ namespace Microsoft.Zelig.Configuration.Environment
     {
         public override object Instantiate(InstructionSetARM iset)
         {
-            if(iset is InstructionSetARMv4)
+            CurrentInstructionSetEncoding.RegisterCurrentEncoding( iset.Version );
+
+            if(iset is InstructionSetARMv7M)
+            {
+                return new Emulation.ArmProcessor.ARMv4Simulator( (InstructionSetARMv4)iset );
+            }
+            else if(iset is InstructionSetARMv4)
             {
                 return new Emulation.ArmProcessor.ARMv4Simulator( (InstructionSetARMv4)iset );
             }

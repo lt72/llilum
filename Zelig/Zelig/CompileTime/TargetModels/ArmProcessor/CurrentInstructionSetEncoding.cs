@@ -21,20 +21,15 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
         {
             lock(s_sync)
             {
-                if(s_CurrentEncoding != null)
-                {
-                    throw new InvalidOperationException("Cannot change encoding");
-                }
-
                 EncodingDefinition enc = null;
                 switch(isv.PlatformVersion)
                 {
                     case InstructionSetVersion.Platform_Version__ARMv4:
                     case InstructionSetVersion.Platform_Version__ARMv5:
-                        enc = new EncodingDefinition_ARMv4();
+                        enc = new EncodingDefinition_ARMv4( isv );
                         break;
                     case InstructionSetVersion.Platform_Version__ARMv7M:
-                        enc = new EncodingDefinition_ARMv7M__32Bits( );
+                        enc = new EncodingDefinition_ARMv7M__32Bits( isv );
                         break;
                     case InstructionSetVersion.Platform_Version__ARMv6M:
                     case InstructionSetVersion.Platform_Version__ARMv7R:
@@ -47,7 +42,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
                 switch(isv.PlatformVFPSupport)
                 {
                     case InstructionSetVersion.Platform_VFP__HardVFP:
-                        encVFP = new EncodingDefinition_VFP_ARMv5();
+                        encVFP = new EncodingDefinition_VFP_ARMv5( isv );
                         break;
                     case InstructionSetVersion.Platform_VFP__SoftVFP:
                     case InstructionSetVersion.Platform_VFP__NoVFP:
@@ -55,9 +50,30 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
                     default:
                         throw new ArgumentException("Cannot register unsupported instruction set");
                 }
-                
-                s_CurrentEncoding    = enc;
-                s_CurrentEncodingVFP = encVFP;
+
+                if(s_CurrentEncoding != null)
+                {
+                    if(!s_CurrentEncoding.Equals( enc ))
+                    {
+                        throw new InvalidOperationException( "Cannot change encoding" );
+                    }
+                }
+                else
+                {
+                    s_CurrentEncoding = enc;
+                }
+
+                if(s_CurrentEncodingVFP != null)
+                {
+                    if(!s_CurrentEncodingVFP.Equals( encVFP ))
+                    {
+                        throw new InvalidOperationException( "Cannot change encoding" );
+                    }
+                }
+                else
+                {
+                    s_CurrentEncodingVFP = encVFP;
+                }
             }
         }
 

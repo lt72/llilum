@@ -15,8 +15,8 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor
     public abstract class SimulatorCore : Hosting.AbstractEngine
     {
         
-        private static EncodingDefinition_ARMv4     s_Encoding    = (EncodingDefinition_ARMv4)CurrentInstructionSetEncoding.GetEncoding();
-        private static EncodingDefinition_VFP_ARMv5 s_EncodingVFP = (EncodingDefinition_VFP_ARMv5)CurrentInstructionSetEncoding.GetVFPEncoding();
+        private static EncodingDefinition     s_Encoding    = CurrentInstructionSetEncoding.GetEncoding();
+        private static EncodingDefinition_VFP s_EncodingVFP = CurrentInstructionSetEncoding.GetVFPEncoding();
 
         public delegate bool ProcessCoprocessorRegisterTransfer( ref uint value            ,
                                                                      bool fFromCoprocessor ,

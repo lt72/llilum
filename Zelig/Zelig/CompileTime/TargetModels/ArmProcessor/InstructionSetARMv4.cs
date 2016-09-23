@@ -5,36 +5,37 @@
 namespace Microsoft.Zelig.TargetModel.ArmProcessor
 {
 
-    using EncDef = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition_ARMv4;
-    
+    using EncDef   = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition;
+    using EncDefv4 = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition_ARMv4;
+
     public class InstructionSetARMv4 : InstructionSetARM
     {
         //
         // State
         //
 
-        private readonly Opcode_MRS                     m_MRS;
-        private readonly Opcode_MSR_1                   m_MSR_1;
-        private readonly Opcode_MSR_2                   m_MSR_2;
-        private readonly Opcode_DataProcessing_1        m_DataProcessing_1;
-        private readonly Opcode_DataProcessing_2        m_DataProcessing_2;
-        private readonly Opcode_DataProcessing_3        m_DataProcessing_3;
-        private readonly Opcode_Multiply                m_Multiply;
-        private readonly Opcode_MultiplyLong            m_MultiplyLong;
-        private readonly Opcode_SingleDataSwap          m_SingleDataSwap;
-        private readonly Opcode_BranchAndExchange       m_BranchAndExchange;
-        private readonly Opcode_HalfwordDataTransfer_1  m_HalfwordDataTransfer_1;
-        private readonly Opcode_HalfwordDataTransfer_2  m_HalfwordDataTransfer_2;
-        private readonly Opcode_SingleDataTransfer_1    m_SingleDataTransfer_1;
-        private readonly Opcode_SingleDataTransfer_2    m_SingleDataTransfer_2;
-        private readonly Opcode_SingleDataTransfer_3    m_SingleDataTransfer_3;
-        private readonly Opcode_BlockDataTransfer       m_BlockDataTransfer;
-        private readonly Opcode_Branch                  m_Branch;
-        private readonly Opcode_CoprocDataTransfer      m_CoprocDataTransfer;
-        private readonly Opcode_CoprocDataOperation     m_CoprocDataOperation;
-        private readonly Opcode_CoprocRegisterTransfer  m_CoprocRegisterTransfer;
-        private readonly Opcode_SoftwareInterrupt       m_SoftwareInterrupt;
-        private readonly Opcode_Breakpoint              m_Breakpoint;
+        protected readonly Opcode_MRS                     m_MRS;
+        protected readonly Opcode_MSR_1                   m_MSR_1;
+        protected readonly Opcode_MSR_2                   m_MSR_2;
+        protected readonly Opcode_DataProcessing_1        m_DataProcessing_1;
+        protected readonly Opcode_DataProcessing_2        m_DataProcessing_2;
+        protected readonly Opcode_DataProcessing_3        m_DataProcessing_3;
+        protected readonly Opcode_Multiply                m_Multiply;
+        protected readonly Opcode_MultiplyLong            m_MultiplyLong;
+        protected readonly Opcode_SingleDataSwap          m_SingleDataSwap;
+        protected readonly Opcode_BranchAndExchange       m_BranchAndExchange;
+        protected readonly Opcode_HalfwordDataTransfer_1  m_HalfwordDataTransfer_1;
+        protected readonly Opcode_HalfwordDataTransfer_2  m_HalfwordDataTransfer_2;
+        protected readonly Opcode_SingleDataTransfer_1    m_SingleDataTransfer_1;
+        protected readonly Opcode_SingleDataTransfer_2    m_SingleDataTransfer_2;
+        protected readonly Opcode_SingleDataTransfer_3    m_SingleDataTransfer_3;
+        protected readonly Opcode_BlockDataTransfer       m_BlockDataTransfer;
+        protected readonly Opcode_Branch                  m_Branch;
+        protected readonly Opcode_CoprocDataTransfer      m_CoprocDataTransfer;
+        protected readonly Opcode_CoprocDataOperation     m_CoprocDataOperation;
+        protected readonly Opcode_CoprocRegisterTransfer  m_CoprocRegisterTransfer;
+        protected readonly Opcode_SoftwareInterrupt       m_SoftwareInterrupt;
+        protected readonly Opcode_Breakpoint              m_Breakpoint;
 
         //
         // Constructor Methods
@@ -97,29 +98,29 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
         {
             Opcode opcode = null;
 
-            if     ((op & EncDef.opmask_Breakpoint            ) == EncDef.op_Breakpoint            ) opcode = m_Breakpoint            ;
-            else if((op & EncDef.opmask_MRS                   ) == EncDef.op_MRS                   ) opcode = m_MRS                   ;
-            else if((op & EncDef.opmask_MSR_1                 ) == EncDef.op_MSR_1                 ) opcode = m_MSR_1                 ;
-            else if((op & EncDef.opmask_MSR_2                 ) == EncDef.op_MSR_2                 ) opcode = m_MSR_2                 ;
-            else if((op & EncDef.opmask_DataProcessing_1      ) == EncDef.op_DataProcessing_1      ) opcode = m_DataProcessing_1      ;
-            else if((op & EncDef.opmask_DataProcessing_2      ) == EncDef.op_DataProcessing_2      ) opcode = m_DataProcessing_2      ;
-            else if((op & EncDef.opmask_DataProcessing_3      ) == EncDef.op_DataProcessing_3      ) opcode = m_DataProcessing_3      ;
-            else if((op & EncDef.opmask_Multiply              ) == EncDef.op_Multiply              ) opcode = m_Multiply              ;
-            else if((op & EncDef.opmask_MultiplyLong          ) == EncDef.op_MultiplyLong          ) opcode = m_MultiplyLong          ;
-            else if((op & EncDef.opmask_SingleDataSwap        ) == EncDef.op_SingleDataSwap        ) opcode = m_SingleDataSwap        ;
-            else if((op & EncDef.opmask_BranchAndExchange     ) == EncDef.op_BranchAndExchange     ) opcode = m_BranchAndExchange     ;
-            else if((op & EncDef.opmask_HalfwordDataTransfer_1) == EncDef.op_HalfwordDataTransfer_1) opcode = m_HalfwordDataTransfer_1;
-            else if((op & EncDef.opmask_HalfwordDataTransfer_2) == EncDef.op_HalfwordDataTransfer_2) opcode = m_HalfwordDataTransfer_2;
-            else if((op & EncDef.opmask_SingleDataTransfer_1  ) == EncDef.op_SingleDataTransfer_1  ) opcode = m_SingleDataTransfer_1  ;
-            else if((op & EncDef.opmask_SingleDataTransfer_2  ) == EncDef.op_SingleDataTransfer_2  ) opcode = m_SingleDataTransfer_2  ;
-            else if((op & EncDef.opmask_SingleDataTransfer_3  ) == EncDef.op_SingleDataTransfer_3  ) opcode = m_SingleDataTransfer_3  ;
-            else if((op & EncDef.opmask_Undefined             ) == EncDef.op_Undefined             ) opcode = null                    ;
-            else if((op & EncDef.opmask_BlockDataTransfer     ) == EncDef.op_BlockDataTransfer     ) opcode = m_BlockDataTransfer     ;
-            else if((op & EncDef.opmask_Branch                ) == EncDef.op_Branch                ) opcode = m_Branch                ;
-            else if((op & EncDef.opmask_CoprocDataTransfer    ) == EncDef.op_CoprocDataTransfer    ) opcode = m_CoprocDataTransfer    ;
-            else if((op & EncDef.opmask_CoprocDataOperation   ) == EncDef.op_CoprocDataOperation   ) opcode = m_CoprocDataOperation   ;
-            else if((op & EncDef.opmask_CoprocRegisterTransfer) == EncDef.op_CoprocRegisterTransfer) opcode = m_CoprocRegisterTransfer;
-            else if((op & EncDef.opmask_SoftwareInterrupt     ) == EncDef.op_SoftwareInterrupt     ) opcode = m_SoftwareInterrupt     ;
+            if     ((op & EncDefv4.opmask_Breakpoint            ) == EncDefv4.op_Breakpoint            ) opcode = m_Breakpoint            ;
+            else if((op & EncDefv4.opmask_MRS                   ) == EncDefv4.op_MRS                   ) opcode = m_MRS                   ;
+            else if((op & EncDefv4.opmask_MSR_1                 ) == EncDefv4.op_MSR_1                 ) opcode = m_MSR_1                 ;
+            else if((op & EncDefv4.opmask_MSR_2                 ) == EncDefv4.op_MSR_2                 ) opcode = m_MSR_2                 ;
+            else if((op & EncDefv4.opmask_DataProcessing_1      ) == EncDefv4.op_DataProcessing_1      ) opcode = m_DataProcessing_1      ;
+            else if((op & EncDefv4.opmask_DataProcessing_2      ) == EncDefv4.op_DataProcessing_2      ) opcode = m_DataProcessing_2      ;
+            else if((op & EncDefv4.opmask_DataProcessing_3      ) == EncDefv4.op_DataProcessing_3      ) opcode = m_DataProcessing_3      ;
+            else if((op & EncDefv4.opmask_Multiply              ) == EncDefv4.op_Multiply              ) opcode = m_Multiply              ;
+            else if((op & EncDefv4.opmask_MultiplyLong          ) == EncDefv4.op_MultiplyLong          ) opcode = m_MultiplyLong          ;
+            else if((op & EncDefv4.opmask_SingleDataSwap        ) == EncDefv4.op_SingleDataSwap        ) opcode = m_SingleDataSwap        ;
+            else if((op & EncDefv4.opmask_BranchAndExchange     ) == EncDefv4.op_BranchAndExchange     ) opcode = m_BranchAndExchange     ;
+            else if((op & EncDefv4.opmask_HalfwordDataTransfer_1) == EncDefv4.op_HalfwordDataTransfer_1) opcode = m_HalfwordDataTransfer_1;
+            else if((op & EncDefv4.opmask_HalfwordDataTransfer_2) == EncDefv4.op_HalfwordDataTransfer_2) opcode = m_HalfwordDataTransfer_2;
+            else if((op & EncDefv4.opmask_SingleDataTransfer_1  ) == EncDefv4.op_SingleDataTransfer_1  ) opcode = m_SingleDataTransfer_1  ;
+            else if((op & EncDefv4.opmask_SingleDataTransfer_2  ) == EncDefv4.op_SingleDataTransfer_2  ) opcode = m_SingleDataTransfer_2  ;
+            else if((op & EncDefv4.opmask_SingleDataTransfer_3  ) == EncDefv4.op_SingleDataTransfer_3  ) opcode = m_SingleDataTransfer_3  ;
+            else if((op & EncDefv4.opmask_Undefined             ) == EncDefv4.op_Undefined             ) opcode = null                    ;
+            else if((op & EncDefv4.opmask_BlockDataTransfer     ) == EncDefv4.op_BlockDataTransfer     ) opcode = m_BlockDataTransfer     ;
+            else if((op & EncDefv4.opmask_Branch                ) == EncDefv4.op_Branch                ) opcode = m_Branch                ;
+            else if((op & EncDefv4.opmask_CoprocDataTransfer    ) == EncDefv4.op_CoprocDataTransfer    ) opcode = m_CoprocDataTransfer    ;
+            else if((op & EncDefv4.opmask_CoprocDataOperation   ) == EncDefv4.op_CoprocDataOperation   ) opcode = m_CoprocDataOperation   ;
+            else if((op & EncDefv4.opmask_CoprocRegisterTransfer) == EncDefv4.op_CoprocRegisterTransfer) opcode = m_CoprocRegisterTransfer;
+            else if((op & EncDefv4.opmask_SoftwareInterrupt     ) == EncDefv4.op_SoftwareInterrupt     ) opcode = m_SoftwareInterrupt     ;
 
             if(opcode != null)
             {
@@ -157,15 +158,15 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
 
         public static string DumpMode( uint mode )
         {
-            switch(mode & EncDef.c_psr_mode)
+            switch(mode & EncDefv4.c_psr_mode)
             {
-                case EncDef.c_psr_mode_USER : return "USER";
-                case EncDef.c_psr_mode_FIQ  : return "FIQ";
-                case EncDef.c_psr_mode_IRQ  : return "IRQ";
-                case EncDef.c_psr_mode_SVC  : return "SVC";
-                case EncDef.c_psr_mode_ABORT: return "ABORT";
-                case EncDef.c_psr_mode_UNDEF: return "UNDEF";
-                case EncDef.c_psr_mode_SYS  : return "SYS";
+                case EncDefv4.c_psr_mode_USER : return "USER";
+                case EncDefv4.c_psr_mode_FIQ  : return "FIQ";
+                case EncDefv4.c_psr_mode_IRQ  : return "IRQ";
+                case EncDefv4.c_psr_mode_SVC  : return "SVC";
+                case EncDefv4.c_psr_mode_ABORT: return "ABORT";
+                case EncDefv4.c_psr_mode_UNDEF: return "UNDEF";
+                case EncDefv4.c_psr_mode_SYS  : return "SYS";
             }
 
             return "??";
@@ -219,7 +220,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
                 op |= s_Encoding.set_StatusRegister_IsSPSR( this.UseSPSR );
                 op |= s_Encoding.set_Register2            ( this.Rd      );
 
-                return op | EncDef.op_MRS;
+                return op | EncDefv4.op_MRS;
             }
 
             public override void Print(     InstructionSetARM         owner         ,
@@ -279,12 +280,12 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
             {
                 PrintMnemonic( str, "MSR{0}", DumpCondition() );
 
-                str.AppendFormat( "{0}_{1}{2}{3}{4}",  this.UseSPSR                             ? "SPSR" : "CPSR",
-                                                      (this.Fields & EncDef.c_psr_field_c) != 0 ? "c"    : ""    ,
-                                                      (this.Fields & EncDef.c_psr_field_x) != 0 ? "x"    : ""    ,
-                                                      (this.Fields & EncDef.c_psr_field_s) != 0 ? "s"    : ""    ,
-                                                      (this.Fields & EncDef.c_psr_field_f) != 0 ? "f"    : ""    );
-            }
+                str.AppendFormat( "{0}_{1}{2}{3}{4}",  this.UseSPSR                               ? "SPSR" : "CPSR",
+                                                      (this.Fields & EncDefv4.c_psr_field_c) != 0 ? "c"    : ""    ,
+                                                      (this.Fields & EncDefv4.c_psr_field_x) != 0 ? "x"    : ""    ,
+                                                      (this.Fields & EncDefv4.c_psr_field_s) != 0 ? "s"    : ""    ,
+                                                      (this.Fields & EncDefv4.c_psr_field_f) != 0 ? "f"    : ""    );
+                }
         }
 
         public sealed class Opcode_MSR_1 : Opcode_MSR
@@ -332,7 +333,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
 
                 op |= s_Encoding.set_Register4( this.Rm  );
 
-                return op | EncDef.op_MSR_1;
+                return op | EncDefv4.op_MSR_1;
             }
 
             public override void Print(     InstructionSetARM         owner         ,
@@ -397,7 +398,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
                 op |= s_Encoding.set_DataProcessing_ImmediateSeed    ( this.ImmediateSeed     );
                 op |= s_Encoding.set_DataProcessing_ImmediateRotation( this.ImmediateRotation );
 
-                return op | EncDef.op_MSR_2;
+                return op | EncDefv4.op_MSR_2;
             }
 
             public override void Print(     InstructionSetARM         owner         ,
@@ -589,7 +590,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
                 op |= s_Encoding.set_DataProcessing_ImmediateSeed    ( this.ImmediateSeed     );
                 op |= s_Encoding.set_DataProcessing_ImmediateRotation( this.ImmediateRotation );
 
-                return op | EncDef.op_DataProcessing_1;
+                return op | EncDefv4.op_DataProcessing_1;
             }
 
             public override void Print(     InstructionSetARM         owner         ,
@@ -785,7 +786,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
                 this.ShiftType  = shiftType;
 
 
-                return op | EncDef.op_DataProcessing_2;
+                return op | EncDefv4.op_DataProcessing_2;
             }
 
             public override void Print(     InstructionSetARM         owner         ,
@@ -856,7 +857,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
 
                 op |= s_Encoding.set_Register3( this.Rs );
 
-                return op | EncDef.op_DataProcessing_3;
+                return op | EncDefv4.op_DataProcessing_3;
             }
 
             public override void Print(     InstructionSetARM         owner         ,
@@ -939,7 +940,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
                 op |= s_Encoding.set_ShouldSetConditions  ( this.SetCC        );
                 op |= s_Encoding.set_Multiply_IsAccumulate( this.IsAccumulate );
 
-                return op | EncDef.op_Multiply;
+                return op | EncDefv4.op_Multiply;
             }
 
             public override void Print(     InstructionSetARM         owner         ,
@@ -1030,7 +1031,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
                 op |= s_Encoding.set_Multiply_IsAccumulate( this.IsAccumulate );
                 op |= s_Encoding.set_Multiply_IsSigned    ( this.IsSigned     );
 
-                return op | EncDef.op_MultiplyLong;
+                return op | EncDefv4.op_MultiplyLong;
             }
 
             public override void Print(     InstructionSetARM         owner         ,
@@ -1103,7 +1104,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
                 op |= s_Encoding.set_Register4                  ( this.Rm     );
                 op |= s_Encoding.set_DataTransfer_IsByteTransfer( this.IsByte );
 
-                return op | EncDef.op_SingleDataSwap;
+                return op | EncDefv4.op_SingleDataSwap;
             }
 
             public override void Print(     InstructionSetARM         owner         ,
@@ -1166,7 +1167,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
                 op |= s_Encoding.set_Branch_Offset( this.Offset );
                 op |= s_Encoding.set_Branch_IsLink( this.IsLink );
 
-                return op | EncDef.op_Branch;
+                return op | EncDefv4.op_Branch;
             }
 
             public override void Print(     InstructionSetARM         owner         ,
@@ -1225,7 +1226,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
 
                 op |= s_Encoding.set_Register4( this.Rn );
 
-                return op | EncDef.op_BranchAndExchange;
+                return op | EncDefv4.op_BranchAndExchange;
             }
 
             public override void Print(     InstructionSetARM         owner         ,
@@ -1469,7 +1470,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
 
                 op |= s_Encoding.set_Register4( this.Rm );
 
-                return op | EncDef.op_HalfwordDataTransfer_1;
+                return op | EncDefv4.op_HalfwordDataTransfer_1;
             }
 
             public override void Print(     InstructionSetARM            owner      ,
@@ -1541,7 +1542,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
 
                 op |= s_Encoding.set_HalfWordDataTransfer_Offset( this.Offset );
 
-                return op | EncDef.op_HalfwordDataTransfer_2;
+                return op | EncDefv4.op_HalfwordDataTransfer_2;
             }
 
             public override void Print(     InstructionSetARM         owner         ,
@@ -1729,7 +1730,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
 
                 op |= s_Encoding.set_DataTransfer_Offset( this.Offset );
 
-                return op | EncDef.op_SingleDataTransfer_1;
+                return op | EncDefv4.op_SingleDataTransfer_1;
             }
 
             public override void Print(     InstructionSetARM         owner         ,
@@ -1934,7 +1935,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
                 this.ShiftType  = shiftType;
 
 
-                return op | EncDef.op_SingleDataTransfer_2;
+                return op | EncDefv4.op_SingleDataTransfer_2;
             }
 
             public override void Print(     InstructionSetARM         owner         ,
@@ -2013,7 +2014,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
 
                 op |= s_Encoding.set_Register3( this.Rs );
 
-                return op | EncDef.op_SingleDataTransfer_3;
+                return op | EncDefv4.op_SingleDataTransfer_3;
             }
 
             public override void Print(     InstructionSetARM         owner         ,
@@ -2086,7 +2087,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
                 op |= s_Encoding.set_BlockDataTransfer_RegisterList( this.Lst     );
                 op |= s_Encoding.set_BlockDataTransfer_LoadPSR     ( this.LoadPSR );
 
-                return op | EncDef.op_BlockDataTransfer;
+                return op | EncDefv4.op_BlockDataTransfer;
             }
 
             public override void Print(     InstructionSetARM              owner    ,
@@ -2290,7 +2291,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
                 op |= s_Encoding.set_CoprocDataTransfer_CRd            ( this.CRd       );
                 op |= s_Encoding.set_CoprocDataTransfer_Offset         ( this.Offset    );
 
-                return op | EncDef.op_CoprocDataTransfer;
+                return op | EncDefv4.op_CoprocDataTransfer;
             }
 
             public override void Print(     InstructionSetARM         owner         ,
@@ -2374,7 +2375,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
                 op |= s_Encoding.set_CoprocDataOperation_CRm( this.CRm );
                 op |= s_Encoding.set_CoprocDataOperation_CRd( this.CRd );
 
-                return op | EncDef.op_CoprocDataOperation;
+                return op | EncDefv4.op_CoprocDataOperation;
             }
 
             public override void Print(     InstructionSetARM         owner         ,
@@ -2454,7 +2455,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
                 op |= s_Encoding.set_CoprocRegisterTransfer_CRm  ( this.CRm   );
                 op |= s_Encoding.set_CoprocRegisterTransfer_Rd   ( this.Rd    );
 
-                return op | EncDef.op_CoprocRegisterTransfer;
+                return op | EncDefv4.op_CoprocRegisterTransfer;
             }
 
             public override void Print(     InstructionSetARM         owner         ,
@@ -2518,7 +2519,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
 
                 op |= s_Encoding.set_SoftwareInterrupt_Immediate( this.Value );
 
-                return op | EncDef.op_SoftwareInterrupt;
+                return op | EncDefv4.op_SoftwareInterrupt;
             }
 
             public override void Print(     InstructionSetARM         owner         ,
@@ -2573,7 +2574,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
             {
                 uint op = s_Encoding.set_Breakpoint_Immediate( this.Value );
 
-                return op | EncDef.op_Breakpoint;
+                return op | EncDefv4.op_Breakpoint;
             }
 
             public override void Print(     InstructionSetARM         owner         ,

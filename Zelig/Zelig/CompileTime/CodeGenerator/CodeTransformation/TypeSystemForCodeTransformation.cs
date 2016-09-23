@@ -1083,35 +1083,38 @@ namespace Microsoft.Zelig.CodeGeneration.IR
                 // -CompilationOption is enforcable. Match the whole hyerarchy. 
                 var cfgProv = GetEnvironmentService<IConfigurationProvider>( );
 
-                object match;
-                if(cfgProv.GetValue( td.Name, out match ) && match is string)
+                if(cfgProv != null)
                 {
-                    string target = (string)match;
-                    var newList = new List<TypeRepresentation>( );
-
-                    foreach(var tdCandidate in lst)
+                    object match;
+                    if(cfgProv.GetValue( td.Name, out match ) && match is string)
                     {
-                        var source = tdCandidate;
+                        string target = (string)match;
+                        var newList = new List<TypeRepresentation>( );
 
-                        while(source != null)
+                        foreach(var tdCandidate in lst)
                         {
-                            if(source.Name == target)
+                            var source = tdCandidate;
+
+                            while(source != null)
                             {
-                                newList.Add( tdCandidate );
+                                if(source.Name == target)
+                                {
+                                    newList.Add( tdCandidate );
 
-                                break;
+                                    break;
+                                }
+
+                                source = source.Extends;
                             }
-
-                            source = source.Extends;
                         }
-                    }
 
-                    if(newList.Count == 0)
-                    {
-                        throw TypeConsistencyErrorException.Create( "Type {0} mandated by explicit configration option {1) could not be found", target, td.Name );
-                    }
+                        if(newList.Count == 0)
+                        {
+                            throw TypeConsistencyErrorException.Create( "Type {0} mandated by explicit configration option {1) could not be found", target, td.Name );
+                        }
 
-                    lst = newList;
+                        lst = newList;
+                    }
                 }
             }
 

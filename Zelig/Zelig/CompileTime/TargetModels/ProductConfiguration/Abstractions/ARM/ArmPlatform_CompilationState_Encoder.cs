@@ -6,16 +6,14 @@
 namespace Microsoft.Zelig.Configuration.Environment.Abstractions
 {
     using System;
-
     using Microsoft.Zelig.Runtime.TypeSystem;
-
     using Microsoft.Zelig.TargetModel.ArmProcessor;
 
-    using ZeligIR = Microsoft.Zelig.CodeGeneration.IR;
+    using ZeligIR        = Microsoft.Zelig.CodeGeneration.IR;
+    
 
     public partial class ArmCompilationState
     {
-        private static EncodingDefinition s_Encoding = CurrentInstructionSetEncoding.GetEncoding();
         //
         // State
         //
@@ -323,7 +321,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                                       out uint valSeed ,
                                                       out uint valRot  )
         {
-            return s_Encoding.check_DataProcessing_ImmediateValue( (uint)val, out valSeed, out valRot );
+            return CurrentInstructionSetEncoding.GetEncoding( ).check_DataProcessing_ImmediateValue( (uint)val, out valSeed, out valRot );
         }
 
         //--//

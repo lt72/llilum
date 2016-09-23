@@ -9,6 +9,10 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
 
         //--//
 
+        public EncodingDefinition_VFP_ARMv5( InstructionSetVersion isv ) : base ( isv )
+        {
+        }
+
         override public uint get_Rn( uint op  ) { return EncodingDefinition.OPCODE_DECODE_EXTRACTFIELD( op , 16, 4 ); }
         override public uint set_Rn( uint val ) { return EncodingDefinition.OPCODE_DECODE_INSERTFIELD ( val, 16, 4 ); }
 

@@ -434,6 +434,8 @@ namespace Microsoft.Zelig.Debugger.ArmProcessor
             m_selectedProduct = (Cfg.ProductCategory)comboBox_Product.SelectedItem;
             m_selectedProduct.ApplyDefaultValues();
 
+            m_selectedEngine = (Cfg.EngineCategory)comboBox_Engine.SelectedItem;
+
             SetStatus();
         }
 

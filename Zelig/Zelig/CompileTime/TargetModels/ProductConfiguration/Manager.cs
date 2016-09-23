@@ -320,8 +320,17 @@ namespace Microsoft.Zelig.Configuration.Environment
                 if(!string.IsNullOrWhiteSpace(productAssemblyPath))
                 {
                     FileInfo file = new FileInfo(productAssemblyPath);
+                    
+                    System.Reflection.Assembly assembly = null;
 
-                    System.Reflection.Assembly assembly = System.Reflection.Assembly.LoadFrom(file.FullName);
+                    try
+                    {
+                        assembly = System.Reflection.Assembly.LoadFrom( file.FullName );
+                    }
+                    catch(FileLoadException)
+                    {
+
+                    }
                         
                     if(assembly != null)
                     {

@@ -51,7 +51,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="ARM\EncodingDefinition_ARMv7M.cs" />
+    <Compile Include="ARM\EncodingDefinition_ARMv7M__32Bits.cs" />
     <Compile Include="CurrentInstructionSetEncoding.cs" />
     <Compile Include="InstructionSetARM.cs" />
     <Compile Include="InstructionSetARMv7M.cs" />
