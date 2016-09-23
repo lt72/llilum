@@ -588,7 +588,7 @@ namespace Microsoft.Zelig.Configuration.Environment
 
             foreach(Type t in array)
             {
-                if(t.IsAbstract == false && t.IsSubclassOf( typeof(Emulation.ArmProcessor.Simulator.Peripheral) ))
+                if(t.IsAbstract == false && t.IsSubclassOf( typeof(Emulation.ArmProcessor.ARMv4Simulator.Peripheral) ))
                 {
                     CreatePeripheral( stack, lst, t, defaultValues );
                 }
@@ -618,7 +618,7 @@ namespace Microsoft.Zelig.Configuration.Environment
 
             foreach(Type t in array)
             {
-                if(t.IsSubclassOf( typeof(Emulation.ArmProcessor.Simulator.InteropHandler) ))
+                if(t.IsSubclassOf( typeof(Emulation.ArmProcessor.ARMv4Simulator.InteropHandler) ))
                 {
                     CreateInterop( stack, lst, t, defaultValues );
                 }

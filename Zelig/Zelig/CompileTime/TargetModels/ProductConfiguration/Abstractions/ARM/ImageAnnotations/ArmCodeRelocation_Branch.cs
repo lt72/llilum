@@ -69,7 +69,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         protected override bool ApplyRelocation( uint srcAddress ,
                                                  uint dstAddress )
         {
-            InstructionSet.Opcode_Branch op = (InstructionSet.Opcode_Branch)ArmCompilationState.GetOpcode( m_cs, m_region, m_offset );
+            InstructionSetARMv4.Opcode_Branch op = (InstructionSetARMv4.Opcode_Branch)ArmCompilationState.GetOpcode( m_cs, m_region, m_offset );
 
             op.Offset = ((int)dstAddress - (int)srcAddress) - m_skew;
 

@@ -12,7 +12,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
 
     internal sealed class ArmCodeRelocation_MOV : ZeligIR.ImageBuilders.CodeRelocation
     {
-        private static EncodingDefinition_ARM s_Encoding = (EncodingDefinition_ARM)CurrentInstructionSetEncoding.GetEncoding();
+        private static EncodingDefinition_ARMv4 s_Encoding = (EncodingDefinition_ARMv4)CurrentInstructionSetEncoding.GetEncoding();
 
         //
         // State
@@ -84,19 +84,19 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
             if(relPos <= 0)
             {
                 val = ~(uint)relPos;
-                op0 = EncodingDefinition_ARM.c_operation_MVN;
-                op1 = EncodingDefinition_ARM.c_operation_BIC;
+                op0 = EncodingDefinition_ARMv4.c_operation_MVN;
+                op1 = EncodingDefinition_ARMv4.c_operation_BIC;
             }
             else
             {
                 val = (uint)relPos;
-                op0 = EncodingDefinition_ARM.c_operation_MOV;
-                op1 = EncodingDefinition_ARM.c_operation_ORR;
+                op0 = EncodingDefinition_ARMv4.c_operation_MOV;
+                op1 = EncodingDefinition_ARMv4.c_operation_ORR;
             }
 
             for(uint pos = 0; pos < m_numOpcodes; pos++)
             {
-                InstructionSet.Opcode_DataProcessing_1 op = (InstructionSet.Opcode_DataProcessing_1)ArmCompilationState.GetOpcode( m_cs, m_region, m_offset + pos * sizeof(uint) );
+                InstructionSetARMv4.Opcode_DataProcessing_1 op = (InstructionSetARMv4.Opcode_DataProcessing_1)ArmCompilationState.GetOpcode( m_cs, m_region, m_offset + pos * sizeof(uint) );
                 uint                                   immRes;
                 uint                                   rotRes;
 

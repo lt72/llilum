@@ -8,7 +8,7 @@ namespace Microsoft.Zelig.Runtime.TargetPlatform.ARMv7
     using System;
 
     using TS     = Microsoft.Zelig.Runtime.TypeSystem;
-    using EncDef = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition_ARM;
+    using EncDef = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition_ARMv7M__32Bits;
 
 
     public abstract partial class ProcessorARMv7MForZelig : ProcessorARMv7M

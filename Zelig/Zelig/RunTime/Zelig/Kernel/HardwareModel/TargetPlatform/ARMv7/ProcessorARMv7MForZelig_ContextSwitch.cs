@@ -10,12 +10,12 @@ namespace Microsoft.Zelig.Runtime.TargetPlatform.ARMv7
 
     using          Microsoft.Zelig.TargetModel.ArmProcessor;
     using TS     = Microsoft.Zelig.Runtime.TypeSystem;
-    using EncDef = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition_ARM;
+    using EncDef = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition_ARMv7M__32Bits;
 
 
     public abstract partial class ProcessorARMv7MForZelig : ProcessorARMv7M
     {
-        protected static EncDef s_Encoding = (EncodingDefinition_ARM)CurrentInstructionSetEncoding.GetEncoding();
+        protected static EncDef s_Encoding = (EncodingDefinition_ARMv7M__32Bits)CurrentInstructionSetEncoding.GetEncoding();
 
         //--//
 

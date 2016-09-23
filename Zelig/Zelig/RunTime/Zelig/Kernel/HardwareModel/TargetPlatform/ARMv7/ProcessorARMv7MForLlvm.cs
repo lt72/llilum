@@ -10,10 +10,7 @@ namespace Microsoft.Zelig.Runtime.TargetPlatform.ARMv7
     using System.Runtime.InteropServices;
 
     using TS = Microsoft.Zelig.Runtime.TypeSystem;
-    using EncDef = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition_ARM;
     using RT = Microsoft.Zelig.Runtime;
-    using ARMv4;
-    using TargetModel.ArmProcessor;
 
     public abstract partial class ProcessorARMv7MForLlvm : ProcessorARMv7M
     {

@@ -15,7 +15,7 @@ namespace Microsoft.Zelig.Debugger.ArmProcessor
     using System.Threading;
 
     using EncDef             = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition;
-    using InstructionSet     = Microsoft.Zelig.TargetModel.ArmProcessor.InstructionSet;
+    using InstructionSet     = Microsoft.Zelig.TargetModel.ArmProcessor.InstructionSetARMv4;
     using IR                 = Microsoft.Zelig.CodeGeneration.IR;
     using RT                 = Microsoft.Zelig.Runtime;
     using TS                 = Microsoft.Zelig.Runtime.TypeSystem;

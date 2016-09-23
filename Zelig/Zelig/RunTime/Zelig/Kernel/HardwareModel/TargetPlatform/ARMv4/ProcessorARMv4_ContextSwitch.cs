@@ -10,12 +10,12 @@ namespace Microsoft.Zelig.Runtime.TargetPlatform.ARMv4
 
     using          Microsoft.Zelig.TargetModel.ArmProcessor;
     using TS     = Microsoft.Zelig.Runtime.TypeSystem;
-    using EncDef = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition_ARM;
+    using EncDef = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition_ARMv4;
 
 
     public abstract partial class ProcessorARMv4 : Processor
     {
-        protected static EncDef s_Encoding = (EncodingDefinition_ARM)CurrentInstructionSetEncoding.GetEncoding();
+        protected static EncDef s_Encoding = (EncodingDefinition_ARMv4)CurrentInstructionSetEncoding.GetEncoding();
 
         //--//
 

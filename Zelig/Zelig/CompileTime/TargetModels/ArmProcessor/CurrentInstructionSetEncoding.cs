@@ -7,9 +7,9 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
         //
         // Singleton
         // 
-        private static EncodingDefinition s_CurrentEncoding;
+        private static EncodingDefinition     s_CurrentEncoding;
         private static EncodingDefinition_VFP s_CurrentEncodingVFP;
-        private static object s_sync = new object();
+        private static object                 s_sync = new object();
 
         protected CurrentInstructionSetEncoding()
         {
@@ -26,15 +26,17 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
                     throw new InvalidOperationException("Cannot change encoding");
                 }
 
-                EncodingDefinition_ARM enc = null;
+                EncodingDefinition enc = null;
                 switch(isv.PlatformVersion)
                 {
                     case InstructionSetVersion.Platform_Version__ARMv4:
                     case InstructionSetVersion.Platform_Version__ARMv5:
-                        enc = new EncodingDefinition_ARM();
+                        enc = new EncodingDefinition_ARMv4();
+                        break;
+                    case InstructionSetVersion.Platform_Version__ARMv7M:
+                        enc = new EncodingDefinition_ARMv7M__32Bits( );
                         break;
                     case InstructionSetVersion.Platform_Version__ARMv6M:
-                    case InstructionSetVersion.Platform_Version__ARMv7M:
                     case InstructionSetVersion.Platform_Version__ARMv7R:
                     case InstructionSetVersion.Platform_Version__ARMv7A:
                     default:
@@ -45,7 +47,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
                 switch(isv.PlatformVFPSupport)
                 {
                     case InstructionSetVersion.Platform_VFP__HardVFP:
-                        encVFP = new EncodingDefinition_VFP_ARM();
+                        encVFP = new EncodingDefinition_VFP_ARMv5();
                         break;
                     case InstructionSetVersion.Platform_VFP__SoftVFP:
                     case InstructionSetVersion.Platform_VFP__NoVFP:
@@ -54,7 +56,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
                         throw new ArgumentException("Cannot register unsupported instruction set");
                 }
                 
-                s_CurrentEncoding = enc;
+                s_CurrentEncoding    = enc;
                 s_CurrentEncodingVFP = encVFP;
             }
         }
@@ -63,9 +65,9 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
         {
             if(s_CurrentEncoding == null)
             {
-                s_CurrentEncoding = new EncodingDefinition_ARM();
-                //throw new InvalidOperationException("Instruction set encoding is unknown");
+                throw new InvalidOperationException("Instruction set encoding is unknown");
             }
+
             return s_CurrentEncoding;
         }
 

@@ -31,7 +31,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
 
         public override void EmitCodeForBasicBlock( ZeligIR.BasicBlock bb )
         {
-            m_pendingCondition = EncodingDefinition_ARM.c_cond_AL;
+            m_pendingCondition = EncodingDefinition.c_cond_AL;
 
             base.EmitCodeForBasicBlock( bb );
         }
@@ -408,12 +408,12 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                     break;
 
                 case ZeligIR.ImageBuilders.Core.BranchEncodingLevel.ShortBranch:
-                    CreateRelocation_Branch( opSource, bb, EncodingDefinition_ARM.c_PC_offset, fConditional );
+                    CreateRelocation_Branch( opSource, bb, EncodingDefinition_ARMv4.c_PC_offset, fConditional );
                     EmitOpcode__BR( 0 );
                     break;
 
                 case ZeligIR.ImageBuilders.Core.BranchEncodingLevel.NearRelativeLoad:
-                    CreateRelocation_LDR( opSource, bb, EncodingDefinition_ARM.c_PC_offset );
+                    CreateRelocation_LDR( opSource, bb, EncodingDefinition_ARMv4.c_PC_offset );
                     EmitOpcode__LDR( m_reg_PC, m_reg_PC, 0 );
                     break;
 
@@ -427,7 +427,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
 
         private void EmitCode_ExternalMethodCallOperator( ZeligIR.ExternalCallOperator op )
         {
-            m_pendingCondition = EncodingDefinition_ARM.c_cond_AL;
+            m_pendingCondition = EncodingDefinition.c_cond_AL;
 
             FlushOperatorContext();
 
@@ -580,7 +580,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
 
                 m_owner.CompileMethod( cfg );
 
-                CreateRelocation_LDR( cfg.EntryBasicBlock.FirstOperator, cfg.EntryBasicBlock, EncodingDefinition_ARM.c_PC_offset );
+                CreateRelocation_LDR( cfg.EntryBasicBlock.FirstOperator, cfg.EntryBasicBlock, EncodingDefinition_ARMv4.c_PC_offset );
                 EmitOpcode__LDR( m_reg_PC, m_reg_PC, 0 );
             }
             else
@@ -1508,7 +1508,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
             {
                 case ZeligIR.ImageBuilders.Core.BranchEncodingLevel.Skip:
                 case ZeligIR.ImageBuilders.Core.BranchEncodingLevel.ShortBranch:
-                    CreateRelocation_Branch( op, bb, EncodingDefinition_ARM.c_PC_offset, false );
+                    CreateRelocation_Branch( op, bb, EncodingDefinition_ARMv4.c_PC_offset, false );
 
                     if(fDeadJump)
                     {
@@ -1526,7 +1526,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                         EmitOpcode__MOV( m_reg_LR, m_reg_PC );
                     }
 
-                    CreateRelocation_LDR( op, bb, EncodingDefinition_ARM.c_PC_offset );
+                    CreateRelocation_LDR( op, bb, EncodingDefinition_ARMv4.c_PC_offset );
                     EmitOpcode__LDR( m_reg_PC, m_reg_PC, 0 );
                     break;
 
@@ -1568,11 +1568,11 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
 
                     switch(op.Alu)
                     {
-                        case ZeligIR.AbstractBinaryOperator.ALU.ADD: cpuALU = EncodingDefinition_ARM.c_operation_ADD; break;
-                        case ZeligIR.AbstractBinaryOperator.ALU.SUB: cpuALU = EncodingDefinition_ARM.c_operation_SUB; break;
-                        case ZeligIR.AbstractBinaryOperator.ALU.AND: cpuALU = EncodingDefinition_ARM.c_operation_AND; break;
-                        case ZeligIR.AbstractBinaryOperator.ALU.OR : cpuALU = EncodingDefinition_ARM.c_operation_ORR; break;
-                        case ZeligIR.AbstractBinaryOperator.ALU.XOR: cpuALU = EncodingDefinition_ARM.c_operation_EOR; break;
+                        case ZeligIR.AbstractBinaryOperator.ALU.ADD: cpuALU = EncodingDefinition_ARMv4.c_operation_ADD; break;
+                        case ZeligIR.AbstractBinaryOperator.ALU.SUB: cpuALU = EncodingDefinition_ARMv4.c_operation_SUB; break;
+                        case ZeligIR.AbstractBinaryOperator.ALU.AND: cpuALU = EncodingDefinition_ARMv4.c_operation_AND; break;
+                        case ZeligIR.AbstractBinaryOperator.ALU.OR : cpuALU = EncodingDefinition_ARMv4.c_operation_ORR; break;
+                        case ZeligIR.AbstractBinaryOperator.ALU.XOR: cpuALU = EncodingDefinition_ARMv4.c_operation_EOR; break;
 
                         default:
                             throw NotImplemented();
@@ -1580,8 +1580,8 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
 
                     switch(op.AluShift)
                     {
-                        case ZeligIR.AbstractBinaryOperator.ALU.SHL: cpuSHIFT =                                                   EncodingDefinition_ARM.c_shift_LSL; break;
-                        case ZeligIR.AbstractBinaryOperator.ALU.SHR: cpuSHIFT = op.SignedShift ? EncodingDefinition_ARM.c_shift_ASR : EncodingDefinition_ARM.c_shift_LSR; break;
+                        case ZeligIR.AbstractBinaryOperator.ALU.SHL: cpuSHIFT =                                                   EncodingDefinition_ARMv4.c_shift_LSL; break;
+                        case ZeligIR.AbstractBinaryOperator.ALU.SHR: cpuSHIFT = op.SignedShift ? EncodingDefinition_ARMv4.c_shift_ASR : EncodingDefinition_ARMv4.c_shift_LSR; break;
 
                         default:
                             throw NotImplemented();
@@ -1589,7 +1589,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
 
                     if(regShift != null)
                     {
-                        InstructionSet.Opcode_DataProcessing_3 enc = this.Encoder.PrepareForDataProcessing_3;
+                        InstructionSetARMv4.Opcode_DataProcessing_3 enc = (InstructionSetARMv4.Opcode_DataProcessing_3)this.Encoder.PrepareForDataProcessing_3;
 
                         enc.Prepare( m_pendingCondition             ,  // uint ConditionCodes ,
                                      GetIntegerEncoding( regLeft )  ,  // uint Rn             ,
@@ -1610,7 +1610,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                         EncodeAs8BitImmediate( shift, false, out valSeed, out valRot );
                         if(valRot == 0)
                         {
-                            InstructionSet.Opcode_DataProcessing_2 enc = this.Encoder.PrepareForDataProcessing_2;
+                            InstructionSetARMv4.Opcode_DataProcessing_2 enc = (InstructionSetARMv4.Opcode_DataProcessing_2)this.Encoder.PrepareForDataProcessing_2;
                             
                             enc.Prepare( m_pendingCondition             ,  // uint ConditionCodes ,
                                          GetIntegerEncoding( regLeft )  ,  // uint Rn             ,
@@ -1951,14 +1951,14 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
 
             if(op.IsLoad)
             {
-                if(mask == EncodingDefinition_ARM.c_register_lst_pc && pa.Emit__WasRegisterTouched( m_reg_LR, m_registersUsed ) == false)
+                if(mask == EncodingDefinition_ARMv4.c_register_lst_pc && pa.Emit__WasRegisterTouched( m_reg_LR, m_registersUsed ) == false)
                 {
                     fFast = true;
                 }
             }
             else
             {
-                if(mask == EncodingDefinition_ARM.c_register_lst_lr && pa.Emit__WasRegisterTouched( m_reg_LR, m_registersUsed ) == false)
+                if(mask == EncodingDefinition_ARMv4.c_register_lst_lr && pa.Emit__WasRegisterTouched( m_reg_LR, m_registersUsed ) == false)
                 {
                     fSkip = true;
                 }
@@ -1979,7 +1979,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
             {
                 var  pa    = this.ArmPlatform;
                 var  Rn    = GetRegisterDescriptor( op.FirstArgument );
-                var  Fd    = pa.GetRegisterForEncoding( EncodingDefinition_VFP_ARM.c_register_d0 + indexLow / 2 );
+                var  Fd    = pa.GetRegisterForEncoding( EncodingDefinition_VFP_ARMv5.c_register_d0 + indexLow / 2 );
                 uint count = indexHigh - indexLow + 2;
 
                 if(op.IsLoad)
@@ -2141,28 +2141,28 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         {
             CHECKS.ASSERT( reg.InIntegerRegisterFile == true, "Expecting an integer register, got {0}", reg );
 
-            return reg.Encoding - EncodingDefinition_ARM.c_register_r0;
+            return reg.Encoding - EncodingDefinition_ARMv4.c_register_r0;
         }
 
         public static uint GetSystemEncoding( ZeligIR.Abstractions.RegisterDescriptor reg )
         {
             CHECKS.ASSERT( reg.IsSystemRegister, "Expecting a system register, got {0}", reg );
 
-            return reg.Encoding - EncodingDefinition_VFP_ARM.c_register_FPSID;
+            return reg.Encoding - EncodingDefinition_VFP_ARMv5.c_register_FPSID;
         }
 
         public static uint GetSinglePrecisionEncoding( ZeligIR.Abstractions.RegisterDescriptor reg )
         {
             CHECKS.ASSERT( reg.InFloatingPointRegisterFile == true && reg.IsDoublePrecision == false, "Expecting a single-precision register, got {0}", reg );
 
-            return reg.Encoding - EncodingDefinition_VFP_ARM.c_register_s0;
+            return reg.Encoding - EncodingDefinition_VFP_ARMv5.c_register_s0;
         }
 
         public static uint GetDoublePrecisionEncoding( ZeligIR.Abstractions.RegisterDescriptor reg )
         {
             CHECKS.ASSERT( reg.InFloatingPointRegisterFile == true && reg.IsDoublePrecision == true, "Expecting a double-precision register, got {0}", reg );
 
-            return (reg.Encoding - EncodingDefinition_VFP_ARM.c_register_d0) * 2;
+            return (reg.Encoding - EncodingDefinition_VFP_ARMv5.c_register_d0) * 2;
         }
     }
 }

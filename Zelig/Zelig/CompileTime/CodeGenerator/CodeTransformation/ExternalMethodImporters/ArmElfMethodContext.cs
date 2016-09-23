@@ -18,7 +18,7 @@ namespace Microsoft.Zelig.CodeGeneration.IR.ExternalMethodImporters
     /// </summary>
     public class ArmElfExternalCallContext : ArmElfContext, ExternalCallOperator.IExternalCallContext
     {
-        private static InstructionSet         s_iset;
+        private static InstructionSetARM      s_iset;
         //--//
         private readonly string               m_methodName;
         private readonly string               m_filePath;
@@ -48,7 +48,7 @@ namespace Microsoft.Zelig.CodeGeneration.IR.ExternalMethodImporters
 
         public static void Initialize(TypeSystemForCodeTransformation typeSystem)
         {
-            s_iset = typeSystem.PlatformAbstraction.GetInstructionSetProvider();
+            s_iset = typeSystem.PlatformAbstraction.GetInstructionSet();
 
             ElfObject.SystemArchitecture arch = ElfObject.SystemArchitecture.ArmV5;
             ElfObject.FloatingPointUnit fpu = ElfObject.FloatingPointUnit.None;
@@ -381,7 +381,7 @@ namespace Microsoft.Zelig.CodeGeneration.IR.ExternalMethodImporters
             {
                 uint                  callOffset = symRef.Offset;
                 uint                  op         = BitConverter.ToUInt32( m_elfSection.Raw, (int)callOffset );
-                InstructionSet.Opcode opcode     = s_iset.Decode( op );
+                InstructionSetARM.Opcode opcode     = s_iset.Decode( op );
                 RelocationEntry       reloc      = symRef.RelocationRef;
                 Symbol                sym        = reloc.ReferencedSymbol;
                 SymbolType            st         = sym.Type;
@@ -392,7 +392,7 @@ namespace Microsoft.Zelig.CodeGeneration.IR.ExternalMethodImporters
 
                 if(st == SymbolType.STT_FUNC || st == SymbolType.STT_NOTYPE)
                 {
-                    if(opcode is InstructionSet.Opcode_Branch)
+                    if(opcode is InstructionSetARMv4.Opcode_Branch)
                     {
                         uint methodOffset;
                         object target = GlobalContext.GetCodeForMethod( symName, out methodOffset );
@@ -416,7 +416,7 @@ namespace Microsoft.Zelig.CodeGeneration.IR.ExternalMethodImporters
                             Console.WriteLine( "UNABLE TO FIND EXTERNAL CALL REFERENCE " + symName );
                         }
                     }
-                    else if(opcode is InstructionSet.Opcode_DataProcessing_2)
+                    else if(opcode is InstructionSetARMv4.Opcode_DataProcessing_2)
                     {
                         uint dataOffset = 0;
 
@@ -483,11 +483,11 @@ namespace Microsoft.Zelig.CodeGeneration.IR.ExternalMethodImporters
 
         private uint UpdateExternalMethodCall( uint opcode, uint callerAddress, uint calleeAddress )
         {
-            InstructionSet.Opcode op = s_iset.Decode( opcode );
+            InstructionSetARM.Opcode op = s_iset.Decode( opcode );
 
-            if(op is InstructionSet.Opcode_Branch)
+            if(op is InstructionSetARMv4.Opcode_Branch)
             {
-                InstructionSet.Opcode_Branch branch = (InstructionSet.Opcode_Branch)op;
+                InstructionSetARMv4.Opcode_Branch branch = (InstructionSetARMv4.Opcode_Branch)op;
 
                 branch.Prepare( branch.ConditionCodes, (int)calleeAddress - EncodingDefinition.c_PC_offset - (int)callerAddress, branch.IsLink );
 

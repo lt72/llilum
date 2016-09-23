@@ -15,7 +15,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
 
     public partial class ArmCompilationState
     {
-        private static EncodingDefinition_ARM s_Encoding = (EncodingDefinition_ARM)CurrentInstructionSetEncoding.GetEncoding();
+        private static EncodingDefinition s_Encoding = CurrentInstructionSetEncoding.GetEncoding();
         //
         // State
         //
@@ -26,7 +26,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         // Helper Methods
         //
 
-        private InstructionSet Encoder
+        private InstructionSetARM Encoder
         {
             get
             {
@@ -34,15 +34,15 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
             }
         }
 
-        private InstructionSet_VFP Encoder_VFP
+        private InstructionSetARMv5_VFP Encoder_VFP
         {
             get
             {
-                return (InstructionSet_VFP)this.Encoder;
+                return (InstructionSetARMv5_VFP)this.Encoder;
             }
         }
 
-        internal static InstructionSet.Opcode GetOpcode( ZeligIR.ImageBuilders.CompilationState cs     ,
+        internal static InstructionSetARM.Opcode GetOpcode( ZeligIR.ImageBuilders.CompilationState cs     ,
                                                          ZeligIR.ImageBuilders.SequentialRegion reg    ,
                                                          uint                                   offset )
         {
@@ -54,7 +54,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         internal static void SetOpcode( ZeligIR.ImageBuilders.CompilationState cs     ,
                                         ZeligIR.ImageBuilders.SequentialRegion reg    ,
                                         uint                                   offset ,
-                                        InstructionSet.Opcode                  op     )
+                                        InstructionSetARM.Opcode                  op     )
         {
             reg.Write( offset, op.Encode() );
         }
@@ -97,9 +97,9 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
             m_pendingCondition = (uint)condARM;
         }
 
-        private void EnqueueOpcode( InstructionSet.Opcode enc )
+        private void EnqueueOpcode( InstructionSetARM.Opcode enc )
         {
-            m_pendingCondition = EncodingDefinition_ARM.c_cond_AL;
+            m_pendingCondition = EncodingDefinition.c_cond_AL;
 
             FlushOperatorContext();
 
@@ -112,25 +112,25 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         {
             uint                                   offset  = m_activeCodeSection.Offset - sizeof(uint);
             ZeligIR.ImageBuilders.SequentialRegion context = m_activeCodeSection.Context;
-            InstructionSet                         encoder = this.Encoder;
+            InstructionSetARM                      encoder = this.Encoder;
 
-            InstructionSet.Opcode op = encoder.Decode( context.ReadUInt( offset ) );
+            InstructionSetARM.Opcode op = encoder.Decode( context.ReadUInt( offset ) );
 
-            if(op is InstructionSet.Opcode_DataProcessing)
+            if(op is InstructionSetARMv4.Opcode_DataProcessing)
             {
-                InstructionSet.Opcode_DataProcessing op2 = (InstructionSet.Opcode_DataProcessing)op;
+                InstructionSetARMv4.Opcode_DataProcessing op2 = (InstructionSetARMv4.Opcode_DataProcessing)op;
 
                 op2.SetCC = true;
             }
-            else if(op is InstructionSet.Opcode_Multiply)
+            else if(op is InstructionSetARMv4.Opcode_Multiply)
             {
-                InstructionSet.Opcode_Multiply op2 = (InstructionSet.Opcode_Multiply)op;
+                InstructionSetARMv4.Opcode_Multiply op2 = (InstructionSetARMv4.Opcode_Multiply)op;
 
                 op2.SetCC = true;
             }
-            else if(op is InstructionSet.Opcode_MultiplyLong)
+            else if(op is InstructionSetARMv4.Opcode_MultiplyLong)
             {
-                InstructionSet.Opcode_MultiplyLong op2 = (InstructionSet.Opcode_MultiplyLong)op;
+                InstructionSetARMv4.Opcode_MultiplyLong op2 = (InstructionSetARMv4.Opcode_MultiplyLong)op;
 
                 op2.SetCC = true;
             }
@@ -178,12 +178,12 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                 case ZeligIR.ImageBuilders.Core.ConstantAddressEncodingLevel.Immediate:
                 case ZeligIR.ImageBuilders.Core.ConstantAddressEncodingLevel.SmallLoad:
                 case ZeligIR.ImageBuilders.Core.ConstantAddressEncodingLevel.NearRelativeLoad:
-                    CreateRelocation_LDR( opSource, obj, EncodingDefinition_ARM.c_PC_offset );
+                    CreateRelocation_LDR( opSource, obj, EncodingDefinition_ARMv4.c_PC_offset );
                     EmitOpcode__LDR( reg, m_reg_PC, 0 );
                     break;
 
                 case ZeligIR.ImageBuilders.Core.ConstantAddressEncodingLevel.FarRelativeLoad16Bit:
-                    CreateRelocation_MOV( opSource, obj, EncodingDefinition_ARM.c_PC_offset, 2 );
+                    CreateRelocation_MOV( opSource, obj, EncodingDefinition_ARMv4.c_PC_offset, 2 );
 
                     EmitOpcode__MOV_CONST( m_reg_Scratch,                0, 0 );
                     EmitOpcode__OR_CONST ( m_reg_Scratch, m_reg_Scratch, 0, 0 );
@@ -192,7 +192,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                     break;
 
                 case ZeligIR.ImageBuilders.Core.ConstantAddressEncodingLevel.FarRelativeLoad24Bit:
-                    CreateRelocation_MOV( opSource, obj, EncodingDefinition_ARM.c_PC_offset, 3 );
+                    CreateRelocation_MOV( opSource, obj, EncodingDefinition_ARMv4.c_PC_offset, 3 );
 
                     EmitOpcode__MOV_CONST( m_reg_Scratch,                0, 0 );
                     EmitOpcode__OR_CONST ( m_reg_Scratch, m_reg_Scratch, 0, 0 );
@@ -202,7 +202,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                     break;
 
                 case ZeligIR.ImageBuilders.Core.ConstantAddressEncodingLevel.FarRelativeLoad32Bit:
-                    CreateRelocation_MOV( opSource, obj, EncodingDefinition_ARM.c_PC_offset, 4 );
+                    CreateRelocation_MOV( opSource, obj, EncodingDefinition_ARMv4.c_PC_offset, 4 );
 
                     EmitOpcode__MOV_CONST( m_reg_Scratch,                0, 0 );
                     EmitOpcode__OR_CONST ( m_reg_Scratch, m_reg_Scratch, 0, 0 );
@@ -250,12 +250,12 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                 case ZeligIR.ImageBuilders.Core.ConstantAddressEncodingLevel.Immediate:
                 case ZeligIR.ImageBuilders.Core.ConstantAddressEncodingLevel.SmallLoad:
                 case ZeligIR.ImageBuilders.Core.ConstantAddressEncodingLevel.NearRelativeLoad:
-                    CreateRelocation_FLD( opSource, obj, EncodingDefinition_ARM.c_PC_offset );
+                    CreateRelocation_FLD( opSource, obj, EncodingDefinition_ARMv4.c_PC_offset );
                     EmitOpcode__FLD( reg, m_reg_PC, 0 );
                     break;
 
                 case ZeligIR.ImageBuilders.Core.ConstantAddressEncodingLevel.FarRelativeLoad16Bit:
-                    CreateRelocation_MOV( opSource, obj, EncodingDefinition_ARM.c_PC_offset, 2 );
+                    CreateRelocation_MOV( opSource, obj, EncodingDefinition_ARMv4.c_PC_offset, 2 );
 
                     EmitOpcode__MOV_CONST( m_reg_Scratch,                0, 0     );
                     EmitOpcode__OR_CONST ( m_reg_Scratch, m_reg_Scratch, 0, 0     );
@@ -264,7 +264,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                     break;
 
                 case ZeligIR.ImageBuilders.Core.ConstantAddressEncodingLevel.FarRelativeLoad24Bit:
-                    CreateRelocation_MOV( opSource, obj, EncodingDefinition_ARM.c_PC_offset, 3 );
+                    CreateRelocation_MOV( opSource, obj, EncodingDefinition_ARMv4.c_PC_offset, 3 );
 
                     EmitOpcode__MOV_CONST( m_reg_Scratch,                0, 0     );
                     EmitOpcode__OR_CONST ( m_reg_Scratch, m_reg_Scratch, 0, 0     );
@@ -274,7 +274,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                     break;
 
                 case ZeligIR.ImageBuilders.Core.ConstantAddressEncodingLevel.FarRelativeLoad32Bit:
-                    CreateRelocation_MOV( opSource, obj, EncodingDefinition_ARM.c_PC_offset, 4 );
+                    CreateRelocation_MOV( opSource, obj, EncodingDefinition_ARMv4.c_PC_offset, 4 );
 
                     EmitOpcode__MOV_CONST( m_reg_Scratch,                0, 0     );
                     EmitOpcode__OR_CONST ( m_reg_Scratch, m_reg_Scratch, 0, 0     );
@@ -365,7 +365,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
 
         public void EmitOpcode__BR( int offset )
         {
-            InstructionSet.Opcode_Branch enc = this.Encoder.PrepareForBranch;
+            InstructionSetARMv4.Opcode_Branch enc = (InstructionSetARMv4.Opcode_Branch)this.Encoder.PrepareForBranch;
 
             enc.Prepare( m_pendingCondition,  // uint ConditionCodes ,
                          offset            ,  // int  Offset         ,
@@ -376,7 +376,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
 
         public void EmitOpcode__BL( int offset )
         {
-            InstructionSet.Opcode_Branch enc = this.Encoder.PrepareForBranch;
+            InstructionSetARMv4.Opcode_Branch enc = (InstructionSetARMv4.Opcode_Branch)this.Encoder.PrepareForBranch;
 
             enc.Prepare( m_pendingCondition,  // uint ConditionCodes ,
                          offset            ,  // int  Offset         ,
@@ -426,7 +426,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                      bool                                    preIndex  ,
                                      bool                                    writeBack )
         {
-            InstructionSet.Opcode_SingleDataTransfer_1 enc = this.Encoder.PrepareForSingleDataTransfer_1;
+            InstructionSetARMv4.Opcode_SingleDataTransfer_1 enc = (InstructionSetARMv4.Opcode_SingleDataTransfer_1)this.Encoder.PrepareForSingleDataTransfer_1;
             bool                                       fUp;
             uint                                       uOffset;
 
@@ -460,7 +460,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                       bool                                    preIndex  ,
                                       bool                                    writeBack )
         {
-            InstructionSet.Opcode_SingleDataTransfer_1 enc = this.Encoder.PrepareForSingleDataTransfer_1;
+            InstructionSetARMv4.Opcode_SingleDataTransfer_1 enc = (InstructionSetARMv4.Opcode_SingleDataTransfer_1)this.Encoder.PrepareForSingleDataTransfer_1;
             bool                                       fUp;
             uint                                       uOffset;
 
@@ -494,7 +494,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                       bool                                    preIndex  ,
                                       bool                                    writeBack )
         {
-            InstructionSet.Opcode_HalfwordDataTransfer_2 enc = this.Encoder.PrepareForHalfwordDataTransfer_2;
+            InstructionSetARMv4.Opcode_HalfwordDataTransfer_2 enc = (InstructionSetARMv4.Opcode_HalfwordDataTransfer_2)this.Encoder.PrepareForHalfwordDataTransfer_2;
             bool                                         fUp;
             uint                                         uOffset;
 
@@ -516,7 +516,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                          fUp                                 ,  // bool Up             ,
                          writeBack                           ,  // bool WriteBack      ,
                          GetIntegerEncoding( Rs )            ,  // uint Rd             ,
-                         EncodingDefinition_ARM.c_halfwordkind_U2,  // uint Kind           ,
+                         EncodingDefinition_ARMv4.c_halfwordkind_U2,  // uint Kind           ,
                          uOffset                             ); // uint Offset         ,
 
             EnqueueOpcode( enc );
@@ -527,7 +527,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         public void EmitOpcode__Push( ZeligIR.Abstractions.RegisterDescriptor Rd ,
                                       ZeligIR.Abstractions.RegisterDescriptor Rs )
         {
-            InstructionSet.Opcode_SingleDataTransfer_1 enc = this.Encoder.PrepareForSingleDataTransfer_1;
+            InstructionSetARMv4.Opcode_SingleDataTransfer_1 enc = (InstructionSetARMv4.Opcode_SingleDataTransfer_1)this.Encoder.PrepareForSingleDataTransfer_1;
 
             enc.Prepare( m_pendingCondition      ,  // uint ConditionCodes ,
                          GetIntegerEncoding( Rd ),  // uint Rn             ,
@@ -545,7 +545,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         public void EmitOpcode__Pop( ZeligIR.Abstractions.RegisterDescriptor Rd ,
                                      ZeligIR.Abstractions.RegisterDescriptor Rs )
         {
-            InstructionSet.Opcode_SingleDataTransfer_1 enc = this.Encoder.PrepareForSingleDataTransfer_1;
+            InstructionSetARMv4.Opcode_SingleDataTransfer_1 enc = (InstructionSetARMv4.Opcode_SingleDataTransfer_1)this.Encoder.PrepareForSingleDataTransfer_1;
 
             enc.Prepare( m_pendingCondition      ,  // uint ConditionCodes ,
                          GetIntegerEncoding( Rd ),  // uint Rn             ,
@@ -614,7 +614,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                                ZeligIR.Abstractions.RegisterDescriptor Ridx  ,
                                                uint                                    shift )
         {
-            InstructionSet.Opcode_SingleDataTransfer_2 enc = this.Encoder.PrepareForSingleDataTransfer_2;
+            InstructionSetARMv4.Opcode_SingleDataTransfer_2 enc = (InstructionSetARMv4.Opcode_SingleDataTransfer_2)this.Encoder.PrepareForSingleDataTransfer_2;
 
             enc.Prepare( m_pendingCondition            ,  // uint ConditionCodes ,
                          GetIntegerEncoding( Rs )      ,  // uint Rn             ,
@@ -625,7 +625,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                          GetIntegerEncoding( Rd   )    ,  // uint Rd             ,
                          false                         ,  // bool IsByte         ,
                          GetIntegerEncoding( Ridx )    ,  // uint Rm             ,
-                         EncodingDefinition_ARM.c_shift_LSL,  // uint ShiftType      ,
+                         EncodingDefinition_ARMv4.c_shift_LSL,  // uint ShiftType      ,
                          shift                         ); // uint ShiftValue     ,
 
             EnqueueOpcode( enc );
@@ -635,7 +635,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         public void EmitOpcode__PLD( ZeligIR.Abstractions.RegisterDescriptor Rs     ,
                                      int                                     offset )
         {
-            InstructionSet.Opcode_SingleDataTransfer_1 enc = this.Encoder.PrepareForSingleDataTransfer_1;
+            InstructionSetARMv4.Opcode_SingleDataTransfer_1 enc = (InstructionSetARMv4.Opcode_SingleDataTransfer_1)this.Encoder.PrepareForSingleDataTransfer_1;
             bool                                       fUp;
             uint                                       uOffset;
 
@@ -650,15 +650,15 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                 uOffset = (uint)offset;
             }
 
-            enc.Prepare( EncodingDefinition_ARM.c_cond_UNUSED,  // uint ConditionCodes ,
-                         GetIntegerEncoding( Rs ),  // uint Rn             ,
-                         true                    ,  // bool IsLoad         ,
-                         true                    ,  // bool PreIndex       ,
-                         fUp                     ,  // bool Up             ,
-                         false                   ,  // bool WriteBack      ,
-                         0xF                     ,  // uint Rd             ,
-                         true                    ,  // bool IsByte         ,
-                         uOffset                 ); // uint Offset         ,
+            enc.Prepare( EncodingDefinition.c_cond_UNUSED,  // uint ConditionCodes ,
+                         GetIntegerEncoding( Rs )        ,  // uint Rn             ,
+                         true                            ,  // bool IsLoad         ,
+                         true                            ,  // bool PreIndex       ,
+                         fUp                             ,  // bool Up             ,
+                         false                           ,  // bool WriteBack      ,
+                         0xF                             ,  // uint Rd             ,
+                         true                            ,  // bool IsByte         ,
+                         uOffset                         ); // uint Offset         ,
 
             EnqueueOpcode( enc );
         }
@@ -676,7 +676,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                      bool                                    preIndex  ,
                                      bool                                    writeBack )
         {
-            InstructionSet.Opcode_SingleDataTransfer_1 enc = this.Encoder.PrepareForSingleDataTransfer_1;
+            InstructionSetARMv4.Opcode_SingleDataTransfer_1 enc = (InstructionSetARMv4.Opcode_SingleDataTransfer_1)this.Encoder.PrepareForSingleDataTransfer_1;
             bool                                       fUp;
             uint                                       uOffset;
 
@@ -710,7 +710,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                        bool                                    preIndex  ,
                                        bool                                    writeBack )
         {
-            InstructionSet.Opcode_HalfwordDataTransfer_2 enc = this.Encoder.PrepareForHalfwordDataTransfer_2;
+            InstructionSetARMv4.Opcode_HalfwordDataTransfer_2 enc = (InstructionSetARMv4.Opcode_HalfwordDataTransfer_2)this.Encoder.PrepareForHalfwordDataTransfer_2;
             bool                                         fUp;
             uint                                         uOffset;
 
@@ -732,7 +732,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                          fUp                                 ,  // bool Up             ,
                          writeBack                           ,  // bool WriteBack      ,
                          GetIntegerEncoding( Rd )            ,  // uint Rd             ,
-                         EncodingDefinition_ARM.c_halfwordkind_I2,  // uint Kind           ,
+                         EncodingDefinition_ARMv4.c_halfwordkind_I2,  // uint Kind           ,
                          uOffset                             ); // uint Offset         
 
             EnqueueOpcode( enc );
@@ -744,7 +744,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                       bool                                    preIndex  ,
                                       bool                                    writeBack )
         {
-            InstructionSet.Opcode_HalfwordDataTransfer_2 enc = this.Encoder.PrepareForHalfwordDataTransfer_2;
+            InstructionSetARMv4.Opcode_HalfwordDataTransfer_2 enc = (InstructionSetARMv4.Opcode_HalfwordDataTransfer_2)this.Encoder.PrepareForHalfwordDataTransfer_2;
             bool                                         fUp;
             uint                                         uOffset;
 
@@ -766,7 +766,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                          fUp                                 ,  // bool Up             ,
                          writeBack                           ,  // bool WriteBack      ,
                          GetIntegerEncoding( Rd )            ,  // uint Rd             ,
-                         EncodingDefinition_ARM.c_halfwordkind_U2,  // uint Kind           ,
+                         EncodingDefinition_ARMv4.c_halfwordkind_U2,  // uint Kind           ,
                          uOffset                             ); // uint Offset         
 
             EnqueueOpcode( enc );
@@ -778,7 +778,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                        bool                                    preIndex  ,
                                        bool                                    writeBack )
         {
-            InstructionSet.Opcode_HalfwordDataTransfer_2 enc = this.Encoder.PrepareForHalfwordDataTransfer_2;
+            InstructionSetARMv4.Opcode_HalfwordDataTransfer_2 enc = (InstructionSetARMv4.Opcode_HalfwordDataTransfer_2)this.Encoder.PrepareForHalfwordDataTransfer_2;
             bool                                         fUp;
             uint                                         uOffset;
 
@@ -800,7 +800,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                          fUp                                 ,  // bool Up             ,
                          writeBack                           ,  // bool WriteBack      ,
                          GetIntegerEncoding( Rd )            ,  // uint Rd             ,
-                         EncodingDefinition_ARM.c_halfwordkind_I1,  // uint Kind           ,
+                         EncodingDefinition_ARMv4.c_halfwordkind_I1,  // uint Kind           ,
                          uOffset                             ); // uint Offset         
 
             EnqueueOpcode( enc );
@@ -812,7 +812,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                       bool                                    preIndex  ,
                                       bool                                    writeBack )
         {
-            InstructionSet.Opcode_SingleDataTransfer_1 enc = this.Encoder.PrepareForSingleDataTransfer_1;
+            InstructionSetARMv4.Opcode_SingleDataTransfer_1 enc = (InstructionSetARMv4.Opcode_SingleDataTransfer_1)this.Encoder.PrepareForSingleDataTransfer_1;
             bool                                       fUp;
             uint                                       uOffset;
 
@@ -847,12 +847,12 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                            uint                                    valSeed ,
                                            uint                                    valRot  )
         {
-            InstructionSet.Opcode_DataProcessing_1 enc = this.Encoder.PrepareForDataProcessing_1;
+            InstructionSetARMv4.Opcode_DataProcessing_1 enc = (InstructionSetARMv4.Opcode_DataProcessing_1)this.Encoder.PrepareForDataProcessing_1;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes    ,
-                         EncodingDefinition_ARM.c_register_r0  ,  // uint Rn                ,
+                         EncodingDefinition_ARMv4.c_register_r0  ,  // uint Rn                ,
                          GetIntegerEncoding( Rd )          ,  // uint Rd                ,
-                         EncodingDefinition_ARM.c_operation_MOV,  // uint Alu               ,
+                         EncodingDefinition_ARMv4.c_operation_MOV,  // uint Alu               ,
                          false                             ,  // bool SetCC             ,
                          valSeed                           ,  // uint ImmediateSeed     ,
                          valRot                            ); // uint ImmediateRotation ,
@@ -864,12 +864,12 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                            uint                                    valSeed ,
                                            uint                                    valRot  )
         {
-            InstructionSet.Opcode_DataProcessing_1 enc = this.Encoder.PrepareForDataProcessing_1;
+            InstructionSetARMv4.Opcode_DataProcessing_1 enc = (InstructionSetARMv4.Opcode_DataProcessing_1)this.Encoder.PrepareForDataProcessing_1;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes    ,
-                         EncodingDefinition_ARM.c_register_r0  ,  // uint Rn                ,
+                         EncodingDefinition_ARMv4.c_register_r0  ,  // uint Rn                ,
                          GetIntegerEncoding( Rd )          ,  // uint Rd                ,
-                         EncodingDefinition_ARM.c_operation_MVN,  // uint Alu               ,
+                         EncodingDefinition_ARMv4.c_operation_MVN,  // uint Alu               ,
                          false                             ,  // bool SetCC             ,
                          valSeed                           ,  // uint ImmediateSeed     ,
                          valRot                            ); // uint ImmediateRotation ,
@@ -882,12 +882,12 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                            uint                                    valSeed ,
                                            uint                                    valRot  )
         {
-            InstructionSet.Opcode_DataProcessing_1 enc = this.Encoder.PrepareForDataProcessing_1;
+            InstructionSetARMv4.Opcode_DataProcessing_1 enc = (InstructionSetARMv4.Opcode_DataProcessing_1)this.Encoder.PrepareForDataProcessing_1;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes    ,
                          GetIntegerEncoding( Rs )          ,  // uint Rn                ,
                          GetIntegerEncoding( Rd )          ,  // uint Rd                ,
-                         EncodingDefinition_ARM.c_operation_ADD,  // uint Alu               ,
+                         EncodingDefinition_ARMv4.c_operation_ADD,  // uint Alu               ,
                          false                             ,  // bool SetCC             ,
                          valSeed                           ,  // uint ImmediateSeed     ,
                          valRot                            ); // uint ImmediateRotation ,
@@ -900,12 +900,12 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                            uint                                    valSeed ,
                                            uint                                    valRot  )
         {
-            InstructionSet.Opcode_DataProcessing_1 enc = this.Encoder.PrepareForDataProcessing_1;
+            InstructionSetARMv4.Opcode_DataProcessing_1 enc = (InstructionSetARMv4.Opcode_DataProcessing_1)this.Encoder.PrepareForDataProcessing_1;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes    ,
                          GetIntegerEncoding( Rs )          ,  // uint Rn                ,
                          GetIntegerEncoding( Rd )          ,  // uint Rd                ,
-                         EncodingDefinition_ARM.c_operation_ADC,  // uint Alu               ,
+                         EncodingDefinition_ARMv4.c_operation_ADC,  // uint Alu               ,
                          false                             ,  // bool SetCC             ,
                          valSeed                           ,  // uint ImmediateSeed     ,
                          valRot                            ); // uint ImmediateRotation ,
@@ -918,12 +918,12 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                            uint                                    valSeed ,
                                            uint                                    valRot  )
         {
-            InstructionSet.Opcode_DataProcessing_1 enc = this.Encoder.PrepareForDataProcessing_1;
+            InstructionSetARMv4.Opcode_DataProcessing_1 enc = (InstructionSetARMv4.Opcode_DataProcessing_1)this.Encoder.PrepareForDataProcessing_1;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes    ,
                          GetIntegerEncoding( Rs )          ,  // uint Rn                ,
                          GetIntegerEncoding( Rd )          ,  // uint Rd                ,
-                         EncodingDefinition_ARM.c_operation_SUB,  // uint Alu               ,
+                         EncodingDefinition_ARMv4.c_operation_SUB,  // uint Alu               ,
                          false                             ,  // bool SetCC             ,
                          valSeed                           ,  // uint ImmediateSeed     ,
                          valRot                            ); // uint ImmediateRotation ,
@@ -936,12 +936,12 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                            uint valSeed ,
                                            uint valRot  )
         {
-            InstructionSet.Opcode_DataProcessing_1 enc = this.Encoder.PrepareForDataProcessing_1;
+            InstructionSetARMv4.Opcode_DataProcessing_1 enc = (InstructionSetARMv4.Opcode_DataProcessing_1)this.Encoder.PrepareForDataProcessing_1;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes    ,
                          GetIntegerEncoding( Rs )          ,  // uint Rn                ,
                          GetIntegerEncoding( Rd )          ,  // uint Rd                ,
-                         EncodingDefinition_ARM.c_operation_SBC,  // uint Alu               ,
+                         EncodingDefinition_ARMv4.c_operation_SBC,  // uint Alu               ,
                          false                             ,  // bool SetCC             ,
                          valSeed                           ,  // uint ImmediateSeed     ,
                          valRot                            ); // uint ImmediateRotation ,
@@ -954,12 +954,12 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                            uint                                    valSeed ,
                                            uint                                    valRot  )
         {
-            InstructionSet.Opcode_DataProcessing_1 enc = this.Encoder.PrepareForDataProcessing_1;
+            InstructionSetARMv4.Opcode_DataProcessing_1 enc = (InstructionSetARMv4.Opcode_DataProcessing_1)this.Encoder.PrepareForDataProcessing_1;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes    ,
                          GetIntegerEncoding( Rs )          ,  // uint Rn                ,
                          GetIntegerEncoding( Rd )          ,  // uint Rd                ,
-                         EncodingDefinition_ARM.c_operation_RSB,  // uint Alu               ,
+                         EncodingDefinition_ARMv4.c_operation_RSB,  // uint Alu               ,
                          false                             ,  // bool SetCC             ,
                          valSeed                           ,  // uint ImmediateSeed     ,
                          valRot                            ); // uint ImmediateRotation ,
@@ -972,12 +972,12 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                            uint                                    valSeed ,
                                            uint                                    valRot  )
         {
-            InstructionSet.Opcode_DataProcessing_1 enc = this.Encoder.PrepareForDataProcessing_1;
+            InstructionSetARMv4.Opcode_DataProcessing_1 enc = (InstructionSetARMv4.Opcode_DataProcessing_1)this.Encoder.PrepareForDataProcessing_1;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes    ,
                          GetIntegerEncoding( Rs )          ,  // uint Rn                ,
                          GetIntegerEncoding( Rd )          ,  // uint Rd                ,
-                         EncodingDefinition_ARM.c_operation_RSC,  // uint Alu               ,
+                         EncodingDefinition_ARMv4.c_operation_RSC,  // uint Alu               ,
                          false                             ,  // bool SetCC             ,
                          valSeed                           ,  // uint ImmediateSeed     ,
                          valRot                            ); // uint ImmediateRotation ,
@@ -989,12 +989,12 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                            uint                                    valSeed ,
                                            uint                                    valRot  )
         {
-            InstructionSet.Opcode_DataProcessing_1 enc = this.Encoder.PrepareForDataProcessing_1;
+            InstructionSetARMv4.Opcode_DataProcessing_1 enc = (InstructionSetARMv4.Opcode_DataProcessing_1)this.Encoder.PrepareForDataProcessing_1;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes    ,
                          GetIntegerEncoding( Rs )          ,  // uint Rn                ,
                          0                                 ,  // uint Rd                ,
-                         EncodingDefinition_ARM.c_operation_CMP,  // uint Alu               ,
+                         EncodingDefinition_ARMv4.c_operation_CMP,  // uint Alu               ,
                          true                              ,  // bool SetCC             ,
                          valSeed                           ,  // uint ImmediateSeed     ,
                          valRot                            ); // uint ImmediateRotation ,
@@ -1006,12 +1006,12 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                            uint                                    valSeed ,
                                            uint                                    valRot  )
         {
-            InstructionSet.Opcode_DataProcessing_1 enc = this.Encoder.PrepareForDataProcessing_1;
+            InstructionSetARMv4.Opcode_DataProcessing_1 enc = (InstructionSetARMv4.Opcode_DataProcessing_1)this.Encoder.PrepareForDataProcessing_1;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes    ,
                          GetIntegerEncoding( Rs )          ,  // uint Rn                ,
                          0                                 ,  // uint Rd                ,
-                         EncodingDefinition_ARM.c_operation_TST,  // uint Alu               ,
+                         EncodingDefinition_ARMv4.c_operation_TST,  // uint Alu               ,
                          true                              ,  // bool SetCC             ,
                          valSeed                           ,  // uint ImmediateSeed     ,
                          valRot                            ); // uint ImmediateRotation ,
@@ -1036,12 +1036,12 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                            uint                                    valSeed ,
                                            uint                                    valRot  )
         {
-            InstructionSet.Opcode_DataProcessing_1 enc = this.Encoder.PrepareForDataProcessing_1;
+            InstructionSetARMv4.Opcode_DataProcessing_1 enc = (InstructionSetARMv4.Opcode_DataProcessing_1)this.Encoder.PrepareForDataProcessing_1;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes    ,
                          GetIntegerEncoding( Rs )          ,  // uint Rn                ,
                          GetIntegerEncoding( Rd )          ,  // uint Rd                ,
-                         EncodingDefinition_ARM.c_operation_AND,  // uint Alu               ,
+                         EncodingDefinition_ARMv4.c_operation_AND,  // uint Alu               ,
                          false                             ,  // bool SetCC             ,
                          valSeed                           ,  // uint ImmediateSeed     ,
                          valRot                            ); // uint ImmediateRotation ,
@@ -1066,12 +1066,12 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                            uint                                    valSeed ,
                                            uint                                    valRot  )
         {
-            InstructionSet.Opcode_DataProcessing_1 enc = this.Encoder.PrepareForDataProcessing_1;
+            InstructionSetARMv4.Opcode_DataProcessing_1 enc = (InstructionSetARMv4.Opcode_DataProcessing_1)this.Encoder.PrepareForDataProcessing_1;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes    ,
                          GetIntegerEncoding( Rs )          ,  // uint Rn                ,
                          GetIntegerEncoding( Rd )          ,  // uint Rd                ,
-                         EncodingDefinition_ARM.c_operation_BIC,  // uint Alu               ,
+                         EncodingDefinition_ARMv4.c_operation_BIC,  // uint Alu               ,
                          false                             ,  // bool SetCC             ,
                          valSeed                           ,  // uint ImmediateSeed     ,
                          valRot                            ); // uint ImmediateRotation ,
@@ -1096,12 +1096,12 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                           uint                                    valSeed ,
                                           uint                                    valRot  )
         {
-            InstructionSet.Opcode_DataProcessing_1 enc = this.Encoder.PrepareForDataProcessing_1;
+            InstructionSetARMv4.Opcode_DataProcessing_1 enc = (InstructionSetARMv4.Opcode_DataProcessing_1)this.Encoder.PrepareForDataProcessing_1;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes    ,
                          GetIntegerEncoding( Rs )          ,  // uint Rn                ,
                          GetIntegerEncoding( Rd )          ,  // uint Rd                ,
-                         EncodingDefinition_ARM.c_operation_ORR,  // uint Alu               ,
+                         EncodingDefinition_ARMv4.c_operation_ORR,  // uint Alu               ,
                          false                             ,  // bool SetCC             ,
                          valSeed                           ,  // uint ImmediateSeed     ,
                          valRot                            ); // uint ImmediateRotation ,
@@ -1126,12 +1126,12 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                            uint                                    valSeed ,
                                            uint                                    valRot  )
         {
-            InstructionSet.Opcode_DataProcessing_1 enc = this.Encoder.PrepareForDataProcessing_1;
+            InstructionSetARMv4.Opcode_DataProcessing_1 enc = (InstructionSetARMv4.Opcode_DataProcessing_1)this.Encoder.PrepareForDataProcessing_1;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes    ,
                          GetIntegerEncoding( Rs )          ,  // uint Rn                ,
                          GetIntegerEncoding( Rd )          ,  // uint Rd                ,
-                         EncodingDefinition_ARM.c_operation_EOR,  // uint Alu               ,
+                         EncodingDefinition_ARMv4.c_operation_EOR,  // uint Alu               ,
                          false                             ,  // bool SetCC             ,
                          valSeed                           ,  // uint ImmediateSeed     ,
                          valRot                            ); // uint ImmediateRotation ,
@@ -1153,15 +1153,15 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         public void EmitOpcode__MOV( ZeligIR.Abstractions.RegisterDescriptor Rd ,
                                      ZeligIR.Abstractions.RegisterDescriptor Rs )
         {
-            InstructionSet.Opcode_DataProcessing_2 enc = this.Encoder.PrepareForDataProcessing_2;
+            InstructionSetARMv4.Opcode_DataProcessing_2 enc = (InstructionSetARMv4.Opcode_DataProcessing_2)this.Encoder.PrepareForDataProcessing_2;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes ,
-                         EncodingDefinition_ARM.c_register_r0  ,  // uint Rn             ,
+                         EncodingDefinition_ARMv4.c_register_r0  ,  // uint Rn             ,
                          GetIntegerEncoding( Rd )          ,  // uint Rd             ,
-                         EncodingDefinition_ARM.c_operation_MOV,  // uint Alu            ,
+                         EncodingDefinition_ARMv4.c_operation_MOV,  // uint Alu            ,
                          false                             ,  // bool SetCC          ,
                          GetIntegerEncoding( Rs )          ,  // uint Rm             ,
-                         EncodingDefinition_ARM.c_shift_LSL    ,  // uint ShiftType      ,
+                         EncodingDefinition_ARMv4.c_shift_LSL    ,  // uint ShiftType      ,
                          0                                 ); // uint ShiftValue     ,
 
             EnqueueOpcode( enc );
@@ -1170,15 +1170,15 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         public void EmitOpcode__MVN( ZeligIR.Abstractions.RegisterDescriptor Rd ,
                                      ZeligIR.Abstractions.RegisterDescriptor Rs )
         {
-            InstructionSet.Opcode_DataProcessing_2 enc = this.Encoder.PrepareForDataProcessing_2;
+            InstructionSetARMv4.Opcode_DataProcessing_2 enc = (InstructionSetARMv4.Opcode_DataProcessing_2)this.Encoder.PrepareForDataProcessing_2;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes ,
-                         EncodingDefinition_ARM.c_register_r0  ,  // uint Rn             ,
+                         EncodingDefinition_ARMv4.c_register_r0  ,  // uint Rn             ,
                          GetIntegerEncoding( Rd )          ,  // uint Rd             ,
-                         EncodingDefinition_ARM.c_operation_MVN,  // uint Alu            ,
+                         EncodingDefinition_ARMv4.c_operation_MVN,  // uint Alu            ,
                          false                             ,  // bool SetCC          ,
                          GetIntegerEncoding( Rs )          ,  // uint Rm             ,
-                         EncodingDefinition_ARM.c_shift_LSL    ,  // uint ShiftType      ,
+                         EncodingDefinition_ARMv4.c_shift_LSL    ,  // uint ShiftType      ,
                          0                                 ); // uint ShiftValue     ,
 
             EnqueueOpcode( enc );
@@ -1188,15 +1188,15 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                      ZeligIR.Abstractions.RegisterDescriptor Rn ,
                                      ZeligIR.Abstractions.RegisterDescriptor Rm )
         {
-            InstructionSet.Opcode_DataProcessing_2 enc = this.Encoder.PrepareForDataProcessing_2;
+            InstructionSetARMv4.Opcode_DataProcessing_2 enc = (InstructionSetARMv4.Opcode_DataProcessing_2)this.Encoder.PrepareForDataProcessing_2;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes ,
                          GetIntegerEncoding( Rn )          ,  // uint Rn             ,
                          GetIntegerEncoding( Rd )          ,  // uint Rd             ,
-                         EncodingDefinition_ARM.c_operation_ADD,  // uint Alu            ,
+                         EncodingDefinition_ARMv4.c_operation_ADD,  // uint Alu            ,
                          false                             ,  // bool SetCC          ,
                          GetIntegerEncoding( Rm )          ,  // uint Rm             ,
-                         EncodingDefinition_ARM.c_shift_LSL    ,  // uint ShiftType      ,
+                         EncodingDefinition_ARMv4.c_shift_LSL    ,  // uint ShiftType      ,
                          0                                 ); // uint ShiftValue     ,
 
             EnqueueOpcode( enc );
@@ -1206,15 +1206,15 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                      ZeligIR.Abstractions.RegisterDescriptor Rn ,
                                      ZeligIR.Abstractions.RegisterDescriptor Rm )
         {
-            InstructionSet.Opcode_DataProcessing_2 enc = this.Encoder.PrepareForDataProcessing_2;
+            InstructionSetARMv4.Opcode_DataProcessing_2 enc = (InstructionSetARMv4.Opcode_DataProcessing_2)this.Encoder.PrepareForDataProcessing_2;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes ,
                          GetIntegerEncoding( Rn )          ,  // uint Rn             ,
                          GetIntegerEncoding( Rd )          ,  // uint Rd             ,
-                         EncodingDefinition_ARM.c_operation_ADC,  // uint Alu            ,
+                         EncodingDefinition_ARMv4.c_operation_ADC,  // uint Alu            ,
                          false                             ,  // bool SetCC          ,
                          GetIntegerEncoding( Rm )          ,  // uint Rm             ,
-                         EncodingDefinition_ARM.c_shift_LSL    ,  // uint ShiftType      ,
+                         EncodingDefinition_ARMv4.c_shift_LSL    ,  // uint ShiftType      ,
                          0                                 ); // uint ShiftValue     ,
 
             EnqueueOpcode( enc );
@@ -1224,15 +1224,15 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                      ZeligIR.Abstractions.RegisterDescriptor Rn ,
                                      ZeligIR.Abstractions.RegisterDescriptor Rm )
         {
-            InstructionSet.Opcode_DataProcessing_2 enc = this.Encoder.PrepareForDataProcessing_2;
+            InstructionSetARMv4.Opcode_DataProcessing_2 enc = (InstructionSetARMv4.Opcode_DataProcessing_2)this.Encoder.PrepareForDataProcessing_2;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes ,
                          GetIntegerEncoding( Rn )          ,  // uint Rn             ,
                          GetIntegerEncoding( Rd )          ,  // uint Rd             ,
-                         EncodingDefinition_ARM.c_operation_SUB,  // uint Alu            ,
+                         EncodingDefinition_ARMv4.c_operation_SUB,  // uint Alu            ,
                          false                             ,  // bool SetCC          ,
                          GetIntegerEncoding( Rm )          ,  // uint Rm             ,
-                         EncodingDefinition_ARM.c_shift_LSL    ,  // uint ShiftType      ,
+                         EncodingDefinition_ARMv4.c_shift_LSL    ,  // uint ShiftType      ,
                          0                                 ); // uint ShiftValue     ,
 
             EnqueueOpcode( enc );
@@ -1242,15 +1242,15 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                      ZeligIR.Abstractions.RegisterDescriptor Rn ,
                                      ZeligIR.Abstractions.RegisterDescriptor Rm )
         {
-            InstructionSet.Opcode_DataProcessing_2 enc = this.Encoder.PrepareForDataProcessing_2;
+            InstructionSetARMv4.Opcode_DataProcessing_2 enc = (InstructionSetARMv4.Opcode_DataProcessing_2)this.Encoder.PrepareForDataProcessing_2;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes ,
                          GetIntegerEncoding( Rn )          ,  // uint Rn             ,
                          GetIntegerEncoding( Rd )          ,  // uint Rd             ,
-                         EncodingDefinition_ARM.c_operation_SBC,  // uint Alu            ,
+                         EncodingDefinition_ARMv4.c_operation_SBC,  // uint Alu            ,
                          false                             ,  // bool SetCC          ,
                          GetIntegerEncoding( Rm )          ,  // uint Rm             ,
-                         EncodingDefinition_ARM.c_shift_LSL    ,  // uint ShiftType      ,
+                         EncodingDefinition_ARMv4.c_shift_LSL    ,  // uint ShiftType      ,
                          0                                 ); // uint ShiftValue     ,
 
             EnqueueOpcode( enc );
@@ -1260,15 +1260,15 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                      ZeligIR.Abstractions.RegisterDescriptor Rn ,
                                      ZeligIR.Abstractions.RegisterDescriptor Rm )
         {
-            InstructionSet.Opcode_DataProcessing_2 enc = this.Encoder.PrepareForDataProcessing_2;
+            InstructionSetARMv4.Opcode_DataProcessing_2 enc = (InstructionSetARMv4.Opcode_DataProcessing_2)this.Encoder.PrepareForDataProcessing_2;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes ,
                          GetIntegerEncoding( Rn )          ,  // uint Rn             ,
                          GetIntegerEncoding( Rd )          ,  // uint Rd             ,
-                         EncodingDefinition_ARM.c_operation_RSC,  // uint Alu            ,
+                         EncodingDefinition_ARMv4.c_operation_RSC,  // uint Alu            ,
                          false                             ,  // bool SetCC          ,
                          GetIntegerEncoding( Rm )          ,  // uint Rm             ,
-                         EncodingDefinition_ARM.c_shift_LSL    ,  // uint ShiftType      ,
+                         EncodingDefinition_ARMv4.c_shift_LSL    ,  // uint ShiftType      ,
                          0                                 ); // uint ShiftValue     ,
 
             EnqueueOpcode( enc );
@@ -1277,15 +1277,15 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         public void EmitOpcode__CMP( ZeligIR.Abstractions.RegisterDescriptor Rn ,
                                      ZeligIR.Abstractions.RegisterDescriptor Rm )
         {
-            InstructionSet.Opcode_DataProcessing_2 enc = this.Encoder.PrepareForDataProcessing_2;
+            InstructionSetARMv4.Opcode_DataProcessing_2 enc = (InstructionSetARMv4.Opcode_DataProcessing_2)this.Encoder.PrepareForDataProcessing_2;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes ,
                          GetIntegerEncoding( Rn )          ,  // uint Rn             ,
                          0                                 ,  // uint Rd             ,
-                         EncodingDefinition_ARM.c_operation_CMP,  // uint Alu            ,
+                         EncodingDefinition_ARMv4.c_operation_CMP,  // uint Alu            ,
                          true                              ,  // bool SetCC          ,
                          GetIntegerEncoding( Rm )          ,  // uint Rm             ,
-                         EncodingDefinition_ARM.c_shift_LSL    ,  // uint ShiftType      ,
+                         EncodingDefinition_ARMv4.c_shift_LSL    ,  // uint ShiftType      ,
                          0                                 ); // uint ShiftValue     ,
 
             EnqueueOpcode( enc );
@@ -1294,15 +1294,15 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         public void EmitOpcode__TST( ZeligIR.Abstractions.RegisterDescriptor Rn ,
                                      ZeligIR.Abstractions.RegisterDescriptor Rm )
         {
-            InstructionSet.Opcode_DataProcessing_2 enc = this.Encoder.PrepareForDataProcessing_2;
+            InstructionSetARMv4.Opcode_DataProcessing_2 enc = (InstructionSetARMv4.Opcode_DataProcessing_2)this.Encoder.PrepareForDataProcessing_2;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes ,
                          GetIntegerEncoding( Rn )          ,  // uint Rn             ,
                          0                                 ,  // uint Rd             ,
-                         EncodingDefinition_ARM.c_operation_TST,  // uint Alu            ,
+                         EncodingDefinition_ARMv4.c_operation_TST,  // uint Alu            ,
                          true                              ,  // bool SetCC          ,
                          GetIntegerEncoding( Rm )          ,  // uint Rm             ,
-                         EncodingDefinition_ARM.c_shift_LSL    ,  // uint ShiftType      ,
+                         EncodingDefinition_ARMv4.c_shift_LSL    ,  // uint ShiftType      ,
                          0                                 ); // uint ShiftValue     ,
 
             EnqueueOpcode( enc );
@@ -1312,15 +1312,15 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                      ZeligIR.Abstractions.RegisterDescriptor Rn ,
                                      ZeligIR.Abstractions.RegisterDescriptor Rm )
         {
-            InstructionSet.Opcode_DataProcessing_2 enc = this.Encoder.PrepareForDataProcessing_2;
+            InstructionSetARMv4.Opcode_DataProcessing_2 enc = (InstructionSetARMv4.Opcode_DataProcessing_2)this.Encoder.PrepareForDataProcessing_2;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes ,
                          GetIntegerEncoding( Rn )          ,  // uint Rn             ,
                          GetIntegerEncoding( Rd )          ,  // uint Rd             ,
-                         EncodingDefinition_ARM.c_operation_AND,  // uint Alu            ,
+                         EncodingDefinition_ARMv4.c_operation_AND,  // uint Alu            ,
                          false                             ,  // bool SetCC          ,
                          GetIntegerEncoding( Rm )          ,  // uint Rm             ,
-                         EncodingDefinition_ARM.c_shift_LSL    ,  // uint ShiftType      ,
+                         EncodingDefinition_ARMv4.c_shift_LSL    ,  // uint ShiftType      ,
                          0                                 ); // uint ShiftValue     ,
 
             EnqueueOpcode( enc );
@@ -1330,15 +1330,15 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                     ZeligIR.Abstractions.RegisterDescriptor Rn ,
                                     ZeligIR.Abstractions.RegisterDescriptor Rm )
         {
-            InstructionSet.Opcode_DataProcessing_2 enc = this.Encoder.PrepareForDataProcessing_2;
+            InstructionSetARMv4.Opcode_DataProcessing_2 enc = (InstructionSetARMv4.Opcode_DataProcessing_2)this.Encoder.PrepareForDataProcessing_2;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes ,
                          GetIntegerEncoding( Rn )          ,  // uint Rn             ,
                          GetIntegerEncoding( Rd )          ,  // uint Rd             ,
-                         EncodingDefinition_ARM.c_operation_ORR,  // uint Alu            ,
+                         EncodingDefinition_ARMv4.c_operation_ORR,  // uint Alu            ,
                          false                             ,  // bool SetCC          ,
                          GetIntegerEncoding( Rm )          ,  // uint Rm             ,
-                         EncodingDefinition_ARM.c_shift_LSL    ,  // uint ShiftType      ,
+                         EncodingDefinition_ARMv4.c_shift_LSL    ,  // uint ShiftType      ,
                          0                                 ); // uint ShiftValue     ,
 
             EnqueueOpcode( enc );
@@ -1348,15 +1348,15 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                      ZeligIR.Abstractions.RegisterDescriptor Rn ,
                                      ZeligIR.Abstractions.RegisterDescriptor Rm )
         {
-            InstructionSet.Opcode_DataProcessing_2 enc = this.Encoder.PrepareForDataProcessing_2;
+            InstructionSetARMv4.Opcode_DataProcessing_2 enc = (InstructionSetARMv4.Opcode_DataProcessing_2)this.Encoder.PrepareForDataProcessing_2;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes ,
                          GetIntegerEncoding( Rn )          ,  // uint Rn             ,
                          GetIntegerEncoding( Rd )          ,  // uint Rd             ,
-                         EncodingDefinition_ARM.c_operation_EOR,  // uint Alu            ,
+                         EncodingDefinition_ARMv4.c_operation_EOR,  // uint Alu            ,
                          false                             ,  // bool SetCC          ,
                          GetIntegerEncoding( Rm )          ,  // uint Rm             ,
-                         EncodingDefinition_ARM.c_shift_LSL    ,  // uint ShiftType      ,
+                         EncodingDefinition_ARMv4.c_shift_LSL    ,  // uint ShiftType      ,
                          0                                 ); // uint ShiftValue     ,
 
             EnqueueOpcode( enc );
@@ -1366,15 +1366,15 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                      ZeligIR.Abstractions.RegisterDescriptor Rm ,
                                      ZeligIR.Abstractions.RegisterDescriptor Rs )
         {
-            InstructionSet.Opcode_DataProcessing_3 enc = this.Encoder.PrepareForDataProcessing_3;
+            InstructionSetARMv4.Opcode_DataProcessing_3 enc = (InstructionSetARMv4.Opcode_DataProcessing_3)this.Encoder.PrepareForDataProcessing_3;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes ,
                          0                                 ,  // uint Rn             ,
                          GetIntegerEncoding( Rd )          ,  // uint Rd             ,
-                         EncodingDefinition_ARM.c_operation_MOV,  // uint Alu            ,
+                         EncodingDefinition_ARMv4.c_operation_MOV,  // uint Alu            ,
                          false                             ,  // bool SetCC          ,
                          GetIntegerEncoding( Rm )          ,  // uint Rm             ,
-                         EncodingDefinition_ARM.c_shift_LSL    ,  // uint ShiftType      ,
+                         EncodingDefinition_ARMv4.c_shift_LSL    ,  // uint ShiftType      ,
                          GetIntegerEncoding( Rs )          ); // uint Rs             ,
 
             EnqueueOpcode( enc );
@@ -1384,15 +1384,15 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                      ZeligIR.Abstractions.RegisterDescriptor Rm ,
                                      ZeligIR.Abstractions.RegisterDescriptor Rs )
         {
-            InstructionSet.Opcode_DataProcessing_3 enc = this.Encoder.PrepareForDataProcessing_3;
+            InstructionSetARMv4.Opcode_DataProcessing_3 enc = (InstructionSetARMv4.Opcode_DataProcessing_3)this.Encoder.PrepareForDataProcessing_3;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes ,
                          0                                 ,  // uint Rn             ,
                          GetIntegerEncoding( Rd )          ,  // uint Rd             ,
-                         EncodingDefinition_ARM.c_operation_MOV,  // uint Alu            ,
+                         EncodingDefinition_ARMv4.c_operation_MOV,  // uint Alu            ,
                          false                             ,  // bool SetCC          ,
                          GetIntegerEncoding( Rm )          ,  // uint Rm             ,
-                         EncodingDefinition_ARM.c_shift_LSR    ,  // uint ShiftType      ,
+                         EncodingDefinition_ARMv4.c_shift_LSR    ,  // uint ShiftType      ,
                          GetIntegerEncoding( Rs )          ); // uint Rs             ,
 
             EnqueueOpcode( enc );
@@ -1402,15 +1402,15 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                      ZeligIR.Abstractions.RegisterDescriptor Rm ,
                                      ZeligIR.Abstractions.RegisterDescriptor Rs )
         {
-            InstructionSet.Opcode_DataProcessing_3 enc = this.Encoder.PrepareForDataProcessing_3;
+            InstructionSetARMv4.Opcode_DataProcessing_3 enc = (InstructionSetARMv4.Opcode_DataProcessing_3)this.Encoder.PrepareForDataProcessing_3;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes ,
                          0                                 ,  // uint Rn             ,
                          GetIntegerEncoding( Rd )          ,  // uint Rd             ,
-                         EncodingDefinition_ARM.c_operation_MOV,  // uint Alu            ,
+                         EncodingDefinition_ARMv4.c_operation_MOV,  // uint Alu            ,
                          false                             ,  // bool SetCC          ,
                          GetIntegerEncoding( Rm )          ,  // uint Rm             ,
-                         EncodingDefinition_ARM.c_shift_ASR    ,  // uint ShiftType      ,
+                         EncodingDefinition_ARMv4.c_shift_ASR    ,  // uint ShiftType      ,
                          GetIntegerEncoding( Rs )          ); // uint Rs             ,
 
             EnqueueOpcode( enc );
@@ -1422,15 +1422,15 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                            ZeligIR.Abstractions.RegisterDescriptor Rs    ,
                                            uint                                    shift )
         {
-            InstructionSet.Opcode_DataProcessing_2 enc = this.Encoder.PrepareForDataProcessing_2;
+            InstructionSetARMv4.Opcode_DataProcessing_2 enc = (InstructionSetARMv4.Opcode_DataProcessing_2)this.Encoder.PrepareForDataProcessing_2;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes ,
-                         EncodingDefinition_ARM.c_register_r0  ,  // uint Rn             ,
+                         EncodingDefinition_ARMv4.c_register_r0  ,  // uint Rn             ,
                          GetIntegerEncoding( Rd )          ,  // uint Rd             ,
-                         EncodingDefinition_ARM.c_operation_MOV,  // uint Alu            ,
+                         EncodingDefinition_ARMv4.c_operation_MOV,  // uint Alu            ,
                          false                             ,  // bool SetCC          ,
                          GetIntegerEncoding( Rs )          ,  // uint Rm             ,
-                         EncodingDefinition_ARM.c_shift_LSL    ,  // uint ShiftType      ,
+                         EncodingDefinition_ARMv4.c_shift_LSL    ,  // uint ShiftType      ,
                          shift                             ); // uint ShiftValue     ,
 
             EnqueueOpcode( enc );
@@ -1440,15 +1440,15 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                            ZeligIR.Abstractions.RegisterDescriptor Rs    ,
                                            uint                                    shift )
         {
-            InstructionSet.Opcode_DataProcessing_2 enc = this.Encoder.PrepareForDataProcessing_2;
+            InstructionSetARMv4.Opcode_DataProcessing_2 enc = (InstructionSetARMv4.Opcode_DataProcessing_2)this.Encoder.PrepareForDataProcessing_2;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes ,
-                         EncodingDefinition_ARM.c_register_r0  ,  // uint Rn             ,
+                         EncodingDefinition_ARMv4.c_register_r0  ,  // uint Rn             ,
                          GetIntegerEncoding( Rd )          ,  // uint Rd             ,
-                         EncodingDefinition_ARM.c_operation_MOV,  // uint Alu            ,
+                         EncodingDefinition_ARMv4.c_operation_MOV,  // uint Alu            ,
                          false                             ,  // bool SetCC          ,
                          GetIntegerEncoding( Rs )          ,  // uint Rm             ,
-                         EncodingDefinition_ARM.c_shift_LSR    ,  // uint ShiftType      ,
+                         EncodingDefinition_ARMv4.c_shift_LSR    ,  // uint ShiftType      ,
                          shift                             ); // uint ShiftValue     ,
 
             EnqueueOpcode( enc );
@@ -1458,15 +1458,15 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                            ZeligIR.Abstractions.RegisterDescriptor Rs    ,
                                            uint                                    shift )
         {
-            InstructionSet.Opcode_DataProcessing_2 enc = this.Encoder.PrepareForDataProcessing_2;
+            InstructionSetARMv4.Opcode_DataProcessing_2 enc = (InstructionSetARMv4.Opcode_DataProcessing_2)this.Encoder.PrepareForDataProcessing_2;
 
             enc.Prepare( m_pendingCondition                ,  // uint ConditionCodes ,
-                         EncodingDefinition_ARM.c_register_r0  ,  // uint Rn             ,
+                         EncodingDefinition_ARMv4.c_register_r0  ,  // uint Rn             ,
                          GetIntegerEncoding( Rd )          ,  // uint Rd             ,
-                         EncodingDefinition_ARM.c_operation_MOV,  // uint Alu            ,
+                         EncodingDefinition_ARMv4.c_operation_MOV,  // uint Alu            ,
                          false                             ,  // bool SetCC          ,
                          GetIntegerEncoding( Rs )          ,  // uint Rm             ,
-                         EncodingDefinition_ARM.c_shift_ASR    ,  // uint ShiftType      ,
+                         EncodingDefinition_ARMv4.c_shift_ASR    ,  // uint ShiftType      ,
                          shift                             ); // uint ShiftValue     ,
 
             EnqueueOpcode( enc );
@@ -1480,7 +1480,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                       ZeligIR.Abstractions.RegisterDescriptor Rm        ,
                                       bool                                    fIsSigned )
         {
-            InstructionSet.Opcode_MultiplyLong enc = this.Encoder.PrepareForMultiplyLong;
+            InstructionSetARMv4.Opcode_MultiplyLong enc = (InstructionSetARMv4.Opcode_MultiplyLong)this.Encoder.PrepareForMultiplyLong;
 
             enc.Prepare( m_pendingCondition        ,  // uint ConditionCodes ,
                          GetIntegerEncoding( RdHi ),  // uint RdHi           ,
@@ -1500,7 +1500,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                      ZeligIR.Abstractions.RegisterDescriptor Rs ,
                                      ZeligIR.Abstractions.RegisterDescriptor Rm )
         {
-            InstructionSet.Opcode_Multiply enc = this.Encoder.PrepareForMultiply;
+            InstructionSetARMv4.Opcode_Multiply enc = (InstructionSetARMv4.Opcode_Multiply)this.Encoder.PrepareForMultiply;
 
             enc.Prepare( m_pendingCondition      ,  // uint ConditionCodes ,
                          GetIntegerEncoding( Rd ),  // uint Rd             ,
@@ -1527,7 +1527,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                      bool                                    Up        ,
                                      bool                                    WriteBack )
         {
-            InstructionSet.Opcode_BlockDataTransfer enc = this.Encoder.PrepareForBlockDataTransfer;
+            InstructionSetARMv4.Opcode_BlockDataTransfer enc = (InstructionSetARMv4.Opcode_BlockDataTransfer)this.Encoder.PrepareForBlockDataTransfer;
 
             enc.Prepare( m_pendingCondition      ,  // uint ConditionCodes ,
                          GetIntegerEncoding( Rn ),  // uint Rn             ,
@@ -1557,7 +1557,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                      bool                                    WriteBack ,
                                      bool                                    LoadPSR   )
         {
-            InstructionSet.Opcode_BlockDataTransfer enc = this.Encoder.PrepareForBlockDataTransfer;
+            InstructionSetARMv4.Opcode_BlockDataTransfer enc = (InstructionSetARMv4.Opcode_BlockDataTransfer)this.Encoder.PrepareForBlockDataTransfer;
 
             enc.Prepare( m_pendingCondition      ,  // uint ConditionCodes ,
                          GetIntegerEncoding( Rn ),  // uint Rn             ,
@@ -1573,7 +1573,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
 
         public void EmitOpcode__SWI( uint val )
         {
-            InstructionSet.Opcode_SoftwareInterrupt enc = this.Encoder.PrepareForSoftwareInterrupt;
+            InstructionSetARMv4.Opcode_SoftwareInterrupt enc = (InstructionSetARMv4.Opcode_SoftwareInterrupt)this.Encoder.PrepareForSoftwareInterrupt;
 
             enc.Prepare( m_pendingCondition,  // uint ConditionCodes ,
                          val               ); // uint Value          );
@@ -1584,7 +1584,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         public void EmitOpcode__MRS( bool                                    UseSPSR ,
                                      ZeligIR.Abstractions.RegisterDescriptor Rd      )
         {
-            InstructionSet.Opcode_MRS enc = this.Encoder.PrepareForMRS;
+            InstructionSetARMv4.Opcode_MRS enc = (InstructionSetARMv4.Opcode_MRS)this.Encoder.PrepareForMRS;
 
             enc.Prepare( m_pendingCondition       ,  // uint ConditionCodes ,
                          UseSPSR                  ,  // bool UseSPSR        ,
@@ -1597,7 +1597,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                      uint                                    Fields  ,
                                      ZeligIR.Abstractions.RegisterDescriptor Rm      )
         {
-            InstructionSet.Opcode_MSR_1 enc = this.Encoder.PrepareForMSR_1;
+            InstructionSetARMv4.Opcode_MSR_1 enc = (InstructionSetARMv4.Opcode_MSR_1)this.Encoder.PrepareForMSR_1;
 
             enc.Prepare( m_pendingCondition       ,  // uint ConditionCodes ,
                          UseSPSR                  ,  // bool UseSPSR        ,
@@ -1612,7 +1612,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                            uint valSeed ,
                                            uint valRot  )
         {
-            InstructionSet.Opcode_MSR_2 enc = this.Encoder.PrepareForMSR_2;
+            InstructionSetARMv4.Opcode_MSR_2 enc = (InstructionSetARMv4.Opcode_MSR_2)this.Encoder.PrepareForMSR_2;
 
             enc.Prepare( m_pendingCondition,  // uint ConditionCodes    ,
                          UseSPSR           ,  // bool UseSPSR           ,
@@ -1630,7 +1630,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                      uint                                    CRm   ,
                                      uint                                    Op2   )
         {
-            InstructionSet.Opcode_CoprocRegisterTransfer enc = this.Encoder.PrepareForCoprocRegisterTransfer;
+            InstructionSetARMv4.Opcode_CoprocRegisterTransfer enc = (InstructionSetARMv4.Opcode_CoprocRegisterTransfer)this.Encoder.PrepareForCoprocRegisterTransfer;
 
             enc.Prepare( m_pendingCondition       ,  // uint ConditionCodes ,
                          false                    ,  // bool IsMRC          ,
@@ -1651,7 +1651,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                      uint                                    CRm   ,
                                      uint                                    Op2   )
         {
-            InstructionSet.Opcode_CoprocRegisterTransfer enc = this.Encoder.PrepareForCoprocRegisterTransfer;
+            InstructionSetARMv4.Opcode_CoprocRegisterTransfer enc = (InstructionSetARMv4.Opcode_CoprocRegisterTransfer)this.Encoder.PrepareForCoprocRegisterTransfer;
 
             enc.Prepare( m_pendingCondition       ,  // uint ConditionCodes ,
                          true                     ,  // bool IsMRC          ,
@@ -1669,7 +1669,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
 
         public void EmitOpcode__BKPT( uint val )
         {
-            InstructionSet.Opcode_Breakpoint enc = this.Encoder.PrepareForBreakpoint;
+            InstructionSetARMv4.Opcode_Breakpoint enc = (InstructionSetARMv4.Opcode_Breakpoint)this.Encoder.PrepareForBreakpoint;
 
             enc.Prepare( m_pendingCondition,  // uint ConditionCodes ,
                          val               ); // uint Value          );
@@ -1686,7 +1686,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
 
         protected override void DumpOpcodes( System.IO.TextWriter textWriter )
         {
-            InstructionSet encoder = this.Encoder;
+            InstructionSetARM encoder = this.Encoder;
 
             textWriter.WriteLine( "{0}", m_cfg );
 

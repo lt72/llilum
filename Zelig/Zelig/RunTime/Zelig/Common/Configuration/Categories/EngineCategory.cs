@@ -11,6 +11,6 @@ namespace Microsoft.Zelig.Configuration.Environment
 
     public abstract class EngineCategory : AbstractCategory
     {
-        public abstract object Instantiate(InstructionSet iset);
+        public abstract object Instantiate(InstructionSetARM iset);
     }
 }

@@ -21,7 +21,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
 
         private ZeligIR.Abstractions.RegisterDescriptor[] m_registers;
         private ZeligIR.Abstractions.RegisterDescriptor   m_scratchRegister;
-        private InstructionSet                            m_instructionSetProvider;
+        private InstructionSetARM                         m_instructionSet;
 
         //
         // Helper Methods
@@ -87,7 +87,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         {
             ZeligIR.Abstractions.RegisterDescriptor reg;
 
-            for(uint encoding = EncodingDefinition_ARM.c_register_r0; encoding <= EncodingDefinition_ARM.c_register_r11; encoding++)
+            for(uint encoding = EncodingDefinition_ARMv4.c_register_r0; encoding <= EncodingDefinition_ARMv4.c_register_r11; encoding++)
             {
                 reg = ZeligIR.Abstractions.RegisterDescriptor.CreateTemplateFor32bitIntegerRegister( lst, string.Format( "R{0}", encoding ), encoding, encoding, ZeligIR.Abstractions.RegisterClass.AvailableForAllocation );
             }
@@ -97,7 +97,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
             //
             // Reserved as a scratch register, so we cannot use it during register allocation.
             //
-            reg = ZeligIR.Abstractions.RegisterDescriptor.CreateTemplateFor32bitIntegerRegister( lst, "R12", EncodingDefinition_ARM.c_register_r12, EncodingDefinition_ARM.c_register_r12, ZeligIR.Abstractions.RegisterClass.None );
+            reg = ZeligIR.Abstractions.RegisterDescriptor.CreateTemplateFor32bitIntegerRegister( lst, "R12", EncodingDefinition_ARMv4.c_register_r12, EncodingDefinition_ARMv4.c_register_r12, ZeligIR.Abstractions.RegisterClass.None );
 
             m_scratchRegister = reg;
 
@@ -107,11 +107,11 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
             // Intrinsic use.
             //
 
-            reg = ZeligIR.Abstractions.RegisterDescriptor.CreateTemplateFor32bitIntegerRegister( lst, "SP", EncodingDefinition_ARM.c_register_sp, EncodingDefinition_ARM.c_register_sp, ZeligIR.Abstractions.RegisterClass.Special | ZeligIR.Abstractions.RegisterClass.StackPointer );
+            reg = ZeligIR.Abstractions.RegisterDescriptor.CreateTemplateFor32bitIntegerRegister( lst, "SP", EncodingDefinition_ARMv4.c_register_sp, EncodingDefinition_ARMv4.c_register_sp, ZeligIR.Abstractions.RegisterClass.Special | ZeligIR.Abstractions.RegisterClass.StackPointer );
 
             //--//
 
-            reg = ZeligIR.Abstractions.RegisterDescriptor.CreateTemplateFor32bitIntegerRegister( lst, "LR", EncodingDefinition_ARM.c_register_lr, EncodingDefinition_ARM.c_register_lr, ZeligIR.Abstractions.RegisterClass.AvailableForAllocation | ZeligIR.Abstractions.RegisterClass.LinkAddress );
+            reg = ZeligIR.Abstractions.RegisterDescriptor.CreateTemplateFor32bitIntegerRegister( lst, "LR", EncodingDefinition_ARMv4.c_register_lr, EncodingDefinition_ARMv4.c_register_lr, ZeligIR.Abstractions.RegisterClass.AvailableForAllocation | ZeligIR.Abstractions.RegisterClass.LinkAddress );
 
             //--//
 
@@ -119,15 +119,15 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
             // Intrinsic use.
             //
 
-            reg = ZeligIR.Abstractions.RegisterDescriptor.CreateTemplateFor32bitIntegerRegister( lst, "PC", EncodingDefinition_ARM.c_register_pc, EncodingDefinition_ARM.c_register_pc, ZeligIR.Abstractions.RegisterClass.Special | ZeligIR.Abstractions.RegisterClass.ProgramCounter );
+            reg = ZeligIR.Abstractions.RegisterDescriptor.CreateTemplateFor32bitIntegerRegister( lst, "PC", EncodingDefinition_ARMv4.c_register_pc, EncodingDefinition_ARMv4.c_register_pc, ZeligIR.Abstractions.RegisterClass.Special | ZeligIR.Abstractions.RegisterClass.ProgramCounter );
 
             //--//
 
             if(this.HasVFPv2)
             {
-                uint encoding32Lo = EncodingDefinition_VFP_ARM.c_register_s0;
-                uint encoding32Hi = EncodingDefinition_VFP_ARM.c_register_s1;
-                uint encoding64   = EncodingDefinition_VFP_ARM.c_register_d0;
+                uint encoding32Lo = EncodingDefinition_VFP_ARMv5.c_register_s0;
+                uint encoding32Hi = EncodingDefinition_VFP_ARMv5.c_register_s1;
+                uint encoding64   = EncodingDefinition_VFP_ARMv5.c_register_d0;
 
                 for(uint i = 0; i < 16; i++)
                 {
@@ -150,15 +150,15 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                     encoding64   += 1;
                 }
 
-                reg = ZeligIR.Abstractions.RegisterDescriptor.CreateTemplateFor32bitSystemRegister( lst, "FPSID", EncodingDefinition_VFP_ARM.c_register_FPSID, EncodingDefinition_VFP_ARM.c_register_FPSID, ZeligIR.Abstractions.RegisterClass.Special );
-                reg = ZeligIR.Abstractions.RegisterDescriptor.CreateTemplateFor32bitSystemRegister( lst, "FPSCR", EncodingDefinition_VFP_ARM.c_register_FPSCR, EncodingDefinition_VFP_ARM.c_register_FPSCR, ZeligIR.Abstractions.RegisterClass.Special );
-                reg = ZeligIR.Abstractions.RegisterDescriptor.CreateTemplateFor32bitSystemRegister( lst, "FPEXC", EncodingDefinition_VFP_ARM.c_register_FPEXC, EncodingDefinition_VFP_ARM.c_register_FPEXC, ZeligIR.Abstractions.RegisterClass.Special );
+                reg = ZeligIR.Abstractions.RegisterDescriptor.CreateTemplateFor32bitSystemRegister( lst, "FPSID", EncodingDefinition_VFP_ARMv5.c_register_FPSID, EncodingDefinition_VFP_ARMv5.c_register_FPSID, ZeligIR.Abstractions.RegisterClass.Special );
+                reg = ZeligIR.Abstractions.RegisterDescriptor.CreateTemplateFor32bitSystemRegister( lst, "FPSCR", EncodingDefinition_VFP_ARMv5.c_register_FPSCR, EncodingDefinition_VFP_ARMv5.c_register_FPSCR, ZeligIR.Abstractions.RegisterClass.Special );
+                reg = ZeligIR.Abstractions.RegisterDescriptor.CreateTemplateFor32bitSystemRegister( lst, "FPEXC", EncodingDefinition_VFP_ARMv5.c_register_FPEXC, EncodingDefinition_VFP_ARMv5.c_register_FPEXC, ZeligIR.Abstractions.RegisterClass.Special );
             }
 
             //--//
 
-            reg = ZeligIR.Abstractions.RegisterDescriptor.CreateTemplateFor32bitSystemRegister( lst, "CPSR", EncodingDefinition_ARM.c_register_cpsr, EncodingDefinition_ARM.c_register_cpsr, ZeligIR.Abstractions.RegisterClass.Special | ZeligIR.Abstractions.RegisterClass.StatusRegister );
-            reg = ZeligIR.Abstractions.RegisterDescriptor.CreateTemplateFor32bitSystemRegister( lst, "SPSR", EncodingDefinition_ARM.c_register_spsr, EncodingDefinition_ARM.c_register_spsr, ZeligIR.Abstractions.RegisterClass.Special | ZeligIR.Abstractions.RegisterClass.StatusRegister );
+            reg = ZeligIR.Abstractions.RegisterDescriptor.CreateTemplateFor32bitSystemRegister( lst, "CPSR", EncodingDefinition_ARMv4.c_register_cpsr, EncodingDefinition_ARMv4.c_register_cpsr, ZeligIR.Abstractions.RegisterClass.Special | ZeligIR.Abstractions.RegisterClass.StatusRegister );
+            reg = ZeligIR.Abstractions.RegisterDescriptor.CreateTemplateFor32bitSystemRegister( lst, "SPSR", EncodingDefinition_ARMv4.c_register_spsr, EncodingDefinition_ARMv4.c_register_spsr, ZeligIR.Abstractions.RegisterClass.Special | ZeligIR.Abstractions.RegisterClass.StatusRegister );
         }
     }
 }

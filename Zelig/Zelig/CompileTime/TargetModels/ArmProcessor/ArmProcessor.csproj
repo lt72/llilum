@@ -51,14 +51,17 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ARM\EncodingDefinition_ARMv7M.cs" />
     <Compile Include="CurrentInstructionSetEncoding.cs" />
+    <Compile Include="InstructionSetARM.cs" />
+    <Compile Include="InstructionSetARMv7M.cs" />
     <Compile Include="InstructionSetVersion.cs" />
-    <Compile Include="InstructionSet.cs" />
-    <Compile Include="InstructionSet_VFP.cs" />
+    <Compile Include="InstructionSetARMv4.cs" />
+    <Compile Include="InstructionSetARMv5_VFP.cs" />
     <Compile Include="EncodingDefinition.cs" />
     <Compile Include="EncodingDefinition_VFP.cs" />
-    <Compile Include="ARM\EncodingDefinition_ARM.cs" />
-    <Compile Include="ARM\EncodingDefinition_VFP_ARM.cs" />
+    <Compile Include="ARM\EncodingDefinition_ARMv4.cs" />
+    <Compile Include="ARM\EncodingDefinition_VFP_ARMv5.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

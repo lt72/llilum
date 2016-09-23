@@ -14,13 +14,13 @@ namespace Microsoft.Zelig.Emulation.Hosting
         // State
         //
 
-        protected readonly InstructionSet m_instructionSet;
+        protected readonly InstructionSetARM m_instructionSet;
         
         //
         // Constructor Methods
         //
 
-        public AbstractEngine(InstructionSet iset)
+        public AbstractEngine(InstructionSetARMv4 iset)
         {
             m_instructionSet = iset;
         }
@@ -30,7 +30,7 @@ namespace Microsoft.Zelig.Emulation.Hosting
             return m_instructionSet != null;
         }
 
-        public InstructionSet InstructionSet
+        public InstructionSetARM InstructionSet
         {
             get
             {

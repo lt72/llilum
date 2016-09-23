@@ -21,9 +21,9 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
 
     public static partial class MM9691LP
     {
-        [Simulator.PeripheralRange(Base=0x30000000U,Length=0x0000000CU,ReadLatency=1,WriteLatency=2)]
-        [Simulator.PeripheralRange(Base=0xB0000000U,Length=0x0000000CU,ReadLatency=1,WriteLatency=2)]
-        public class BUSWATCHER : Simulator.Peripheral
+        [ARMv4Simulator.PeripheralRange(Base=0x30000000U,Length=0x0000000CU,ReadLatency=1,WriteLatency=2)]
+        [ARMv4Simulator.PeripheralRange(Base=0xB0000000U,Length=0x0000000CU,ReadLatency=1,WriteLatency=2)]
+        public class BUSWATCHER : ARMv4Simulator.Peripheral
         {
             public const uint AHB_Abort_Control__ERR       = 0x00000001;
             public const uint AHB_Abort_Control__HWRITE    = 0x00000002;
@@ -39,9 +39,9 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
 
             //--//
 
-            [Simulator.Register(Offset=0x00000000U)] public uint AHB_Abort_Address;
-            [Simulator.Register(Offset=0x00000004U)] public uint AHB_Abort_Control;
-            [Simulator.Register(Offset=0x00000008U)] public uint AHB_Abort_Enable
+            [ARMv4Simulator.Register(Offset=0x00000000U)] public uint AHB_Abort_Address;
+            [ARMv4Simulator.Register(Offset=0x00000004U)] public uint AHB_Abort_Control;
+            [ARMv4Simulator.Register(Offset=0x00000008U)] public uint AHB_Abort_Enable
             {
                 get
                 {
@@ -49,21 +49,21 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                 }
             }
 
-            [Simulator.Register(Offset=0x00000010U)] public uint AHB_Counter_Enable;
-            [Simulator.Register(Offset=0x00000014U)] public uint AHB_Counter_Restart;
-            [Simulator.Register(Offset=0x00000018U)] public uint AHB_Valid_Count;
-            [Simulator.Register(Offset=0x0000001CU)] public uint AHB_Idle_Count;
-            [Simulator.Register(Offset=0x00000020U)] public uint AHB_Cache_Valid_Count;
-            [Simulator.Register(Offset=0x00000024U)] public uint AHB_NonCache_Count;
-            [Simulator.Register(Offset=0x00000028U)] public uint AHB_Cache_Miss;
-            [Simulator.Register(Offset=0x0000002CU)] public uint AHB_CPU_Idle_Count;
+            [ARMv4Simulator.Register(Offset=0x00000010U)] public uint AHB_Counter_Enable;
+            [ARMv4Simulator.Register(Offset=0x00000014U)] public uint AHB_Counter_Restart;
+            [ARMv4Simulator.Register(Offset=0x00000018U)] public uint AHB_Valid_Count;
+            [ARMv4Simulator.Register(Offset=0x0000001CU)] public uint AHB_Idle_Count;
+            [ARMv4Simulator.Register(Offset=0x00000020U)] public uint AHB_Cache_Valid_Count;
+            [ARMv4Simulator.Register(Offset=0x00000024U)] public uint AHB_NonCache_Count;
+            [ARMv4Simulator.Register(Offset=0x00000028U)] public uint AHB_Cache_Miss;
+            [ARMv4Simulator.Register(Offset=0x0000002CU)] public uint AHB_CPU_Idle_Count;
         }
 
-        [Simulator.PeripheralRange(Base=0x30010000U,Length=0x00000060U,ReadLatency=1,WriteLatency=2)]
-        [Simulator.PeripheralRange(Base=0xB0010000U,Length=0x00000060U,ReadLatency=1,WriteLatency=2)]
-        public class EBIU : Simulator.Peripheral
+        [ARMv4Simulator.PeripheralRange(Base=0x30010000U,Length=0x00000060U,ReadLatency=1,WriteLatency=2)]
+        [ARMv4Simulator.PeripheralRange(Base=0xB0010000U,Length=0x00000060U,ReadLatency=1,WriteLatency=2)]
+        public class EBIU : ARMv4Simulator.Peripheral
         {
-            public class DEVICE : Simulator.Peripheral
+            public class DEVICE : ARMv4Simulator.Peripheral
             {
                 public const uint Control__WS__mask    = 0x0000003F;
                 public const  int Control__WS__shift   =          0;
@@ -83,23 +83,23 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
 
                 //--//
 
-                [Simulator.LinkToContainer()           ] public EBIU Parent;
-                [Simulator.Register(Offset=0x00000000U)] public uint LowAddress;
-                [Simulator.Register(Offset=0x00000004U)] public uint HighAddress;
-                [Simulator.Register(Offset=0x00000008U)] public uint Control;
+                [ARMv4Simulator.LinkToContainer()           ] public EBIU Parent;
+                [ARMv4Simulator.Register(Offset=0x00000000U)] public uint LowAddress;
+                [ARMv4Simulator.Register(Offset=0x00000004U)] public uint HighAddress;
+                [ARMv4Simulator.Register(Offset=0x00000008U)] public uint Control;
             }
 
-            [Simulator.Register(Offset=0x00000000U,Size=0x00000010U)] public DEVICE Device0;
-            [Simulator.Register(Offset=0x00000010U,Size=0x00000010U)] public DEVICE Device1;
-            [Simulator.Register(Offset=0x00000020U,Size=0x00000010U)] public DEVICE Device2;
-            [Simulator.Register(Offset=0x00000030U,Size=0x00000010U)] public DEVICE Device3;
-            [Simulator.Register(Offset=0x00000040U,Size=0x00000010U)] public DEVICE Device4;
-            [Simulator.Register(Offset=0x00000050U,Size=0x00000010U)] public DEVICE Device5;
+            [ARMv4Simulator.Register(Offset=0x00000000U,Size=0x00000010U)] public DEVICE Device0;
+            [ARMv4Simulator.Register(Offset=0x00000010U,Size=0x00000010U)] public DEVICE Device1;
+            [ARMv4Simulator.Register(Offset=0x00000020U,Size=0x00000010U)] public DEVICE Device2;
+            [ARMv4Simulator.Register(Offset=0x00000030U,Size=0x00000010U)] public DEVICE Device3;
+            [ARMv4Simulator.Register(Offset=0x00000040U,Size=0x00000010U)] public DEVICE Device4;
+            [ARMv4Simulator.Register(Offset=0x00000050U,Size=0x00000010U)] public DEVICE Device5;
         }
 
-        [Simulator.PeripheralRange(Base=0x30020000U,Length=0x00000114U,ReadLatency=1,WriteLatency=2)]
-        [Simulator.PeripheralRange(Base=0xB0020000U,Length=0x00000114U,ReadLatency=1,WriteLatency=2)]
-        public class DMAC : Simulator.Peripheral
+        [ARMv4Simulator.PeripheralRange(Base=0x30020000U,Length=0x00000114U,ReadLatency=1,WriteLatency=2)]
+        [ARMv4Simulator.PeripheralRange(Base=0xB0020000U,Length=0x00000114U,ReadLatency=1,WriteLatency=2)]
+        public class DMAC : ARMv4Simulator.Peripheral
         {
             //
             //    static const UINT32 c_DMAC_ENABLE             0x00000001
@@ -176,38 +176,38 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
             //    static const UINT32 c_DMAC_IDL_CYCLE_MASK     0xf8000000
             //
 
-            public class CHANNEL : Simulator.Peripheral
+            public class CHANNEL : ARMv4Simulator.Peripheral
             {
-                [Simulator.LinkToContainer()           ] public DMAC Parent;
-                [Simulator.Register(Offset=0x00000000U)] public uint SourceStartAddress;
-                [Simulator.Register(Offset=0x00000004U)] public uint DestinationStartAddress;
-                [Simulator.Register(Offset=0x00000008U)] public uint SourceBeat;
-                [Simulator.Register(Offset=0x0000000CU)] public uint ControlWord;
+                [ARMv4Simulator.LinkToContainer()           ] public DMAC Parent;
+                [ARMv4Simulator.Register(Offset=0x00000000U)] public uint SourceStartAddress;
+                [ARMv4Simulator.Register(Offset=0x00000004U)] public uint DestinationStartAddress;
+                [ARMv4Simulator.Register(Offset=0x00000008U)] public uint SourceBeat;
+                [ARMv4Simulator.Register(Offset=0x0000000CU)] public uint ControlWord;
             }
 
-            public class CHANNEL_STATE : Simulator.Peripheral
+            public class CHANNEL_STATE : ARMv4Simulator.Peripheral
             {
-                [Simulator.LinkToContainer()           ] public DMAC Parent;
-                [Simulator.Register(Offset=0x00000000U)] public uint SourceCurrentAddress;       // read only
-                [Simulator.Register(Offset=0x00000004U)] public uint DestinationCurrentAddress;  // read only
-                [Simulator.Register(Offset=0x00000008U)] public uint SourceCurrentBeatCount;     // read only
+                [ARMv4Simulator.LinkToContainer()           ] public DMAC Parent;
+                [ARMv4Simulator.Register(Offset=0x00000000U)] public uint SourceCurrentAddress;       // read only
+                [ARMv4Simulator.Register(Offset=0x00000004U)] public uint DestinationCurrentAddress;  // read only
+                [ARMv4Simulator.Register(Offset=0x00000008U)] public uint SourceCurrentBeatCount;     // read only
             }
 
             //--//
 
-            [Simulator.Register(Offset=0x00000000U,Size=0x00000010U,Instances=8)] public CHANNEL[]       Channel;
-            [Simulator.Register(Offset=0x00000080U,Size=0x00000010U,Instances=8)] public CHANNEL_STATE[] ChannelState;
-            [Simulator.Register(Offset=0x00000100U                             )] public uint            InterruptStatus;
-            [Simulator.Register(Offset=0x00000104U                             )] public uint            InterruptRawStatus;
-            [Simulator.Register(Offset=0x00000108U                             )] public uint            InterruptEnable;
-            [Simulator.Register(Offset=0x0000010CU                             )] public uint            InterruptEnableClear;
-            [Simulator.Register(Offset=0x00000110U                             )] public uint            InternalDMACTestMode;
-            [Simulator.Register(Offset=0x00000114U                             )] public uint            InternalTestRequest;
+            [ARMv4Simulator.Register(Offset=0x00000000U,Size=0x00000010U,Instances=8)] public CHANNEL[]       Channel;
+            [ARMv4Simulator.Register(Offset=0x00000080U,Size=0x00000010U,Instances=8)] public CHANNEL_STATE[] ChannelState;
+            [ARMv4Simulator.Register(Offset=0x00000100U                             )] public uint            InterruptStatus;
+            [ARMv4Simulator.Register(Offset=0x00000104U                             )] public uint            InterruptRawStatus;
+            [ARMv4Simulator.Register(Offset=0x00000108U                             )] public uint            InterruptEnable;
+            [ARMv4Simulator.Register(Offset=0x0000010CU                             )] public uint            InterruptEnableClear;
+            [ARMv4Simulator.Register(Offset=0x00000110U                             )] public uint            InternalDMACTestMode;
+            [ARMv4Simulator.Register(Offset=0x00000114U                             )] public uint            InternalTestRequest;
         }
 
-        [Simulator.PeripheralRange(Base=0x30030000U,Length=0x00008008U,ReadLatency=1,WriteLatency=2)]
-        [Simulator.PeripheralRange(Base=0xB0030000U,Length=0x00008008U,ReadLatency=1,WriteLatency=2)]
-        public class VITERBI : Simulator.Peripheral
+        [ARMv4Simulator.PeripheralRange(Base=0x30030000U,Length=0x00008008U,ReadLatency=1,WriteLatency=2)]
+        [ARMv4Simulator.PeripheralRange(Base=0xB0030000U,Length=0x00008008U,ReadLatency=1,WriteLatency=2)]
+        public class VITERBI : ARMv4Simulator.Peripheral
         {
 ////        //--//
 ////
@@ -239,9 +239,9 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
 ////        static const    UINT32 Control__GO_BOTH    = 0x00000100;
         }
 
-        [Simulator.PeripheralRange(Base=0x30040000U,Length=0x00008020U,ReadLatency=1,WriteLatency=2)]
-        [Simulator.PeripheralRange(Base=0xB0040000U,Length=0x00008020U,ReadLatency=1,WriteLatency=2)]
-        public class FILTERARCTAN : Simulator.Peripheral
+        [ARMv4Simulator.PeripheralRange(Base=0x30040000U,Length=0x00008020U,ReadLatency=1,WriteLatency=2)]
+        [ARMv4Simulator.PeripheralRange(Base=0xB0040000U,Length=0x00008020U,ReadLatency=1,WriteLatency=2)]
+        public class FILTERARCTAN : ARMv4Simulator.Peripheral
         {
 ////        static const UINT32 c_Base = 0xB0040000;
 ////
@@ -311,8 +311,8 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
 ////        static const    UINT32 CONT__GO_FILT       = 0x00000080;
         }
 
-        [Simulator.PeripheralRange(Base=0x38000000U,Length=0x00000210U,ReadLatency=1,WriteLatency=2)]
-        public class INTC : Simulator.Peripheral
+        [ARMv4Simulator.PeripheralRange(Base=0x38000000U,Length=0x00000210U,ReadLatency=1,WriteLatency=2)]
+        public class INTC : ARMv4Simulator.Peripheral
         {
             public const int IRQ_INDEX_unused0                  =  0;
             public const int IRQ_INDEX_Programmed_Interrupt     =  1;
@@ -347,11 +347,11 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
             public const int IRQ_INDEX_Filter_Processor         = 30;
             public const int IRQ_INDEX_AHB_Write_Error          = 31;
 
-            public class IRQ : Simulator.Peripheral
+            public class IRQ : ARMv4Simulator.Peripheral
             {
-                [Simulator.LinkToContainer] public INTC Parent;
+                [ARMv4Simulator.LinkToContainer] public INTC Parent;
 
-                [Simulator.Register(Offset=0x00000000U)] public uint Status
+                [ARMv4Simulator.Register(Offset=0x00000000U)] public uint Status
                 {
                     get
                     {
@@ -359,7 +359,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                     }
                 }
 
-                [Simulator.Register(Offset=0x00000004U)] public uint RawStatus
+                [ARMv4Simulator.Register(Offset=0x00000004U)] public uint RawStatus
                 {
                     get
                     {
@@ -378,7 +378,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                     }
                 }
 
-                [Simulator.Register(Offset=0x00000008U)] public uint EnableSet
+                [ARMv4Simulator.Register(Offset=0x00000008U)] public uint EnableSet
                 {
                     get
                     {
@@ -393,7 +393,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                     }
                 }
 
-                [Simulator.Register(Offset=0x0000000CU)] public uint EnableClear
+                [ARMv4Simulator.Register(Offset=0x0000000CU)] public uint EnableClear
                 {
                     get
                     {
@@ -407,7 +407,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                         this.Parent.Evaluate();
                     }
                 }
-                [Simulator.Register(Offset=0x00000010U)] public uint Soft
+                [ARMv4Simulator.Register(Offset=0x00000010U)] public uint Soft
                 {
                     get
                     {
@@ -422,7 +422,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                     }
                 }
 
-                [Simulator.Register(Offset=0x00000014U)] public uint TestSource
+                [ARMv4Simulator.Register(Offset=0x00000014U)] public uint TestSource
                 {
                     get
                     {
@@ -437,7 +437,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                     }
                 }
 
-                [Simulator.Register(Offset=0x00000018U)] public uint SourceSelect
+                [ARMv4Simulator.Register(Offset=0x00000018U)] public uint SourceSelect
                 {
                     get
                     {
@@ -460,11 +460,11 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                 uint m_state_SourceSelect;
             }
 
-            public class FIRQ : Simulator.Peripheral
+            public class FIRQ : ARMv4Simulator.Peripheral
             {
-                [Simulator.LinkToContainer] public INTC Parent;
+                [ARMv4Simulator.LinkToContainer] public INTC Parent;
 
-                [Simulator.Register(Offset=0x00000000U)] public uint Status
+                [ARMv4Simulator.Register(Offset=0x00000000U)] public uint Status
                 {
                     get
                     {
@@ -472,7 +472,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                     }
                 }
 
-                [Simulator.Register(Offset=0x00000004U)] public uint RawStatus
+                [ARMv4Simulator.Register(Offset=0x00000004U)] public uint RawStatus
                 {
                     get
                     {
@@ -480,7 +480,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                     }
                 }
 
-                [Simulator.Register(Offset=0x00000008U)] public uint EnableSet
+                [ARMv4Simulator.Register(Offset=0x00000008U)] public uint EnableSet
                 {
                     get
                     {
@@ -495,7 +495,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                     }
                 }
 
-                [Simulator.Register(Offset=0x0000000CU)] public uint EnableClear
+                [ARMv4Simulator.Register(Offset=0x0000000CU)] public uint EnableClear
                 {
                     get
                     {
@@ -510,9 +510,9 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                     }
                 }
 
-                [Simulator.Register(Offset=0x00000014U)] public uint TestSource;
-                [Simulator.Register(Offset=0x00000018U)] public uint SourceSelect;
-                [Simulator.Register(Offset=0x0000001CU)] public uint Select
+                [ARMv4Simulator.Register(Offset=0x00000014U)] public uint TestSource;
+                [ARMv4Simulator.Register(Offset=0x00000018U)] public uint SourceSelect;
+                [ARMv4Simulator.Register(Offset=0x0000001CU)] public uint Select
                 {
                     get
                     {
@@ -533,15 +533,15 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                 uint m_state_Select;
             }
 
-            [Simulator.Register(Offset=0x00000000U,Size=0x00000020U)] public IRQ  Irq;
-            [Simulator.Register(Offset=0x00000020U)                 ] public uint INTOUT_L_EnableSet;
-            [Simulator.Register(Offset=0x00000024U)                 ] public uint INTOUT_L_EnableClear;
-            [Simulator.Register(Offset=0x00000100U,Size=0x00000020U)] public FIRQ Fiq;
-            [Simulator.Register(Offset=0x00000200U)                 ] public uint EdgeStatus;
-            [Simulator.Register(Offset=0x00000204U)                 ] public uint EdgeRawStatus;
-            [Simulator.Register(Offset=0x00000208U)                 ] public uint EdgeEnable;
-            [Simulator.Register(Offset=0x0000020CU)                 ] public uint EdgeEnableClear;
-            [Simulator.Register(Offset=0x00000210U)                 ] public uint EdgeClear;
+            [ARMv4Simulator.Register(Offset=0x00000000U,Size=0x00000020U)] public IRQ  Irq;
+            [ARMv4Simulator.Register(Offset=0x00000020U)                 ] public uint INTOUT_L_EnableSet;
+            [ARMv4Simulator.Register(Offset=0x00000024U)                 ] public uint INTOUT_L_EnableClear;
+            [ARMv4Simulator.Register(Offset=0x00000100U,Size=0x00000020U)] public FIRQ Fiq;
+            [ARMv4Simulator.Register(Offset=0x00000200U)                 ] public uint EdgeStatus;
+            [ARMv4Simulator.Register(Offset=0x00000204U)                 ] public uint EdgeRawStatus;
+            [ARMv4Simulator.Register(Offset=0x00000208U)                 ] public uint EdgeEnable;
+            [ARMv4Simulator.Register(Offset=0x0000020CU)                 ] public uint EdgeEnableClear;
+            [ARMv4Simulator.Register(Offset=0x00000210U)                 ] public uint EdgeClear;
 
             private uint m_inputStatus = 0;
 
@@ -578,12 +578,12 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
             }
         }
 
-        [Simulator.PeripheralRange(Base=0x38010000U,Length=0x0000005CU,ReadLatency=1,WriteLatency=2)]
-        public class REMAP_PAUSE : Simulator.Peripheral
+        [ARMv4Simulator.PeripheralRange(Base=0x38010000U,Length=0x0000005CU,ReadLatency=1,WriteLatency=2)]
+        public class REMAP_PAUSE : ARMv4Simulator.Peripheral
         {
             public const uint ResetStatus__POR = 0x00000001;
 
-            [Simulator.Register(Offset=0x00000000U)] public uint Pause
+            [ARMv4Simulator.Register(Offset=0x00000000U)] public uint Pause
             {
                 set
                 {
@@ -591,16 +591,16 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                 }
             }
 
-            [Simulator.Register(Offset=0x00000000U)] public uint Pause_CPU_ONLY;
-            [Simulator.Register(Offset=0x00000010U)] public uint Identification = 0x4E969101;
-            [Simulator.Register(Offset=0x00000020U)] public uint ClearResetMap
+            [ARMv4Simulator.Register(Offset=0x00000000U)] public uint Pause_CPU_ONLY;
+            [ARMv4Simulator.Register(Offset=0x00000010U)] public uint Identification = 0x4E969101;
+            [ARMv4Simulator.Register(Offset=0x00000020U)] public uint ClearResetMap
             {
                 set
                 {
                     //
                     // Map RAM to 0x00000000.
                     //
-                    Simulator.AddressSpaceHandler hnd = m_owner.FindMemoryAtAddress( 0x08000000u );
+                    ARMv4Simulator.AddressSpaceHandler hnd = m_owner.FindMemoryAtAddress( 0x08000000u );
                     if(hnd != null)
                     {
                         hnd.LinkAtAddress( 0 );
@@ -608,11 +608,11 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                 }
             }
 
-            [Simulator.Register(Offset=0x00000030U)] public uint ResetStatus;
-            [Simulator.Register(Offset=0x00000034U)] public uint ResetStatusClear;
-            [Simulator.Register(Offset=0x00000040U)] public uint SystemConfiguration;
+            [ARMv4Simulator.Register(Offset=0x00000030U)] public uint ResetStatus;
+            [ARMv4Simulator.Register(Offset=0x00000034U)] public uint ResetStatusClear;
+            [ARMv4Simulator.Register(Offset=0x00000040U)] public uint SystemConfiguration;
 
-            [Simulator.Register(Offset=0x00000050U)] public uint Cache_Enable
+            [ARMv4Simulator.Register(Offset=0x00000050U)] public uint Cache_Enable
             {
                 set
                 {
@@ -624,7 +624,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                 }
             }
 
-            [Simulator.Register(Offset=0x00000054U)] public uint Cache_Tags_Reset
+            [ARMv4Simulator.Register(Offset=0x00000054U)] public uint Cache_Tags_Reset
             {
                 set
                 {
@@ -636,7 +636,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                 }
             }
 
-            [Simulator.Register(Offset=0x00000058U)] public uint Cache_Flush_Enable
+            [ARMv4Simulator.Register(Offset=0x00000058U)] public uint Cache_Flush_Enable
             {
                 set
                 {
@@ -657,7 +657,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                 //
                 // Map FLASH to 0x00000000.
                 //
-                Simulator.AddressSpaceHandler hnd = m_owner.FindMemoryAtAddress( 0x10000000u );
+                ARMv4Simulator.AddressSpaceHandler hnd = m_owner.FindMemoryAtAddress( 0x10000000u );
                 if(hnd != null)
                 {
                     hnd.LinkAtAddress( 0 );
@@ -665,7 +665,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
             }
         }
 
-        public abstract class ARMTIMERx : Simulator.Peripheral
+        public abstract class ARMTIMERx : ARMv4Simulator.Peripheral
         {
             public const byte Control__PRESCALE_1    = 0x00;
             public const byte Control__PRESCALE_16   = 0x04;
@@ -674,8 +674,8 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
             public const byte Control__MODE_PERIODIC = 0x40;
             public const byte Control__MODE_ENABLE   = 0x80;
 
-            [Simulator.Register(Offset=0x00000000U)] public ushort Load;
-            [Simulator.Register(Offset=0x00000004U)] public ushort Value
+            [ARMv4Simulator.Register(Offset=0x00000000U)] public ushort Load;
+            [ARMv4Simulator.Register(Offset=0x00000004U)] public ushort Value
             {
                 get
                 {
@@ -709,8 +709,8 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                     return (ushort)(0 - m_owner.ClockTicks);
                 }
             }
-            [Simulator.Register(Offset=0x00000008U)] public byte   Control;
-            [Simulator.Register(Offset=0x0000000CU)] public ushort Clear;
+            [ARMv4Simulator.Register(Offset=0x00000008U)] public byte   Control;
+            [ARMv4Simulator.Register(Offset=0x0000000CU)] public ushort Clear;
 
 #if TRACE_INTERRUPT_WITH_ARMTIMER
             bool  fActive;
@@ -718,20 +718,20 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
 #endif
         }
 
-        [Simulator.PeripheralRange(Base=0x38020000U,Length=0x00000020U,ReadLatency=1,WriteLatency=2)]
+        [ARMv4Simulator.PeripheralRange(Base=0x38020000U,Length=0x00000020U,ReadLatency=1,WriteLatency=2)]
         public class ARMTIMER0 : ARMTIMERx
         {
         }
 
-        [Simulator.PeripheralRange(Base=0x38020020U,Length=0x00000020U,ReadLatency=1,WriteLatency=2)]
+        [ARMv4Simulator.PeripheralRange(Base=0x38020020U,Length=0x00000020U,ReadLatency=1,WriteLatency=2)]
         public class ARMTIMER1 : ARMTIMERx
         {
         }
 
-        [Simulator.PeripheralRange(Base=0x38030000U,Length=0x00000050U,ReadLatency=1,WriteLatency=2)]
-        public class VTU32 : Simulator.Peripheral
+        [ARMv4Simulator.PeripheralRange(Base=0x38030000U,Length=0x00000050U,ReadLatency=1,WriteLatency=2)]
+        public class VTU32 : ARMv4Simulator.Peripheral
         {
-            public class IO_CONTROL : Simulator.Peripheral
+            public class IO_CONTROL : ARMv4Simulator.Peripheral
             {
                 public const uint CxyEDG_000   = 0x00000000;
                 public const uint CxyEDG_001   = 0x00000001;
@@ -744,8 +744,8 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                 public const uint PxyPOL_RESET = 0x00000000;
                 public const uint PxyPOL_SET   = 0x00000008;
 
-                [Simulator.LinkToContainer()           ] public VTU32 Parent;
-                [Simulator.Register(Offset=0x00000000U)] public uint  Value;
+                [ARMv4Simulator.LinkToContainer()           ] public VTU32 Parent;
+                [ARMv4Simulator.Register(Offset=0x00000000U)] public uint  Value;
 
                 //--//
 
@@ -772,12 +772,12 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                 }
             }
 
-            public class CHANNEL_PAIR : Simulator.Peripheral
+            public class CHANNEL_PAIR : ARMv4Simulator.Peripheral
             {
-                public class CHANNEL : Simulator.Peripheral
+                public class CHANNEL : ARMv4Simulator.Peripheral
                 {
-                    [Simulator.LinkToContainer()           ] public CHANNEL_PAIR Parent;
-                    [Simulator.Register(Offset=0x00000000U)] public uint         Counter
+                    [ARMv4Simulator.LinkToContainer()           ] public CHANNEL_PAIR Parent;
+                    [ARMv4Simulator.Register(Offset=0x00000000U)] public uint         Counter
                     {
                         get
                         {
@@ -790,8 +790,8 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                         }
                     }
 
-                    [Simulator.Register(Offset=0x00000004U)] public uint         PeriodCapture;
-                    [Simulator.Register(Offset=0x00000008U)] public uint         DutyCycleCapture;
+                    [ARMv4Simulator.Register(Offset=0x00000004U)] public uint         PeriodCapture;
+                    [ARMv4Simulator.Register(Offset=0x00000008U)] public uint         DutyCycleCapture;
 
                     internal ulong m_base;
                     uint           m_state_Counter;
@@ -860,9 +860,9 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                     }
                 }
                 
-                [Simulator.LinkToContainer()           ]                        public VTU32     Parent;
-                [Simulator.Register(Offset=0x00000000U)]                        public uint      ClockPrescalar;
-                [Simulator.Register(Offset=0x00000004U,Size=0x0CU,Instances=2)] public CHANNEL[] Channel;
+                [ARMv4Simulator.LinkToContainer()           ]                        public VTU32     Parent;
+                [ARMv4Simulator.Register(Offset=0x00000000U)]                        public uint      ClockPrescalar;
+                [ARMv4Simulator.Register(Offset=0x00000004U,Size=0x0CU,Instances=2)] public CHANNEL[] Channel;
 
                 //--//
 
@@ -926,7 +926,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
 
             //--//
 
-            [Simulator.Register(Offset=0x00000000U)]                        public uint           ModeControl
+            [ARMv4Simulator.Register(Offset=0x00000000U)]                        public uint           ModeControl
             {
                 get
                 {
@@ -973,9 +973,9 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                 }
             }
 
-            [Simulator.Register(Offset=0x00000004U,Size=0x04U,Instances=2)] public IO_CONTROL[]   IOControl;
-            [Simulator.Register(Offset=0x0000000CU)]                        public uint           InterruptControl;
-            [Simulator.Register(Offset=0x00000010U)]                        public uint           InterruptPending
+            [ARMv4Simulator.Register(Offset=0x00000004U,Size=0x04U,Instances=2)] public IO_CONTROL[]   IOControl;
+            [ARMv4Simulator.Register(Offset=0x0000000CU)]                        public uint           InterruptControl;
+            [ARMv4Simulator.Register(Offset=0x00000010U)]                        public uint           InterruptPending
             {
                 get
                 {
@@ -983,8 +983,8 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                 }
             }
 
-            [Simulator.Register(Offset=0x00000014U,Size=0x1CU,Instances=2)] public CHANNEL_PAIR[] ChannelPair;
-            [Simulator.Register(Offset=0x0000004CU)]                        public uint           ExternalClockSelectRegister;
+            [ARMv4Simulator.Register(Offset=0x00000014U,Size=0x1CU,Instances=2)] public CHANNEL_PAIR[] ChannelPair;
+            [ARMv4Simulator.Register(Offset=0x0000004CU)]                        public uint           ExternalClockSelectRegister;
 
             //--//
 
@@ -1019,7 +1019,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
             }
         }
 
-        public abstract class USARTx : Simulator.Peripheral, Hosting.IAsynchronousSerialInterface
+        public abstract class USARTx : ARMv4Simulator.Peripheral, Hosting.IAsynchronousSerialInterface
         {
 ////        static const UINT32 SER1_CLKX = MM9637A_GPIO::c_Pin_00;
 ////        static const UINT32 SER1_TDX  = MM9637A_GPIO::c_Pin_01;
@@ -1117,10 +1117,10 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
 
             //--//
 
-            [Simulator.LinkToPeripheral()          ] public INTC InterruptController;
-            [Simulator.LinkToPeripheral()          ] public CMU  ClockController;
+            [ARMv4Simulator.LinkToPeripheral()          ] public INTC InterruptController;
+            [ARMv4Simulator.LinkToPeripheral()          ] public CMU  ClockController;
 
-            [Simulator.Register(Offset=0x00000000U)] public byte UnTBUF
+            [ARMv4Simulator.Register(Offset=0x00000000U)] public byte UnTBUF
             {
                 get
                 {
@@ -1151,7 +1151,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                 }
             }
 
-            [Simulator.Register(Offset=0x00000004U)] public byte UnRBUF
+            [ARMv4Simulator.Register(Offset=0x00000004U)] public byte UnRBUF
             {
                 get
                 {
@@ -1173,7 +1173,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                 }
             }
 
-            [Simulator.Register(Offset=0x00000008U)] public byte UnICTRL
+            [ARMv4Simulator.Register(Offset=0x00000008U)] public byte UnICTRL
             {
                 get
                 {
@@ -1201,7 +1201,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                 }
             }
 
-            [Simulator.Register(Offset=0x0000000CU)] public byte UnSTAT
+            [ARMv4Simulator.Register(Offset=0x0000000CU)] public byte UnSTAT
             {
                 get
                 {
@@ -1216,13 +1216,13 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                 }
             }
 
-            [Simulator.Register(Offset=0x00000010U)] public byte UnFRS;
-            [Simulator.Register(Offset=0x00000014U)] public byte UnMDSL1;
-            [Simulator.Register(Offset=0x00000018U)] public byte UnBAUD;
-            [Simulator.Register(Offset=0x0000001CU)] public byte UnPSR;
-            [Simulator.Register(Offset=0x00000020U)] public byte UnOVSR;
-            [Simulator.Register(Offset=0x00000024U)] public byte UnMDSL2;
-            [Simulator.Register(Offset=0x00000028U)] public byte UnSPOS;
+            [ARMv4Simulator.Register(Offset=0x00000010U)] public byte UnFRS;
+            [ARMv4Simulator.Register(Offset=0x00000014U)] public byte UnMDSL1;
+            [ARMv4Simulator.Register(Offset=0x00000018U)] public byte UnBAUD;
+            [ARMv4Simulator.Register(Offset=0x0000001CU)] public byte UnPSR;
+            [ARMv4Simulator.Register(Offset=0x00000020U)] public byte UnOVSR;
+            [ARMv4Simulator.Register(Offset=0x00000024U)] public byte UnMDSL2;
+            [ARMv4Simulator.Register(Offset=0x00000028U)] public byte UnSPOS;
 
             //--//
 
@@ -1557,7 +1557,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
             }
         }
 
-        [Simulator.PeripheralRange(Base=0x38040000U,Length=0x00010000U,ReadLatency=1,WriteLatency=2)]
+        [ARMv4Simulator.PeripheralRange(Base=0x38040000U,Length=0x00010000U,ReadLatency=1,WriteLatency=2)]
         public class USART0 : USARTx
         {
             public override void OnConnected()
@@ -1568,7 +1568,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
             }
         }
 
-        [Simulator.PeripheralRange(Base=0x38050000U,Length=0x00010000U,ReadLatency=1,WriteLatency=2)]
+        [ARMv4Simulator.PeripheralRange(Base=0x38050000U,Length=0x00010000U,ReadLatency=1,WriteLatency=2)]
         public class USART1 : USARTx
         {
             public override void OnConnected()
@@ -1579,8 +1579,8 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
             }
         }
 
-        [Simulator.PeripheralRange(Base=0x38060000U,Length=0x00000100U,ReadLatency=1,WriteLatency=2)]
-        public class USB : Simulator.Peripheral
+        [ARMv4Simulator.PeripheralRange(Base=0x38060000U,Length=0x00000100U,ReadLatency=1,WriteLatency=2)]
+        public class USB : ARMv4Simulator.Peripheral
         {
 ////        struct ENDPNT
 ////        {
@@ -1891,12 +1891,12 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
 ////        /*************/ ENDPNT EP[4];
         }
 
-        [Simulator.PeripheralRange(Base=0x38070000U,Length=0x00000200U,ReadLatency=1,WriteLatency=2)]
-        public class GPIO : Simulator.Peripheral
+        [ARMv4Simulator.PeripheralRange(Base=0x38070000U,Length=0x00000200U,ReadLatency=1,WriteLatency=2)]
+        public class GPIO : ARMv4Simulator.Peripheral
         {
             public delegate void NotifyOnChange( uint index, bool fSet );
 
-            public class CW : Simulator.Peripheral
+            public class CW : ARMv4Simulator.Peripheral
             {
                 public const ushort PIN              = 0x0001;
                 public const ushort DOUT_IEN         = 0x0002;
@@ -1922,8 +1922,8 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
 
                 public const ushort Config_Mask      = (DOUT_IEN | RES_mask | MODE_mask | DB_EN);
 
-                [Simulator.LinkToContainer()           ] public GPIO   Parent;
-                [Simulator.Register(Offset=0x00000000U)] public ushort Data
+                [ARMv4Simulator.LinkToContainer()           ] public GPIO   Parent;
+                [ARMv4Simulator.Register(Offset=0x00000000U)] public ushort Data
                 {
                     get
                     {
@@ -2119,7 +2119,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                 }
             }
 
-            public class PIN8 : Simulator.Peripheral
+            public class PIN8 : ARMv4Simulator.Peripheral
             {
                 public const byte DBCLK_SEL__SLOWCLK_DIV_00002 = 0x00;
                 public const byte DBCLK_SEL__SLOWCLK_DIV_00004 = 0x01;
@@ -2138,8 +2138,8 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                 public const byte DBCLK_SEL__SLOWCLK_DIV_32768 = 0x0E;
                 public const byte DBCLK_SEL__SLOWCLK_DIV_65536 = 0x0F;
 
-                [Simulator.LinkToContainer()           ] public GPIO Parent;
-                [Simulator.Register(Offset=0x00000000U)] public byte PIN_DIN8
+                [ARMv4Simulator.LinkToContainer()           ] public GPIO Parent;
+                [ARMv4Simulator.Register(Offset=0x00000000U)] public byte PIN_DIN8
                 {
                     get
                     {
@@ -2158,7 +2158,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                     }
                 }
 
-                [Simulator.Register(Offset=0x00000004U)] public byte DATA_OUT8
+                [ARMv4Simulator.Register(Offset=0x00000004U)] public byte DATA_OUT8
                 {
                     get
                     {
@@ -2196,9 +2196,9 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                     }
                 }
 
-                [Simulator.Register(Offset=0x00000008U)] public byte INTR_STAT8;
+                [ARMv4Simulator.Register(Offset=0x00000008U)] public byte INTR_STAT8;
 
-                [Simulator.Register(Offset=0x0000000CU)] public byte INTR_RAW8
+                [ARMv4Simulator.Register(Offset=0x0000000CU)] public byte INTR_RAW8
                 {
                     get
                     {
@@ -2222,7 +2222,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                     }
                 }
 
-                [Simulator.Register(Offset=0x00000010U)] public byte DBCLK_SEL;       // only valid in array offset 0 (+0x0110)
+                [ARMv4Simulator.Register(Offset=0x00000010U)] public byte DBCLK_SEL;       // only valid in array offset 0 (+0x0110)
 
                 //
                 // Helper Methods
@@ -2282,9 +2282,9 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
 
             //--//
 
-            [Simulator.LinkToPeripheral()                                  ] public INTC   InterruptController;
-            [Simulator.Register(Offset=0x00000000U,Size=0x04U,Instances=64)] public CW[]   Control;
-            [Simulator.Register(Offset=0x00000100U,Size=0x20U,Instances= 8)] public PIN8[] Pin8;
+            [ARMv4Simulator.LinkToPeripheral()                                  ] public INTC   InterruptController;
+            [ARMv4Simulator.Register(Offset=0x00000000U,Size=0x04U,Instances=64)] public CW[]   Control;
+            [ARMv4Simulator.Register(Offset=0x00000100U,Size=0x20U,Instances= 8)] public PIN8[] Pin8;
 
             NotifyOnChange[] m_callbacks = new NotifyOnChange[64];
 
@@ -2383,22 +2383,22 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
             }
         }
 
-        [Simulator.PeripheralRange(Base=0x38090000U,Length=0x00000080U,ReadLatency=1,WriteLatency=2)]
-        public class SECURITYKEY : Simulator.Peripheral
+        [ARMv4Simulator.PeripheralRange(Base=0x38090000U,Length=0x00000080U,ReadLatency=1,WriteLatency=2)]
+        public class SECURITYKEY : ARMv4Simulator.Peripheral
         {
-            public class BYTE : Simulator.Peripheral
+            public class BYTE : ARMv4Simulator.Peripheral
             {
-                [Simulator.LinkToContainer()           ] public SECURITYKEY Parent;
-                [Simulator.Register(Offset=0x00000000U)] public byte        Data8;
+                [ARMv4Simulator.LinkToContainer()           ] public SECURITYKEY Parent;
+                [ARMv4Simulator.Register(Offset=0x00000000U)] public byte        Data8;
             }
 
             //--//
 
-            [Simulator.Register(Offset=0x00000000U,Size=4,Instances=32)] public BYTE[] Key;
+            [ARMv4Simulator.Register(Offset=0x00000000U,Size=4,Instances=32)] public BYTE[] Key;
         }
 
-        [Simulator.PeripheralRange(Base=0x380A0000U,Length=0x00000014U,ReadLatency=1,WriteLatency=2)]
-        public class MWSPI : Simulator.Peripheral, Hosting.ISynchronousSerialInterfaceController
+        [ARMv4Simulator.PeripheralRange(Base=0x380A0000U,Length=0x00000014U,ReadLatency=1,WriteLatency=2)]
+        public class MWSPI : ARMv4Simulator.Peripheral, Hosting.ISynchronousSerialInterfaceController
         {
             public const uint c_MS1LE  = GPIO.c_Pin_07;
             public const uint c_MSK    = GPIO.c_Pin_16;
@@ -2448,11 +2448,11 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
 
             //--//
 
-            [Simulator.LinkToPeripheral()          ] public INTC   InterruptController;
-            [Simulator.LinkToPeripheral()          ] public CMU    ClockController;
-            [Simulator.LinkToPeripheral()          ] public GPIO   InputOutput;
+            [ARMv4Simulator.LinkToPeripheral()          ] public INTC   InterruptController;
+            [ARMv4Simulator.LinkToPeripheral()          ] public CMU    ClockController;
+            [ARMv4Simulator.LinkToPeripheral()          ] public GPIO   InputOutput;
 
-            [Simulator.Register(Offset=0x00000000U)] public ushort MWnDAT
+            [ARMv4Simulator.Register(Offset=0x00000000U)] public ushort MWnDAT
             {
                 get
                 {
@@ -2514,7 +2514,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                 }
             }
 
-            [Simulator.Register(Offset=0x00000004U)] public ushort MWnCTL1
+            [ARMv4Simulator.Register(Offset=0x00000004U)] public ushort MWnCTL1
             {
                 get
                 {
@@ -2559,7 +2559,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                     }
                 }
             }
-            [Simulator.Register(Offset=0x00000008U)] public ushort MWnSTAT
+            [ARMv4Simulator.Register(Offset=0x00000008U)] public ushort MWnSTAT
             {
                 get
                 {
@@ -2595,7 +2595,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                 }
             }
 
-            [Simulator.Register(Offset=0x0000000CU)] public ushort MWnCTL2
+            [ARMv4Simulator.Register(Offset=0x0000000CU)] public ushort MWnCTL2
             {
                 get
                 {
@@ -2634,7 +2634,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                 }
             }
 
-            [Simulator.Register(Offset=0x00000010U)] public ushort MWnTEST;
+            [ARMv4Simulator.Register(Offset=0x00000010U)] public ushort MWnTEST;
 
             ushort m_state_MWnCTL1;
             ushort m_state_MWnSTAT;
@@ -3026,8 +3026,8 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
             }
         }
 
-        [Simulator.PeripheralRange(Base=0x380B0000U,Length=0x00000018U,ReadLatency=1,WriteLatency=2)]
-        public class CMU : Simulator.Peripheral
+        [ARMv4Simulator.PeripheralRange(Base=0x380B0000U,Length=0x00000018U,ReadLatency=1,WriteLatency=2)]
+        public class CMU : ARMv4Simulator.Peripheral
         {
             public enum PERF_LEVEL : uint
             {
@@ -3080,11 +3080,11 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
 
             //--//
 
-            [Simulator.Register(Offset=0x00000000U)] public uint PERF_LVL;
-            [Simulator.Register(Offset=0x00000004U)] public uint CLK_SEL;
-            [Simulator.Register(Offset=0x00000008U)] public byte REF_REG;
+            [ARMv4Simulator.Register(Offset=0x00000000U)] public uint PERF_LVL;
+            [ARMv4Simulator.Register(Offset=0x00000004U)] public uint CLK_SEL;
+            [ARMv4Simulator.Register(Offset=0x00000008U)] public byte REF_REG;
 
-            [Simulator.Register(Offset=0x0000000CU)] public uint MCLK_EN
+            [ARMv4Simulator.Register(Offset=0x0000000CU)] public uint MCLK_EN
             {
                 get
                 {
@@ -3107,14 +3107,14 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                 }
             }
 
-            [Simulator.Register(Offset=0x00000010U)] public uint CLK_EN_REG;
-            [Simulator.Register(Offset=0x00000014U)] public uint PLLNMP;
+            [ARMv4Simulator.Register(Offset=0x00000010U)] public uint CLK_EN_REG;
+            [ARMv4Simulator.Register(Offset=0x00000014U)] public uint PLLNMP;
 
             uint m_state_MCLK_EN;
         }
 
-        [Simulator.PeripheralRange(Base=0x380C0000U,Length=0x00000020U,ReadLatency=1,WriteLatency=2)]
-        public class RTC : Simulator.Peripheral
+        [ARMv4Simulator.PeripheralRange(Base=0x380C0000U,Length=0x00000020U,ReadLatency=1,WriteLatency=2)]
+        public class RTC : ARMv4Simulator.Peripheral
         {
             public const uint WDCTL__DIS                        = 0x00000000;
             public const uint WDCTL__EN                         = 0x00000001;
@@ -3133,9 +3133,9 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
 
             //--//
 
-            [Simulator.LinkToPeripheral()          ] public INTC InterruptController;
+            [ARMv4Simulator.LinkToPeripheral()          ] public INTC InterruptController;
 
-            [Simulator.Register(Offset=0x00000000U)] public uint HREG_low
+            [ARMv4Simulator.Register(Offset=0x00000000U)] public uint HREG_low
             {
                 get
                 {
@@ -3148,7 +3148,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                 }
             }
 
-            [Simulator.Register(Offset=0x00000004U)] public uint HREG_high
+            [ARMv4Simulator.Register(Offset=0x00000004U)] public uint HREG_high
             {
                 get
                 {
@@ -3165,7 +3165,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                 }
             }
 
-            [Simulator.Register(Offset=0x00000008U)] public uint COMP_low
+            [ARMv4Simulator.Register(Offset=0x00000008U)] public uint COMP_low
             {
                 get
                 {
@@ -3185,7 +3185,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                 }
             }
 
-            [Simulator.Register(Offset=0x0000000CU)] public uint COMP_high
+            [ARMv4Simulator.Register(Offset=0x0000000CU)] public uint COMP_high
             {
                 get
                 {
@@ -3206,7 +3206,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                 }
             }
 
-            [Simulator.Register(Offset=0x00000010U)] public uint LD_HREG
+            [ARMv4Simulator.Register(Offset=0x00000010U)] public uint LD_HREG
             {
                 set
                 {
@@ -3218,9 +3218,9 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                 }
             }
 
-            [Simulator.Register(Offset=0x00000014U)] public uint WDCTL;
-            [Simulator.Register(Offset=0x00000018U)] public uint WDDLY;
-            [Simulator.Register(Offset=0x0000001CU)] public uint WDRST;
+            [ARMv4Simulator.Register(Offset=0x00000014U)] public uint WDCTL;
+            [ARMv4Simulator.Register(Offset=0x00000018U)] public uint WDDLY;
+            [ARMv4Simulator.Register(Offset=0x0000001CU)] public uint WDRST;
 
             //--//
 
@@ -3328,14 +3328,14 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
             }
         }
 
-        [Simulator.PeripheralRange(Base=0x380D0000U,Length=0x00000004U,ReadLatency=1,WriteLatency=2)]
-        public class EDMAIF : Simulator.Peripheral
+        [ARMv4Simulator.PeripheralRange(Base=0x380D0000U,Length=0x00000004U,ReadLatency=1,WriteLatency=2)]
+        public class EDMAIF : ARMv4Simulator.Peripheral
         {
-            [Simulator.Register(Offset=0x00000000U)] public uint EMDAIF_Control;
+            [ARMv4Simulator.Register(Offset=0x00000000U)] public uint EMDAIF_Control;
         }
 
-        [Simulator.PeripheralRange(Base=0x380E0000U,Length=0x00000020U,ReadLatency=1,WriteLatency=2)]
-        public class PCU : Simulator.Peripheral
+        [ARMv4Simulator.PeripheralRange(Base=0x380E0000U,Length=0x00000020U,ReadLatency=1,WriteLatency=2)]
+        public class PCU : ARMv4Simulator.Peripheral
         {
             public const uint PCU_STATUS__LN2   = 0x00000040;
             public const uint PCU_STATUS__LN1   = 0x00000020;
@@ -3345,88 +3345,88 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
             public const uint PCU_STATUS__DEAD  = 0x00000002;
             public const uint PCU_STATUS__OFF   = 0x00000001;
 
-            [Simulator.Register(Offset=0x00000000U)] public uint CLR_SW1;
-            [Simulator.Register(Offset=0x00000004U)] public uint SET_SW1;
+            [ARMv4Simulator.Register(Offset=0x00000000U)] public uint CLR_SW1;
+            [ARMv4Simulator.Register(Offset=0x00000004U)] public uint SET_SW1;
 
-            [Simulator.Register(Offset=0x00000008U)] public uint CLR_LN1;
-            [Simulator.Register(Offset=0x0000000CU)] public uint SET_LN1;
+            [ARMv4Simulator.Register(Offset=0x00000008U)] public uint CLR_LN1;
+            [ARMv4Simulator.Register(Offset=0x0000000CU)] public uint SET_LN1;
 
-            [Simulator.Register(Offset=0x00000010U)] public uint CLR_LN2;
-            [Simulator.Register(Offset=0x00000014U)] public uint SET_LN2;
+            [ARMv4Simulator.Register(Offset=0x00000010U)] public uint CLR_LN2;
+            [ARMv4Simulator.Register(Offset=0x00000014U)] public uint SET_LN2;
 
-            [Simulator.Register(Offset=0x00000018U)] public uint SW_RESET;
+            [ARMv4Simulator.Register(Offset=0x00000018U)] public uint SW_RESET;
 
-            [Simulator.Register(Offset=0x0000001CU)] public uint PCU_STATUS;
+            [ARMv4Simulator.Register(Offset=0x0000001CU)] public uint PCU_STATUS;
 
-            [Simulator.Register(Offset=0x00000020U)] public byte CLR_SW1_CNT;
-            [Simulator.Register(Offset=0x00000024U)] public byte SET_SW1_CNT;
-            [Simulator.Register(Offset=0x00000028U)] public byte CLR_LN1_CNT;
-            [Simulator.Register(Offset=0x0000002CU)] public byte SET_LN1_CNT;
-            [Simulator.Register(Offset=0x00000030U)] public byte CLR_LN2_CNT;
-            [Simulator.Register(Offset=0x00000034U)] public byte SET_LN2_CNT;
+            [ARMv4Simulator.Register(Offset=0x00000020U)] public byte CLR_SW1_CNT;
+            [ARMv4Simulator.Register(Offset=0x00000024U)] public byte SET_SW1_CNT;
+            [ARMv4Simulator.Register(Offset=0x00000028U)] public byte CLR_LN1_CNT;
+            [ARMv4Simulator.Register(Offset=0x0000002CU)] public byte SET_LN1_CNT;
+            [ARMv4Simulator.Register(Offset=0x00000030U)] public byte CLR_LN2_CNT;
+            [ARMv4Simulator.Register(Offset=0x00000034U)] public byte SET_LN2_CNT;
         }
 
 
         //
         // Advanced Power Control
         //
-        [Simulator.PeripheralRange(Base=0x380F0000U,Length=0x00000020U,ReadLatency=1,WriteLatency=2)]
+        [ARMv4Simulator.PeripheralRange(Base=0x380F0000U,Length=0x00000020U,ReadLatency=1,WriteLatency=2)]
         public class APC
         {
-            [Simulator.Register(Offset=0x00000000U)] public byte APC_PWICMD;
-            [Simulator.Register(Offset=0x00000004U)] public byte APC_PWIDATAWR;
-            [Simulator.Register(Offset=0x00000008U)] public byte APC_PWIDATAWD;
-            [Simulator.Register(Offset=0x00000010U)] public byte APC_CONTROL;
-            [Simulator.Register(Offset=0x00000014U)] public byte APC_STATUS;
-            [Simulator.Register(Offset=0x00000018U)] public byte APC_MINVDD_LIMIT;
-            [Simulator.Register(Offset=0x0000001CU)] public byte APC_VDDCHK;
-            [Simulator.Register(Offset=0x00000020U)] public byte APC_VDDCHKD;
-            [Simulator.Register(Offset=0x00000024U)] public byte APC_PREDLYSEL;
-            [Simulator.Register(Offset=0x00000028U)] public byte APC_IMASK;
-            [Simulator.Register(Offset=0x0000002CU)] public byte APC_ISTATUS;
-            [Simulator.Register(Offset=0x00000030U)] public byte APC_ICLEAR;
-            [Simulator.Register(Offset=0x00000034U)] public byte APC_UNSH_NOISE;
-            [Simulator.Register(Offset=0x00000038U)] public byte APC_WKUP_DLY;
-            [Simulator.Register(Offset=0x0000003CU)] public byte APC_SLK_SMP;
-            [Simulator.Register(Offset=0x00000040U)] public byte APC_CLKDIV_PWICLK;
-            [Simulator.Register(Offset=0x00000050U)] public byte APC_OVSHT_LMT;
-            [Simulator.Register(Offset=0x00000054U)] public byte APC_CLP_CTRL;
-            [Simulator.Register(Offset=0x00000058U)] public byte APC_SS_SRATE;
-            [Simulator.Register(Offset=0x0000005CU)] public byte APC_IGAIN4;
-            [Simulator.Register(Offset=0x00000060U)] public byte APC_IGAIN1;
-            [Simulator.Register(Offset=0x00000064U)] public byte APC_IGAIN2;
-            [Simulator.Register(Offset=0x00000068U)] public byte APC_IGAIN3;
-            [Simulator.Register(Offset=0x0000006CU)] public byte APC_ITSTCTRL;
-            [Simulator.Register(Offset=0x00000070U)] public byte APC_ITSTIP1;
-            [Simulator.Register(Offset=0x00000074U)] public byte APC_ITSTIP2;
-            [Simulator.Register(Offset=0x00000078U)] public byte APC_ITSTOP1;
-            [Simulator.Register(Offset=0x0000007CU)] public byte APC_ITSTOP2;
-            [Simulator.Register(Offset=0x00000080U)] public byte APC_PL1_CALCODE;
-            [Simulator.Register(Offset=0x00000084U)] public byte APC_PL2_CALCODE;
-            [Simulator.Register(Offset=0x00000088U)] public byte APC_PL3_CALCODE;
-            [Simulator.Register(Offset=0x0000008CU)] public byte APC_PL4_CALCODE;
-            [Simulator.Register(Offset=0x00000090U)] public byte APC_PL5_CALCODE;
-            [Simulator.Register(Offset=0x00000094U)] public byte APC_PL6_CALCODE;
-            [Simulator.Register(Offset=0x00000098U)] public byte APC_PL7_CALCODE;
-            [Simulator.Register(Offset=0x0000009CU)] public byte APC_PL8_CALCODE;
-            [Simulator.Register(Offset=0x000000A0U)] public byte APC_PL1_COREVDD;
-            [Simulator.Register(Offset=0x000000A4U)] public byte APC_PL2_COREVDD;
-            [Simulator.Register(Offset=0x000000A8U)] public byte APC_PL3_COREVDD;
-            [Simulator.Register(Offset=0x000000ACU)] public byte APC_PL4_COREVDD;
-            [Simulator.Register(Offset=0x000000B0U)] public byte APC_PL5_COREVDD;
-            [Simulator.Register(Offset=0x000000B4U)] public byte APC_PL6_COREVDD;
-            [Simulator.Register(Offset=0x000000B8U)] public byte APC_PL7_COREVDD;
-            [Simulator.Register(Offset=0x000000BCU)] public byte APC_PL8_COREVDD;
-            [Simulator.Register(Offset=0x000000C0U)] public byte APC_RET_VDD;
-            [Simulator.Register(Offset=0x000000C4U)] public byte APC_INTEGRATION_TEST_REG;
-            [Simulator.Register(Offset=0x000000E0U)] public byte APC_DBG_DLYCODE;
-            [Simulator.Register(Offset=0x000000FCU)] public byte APC_REV;
+            [ARMv4Simulator.Register(Offset=0x00000000U)] public byte APC_PWICMD;
+            [ARMv4Simulator.Register(Offset=0x00000004U)] public byte APC_PWIDATAWR;
+            [ARMv4Simulator.Register(Offset=0x00000008U)] public byte APC_PWIDATAWD;
+            [ARMv4Simulator.Register(Offset=0x00000010U)] public byte APC_CONTROL;
+            [ARMv4Simulator.Register(Offset=0x00000014U)] public byte APC_STATUS;
+            [ARMv4Simulator.Register(Offset=0x00000018U)] public byte APC_MINVDD_LIMIT;
+            [ARMv4Simulator.Register(Offset=0x0000001CU)] public byte APC_VDDCHK;
+            [ARMv4Simulator.Register(Offset=0x00000020U)] public byte APC_VDDCHKD;
+            [ARMv4Simulator.Register(Offset=0x00000024U)] public byte APC_PREDLYSEL;
+            [ARMv4Simulator.Register(Offset=0x00000028U)] public byte APC_IMASK;
+            [ARMv4Simulator.Register(Offset=0x0000002CU)] public byte APC_ISTATUS;
+            [ARMv4Simulator.Register(Offset=0x00000030U)] public byte APC_ICLEAR;
+            [ARMv4Simulator.Register(Offset=0x00000034U)] public byte APC_UNSH_NOISE;
+            [ARMv4Simulator.Register(Offset=0x00000038U)] public byte APC_WKUP_DLY;
+            [ARMv4Simulator.Register(Offset=0x0000003CU)] public byte APC_SLK_SMP;
+            [ARMv4Simulator.Register(Offset=0x00000040U)] public byte APC_CLKDIV_PWICLK;
+            [ARMv4Simulator.Register(Offset=0x00000050U)] public byte APC_OVSHT_LMT;
+            [ARMv4Simulator.Register(Offset=0x00000054U)] public byte APC_CLP_CTRL;
+            [ARMv4Simulator.Register(Offset=0x00000058U)] public byte APC_SS_SRATE;
+            [ARMv4Simulator.Register(Offset=0x0000005CU)] public byte APC_IGAIN4;
+            [ARMv4Simulator.Register(Offset=0x00000060U)] public byte APC_IGAIN1;
+            [ARMv4Simulator.Register(Offset=0x00000064U)] public byte APC_IGAIN2;
+            [ARMv4Simulator.Register(Offset=0x00000068U)] public byte APC_IGAIN3;
+            [ARMv4Simulator.Register(Offset=0x0000006CU)] public byte APC_ITSTCTRL;
+            [ARMv4Simulator.Register(Offset=0x00000070U)] public byte APC_ITSTIP1;
+            [ARMv4Simulator.Register(Offset=0x00000074U)] public byte APC_ITSTIP2;
+            [ARMv4Simulator.Register(Offset=0x00000078U)] public byte APC_ITSTOP1;
+            [ARMv4Simulator.Register(Offset=0x0000007CU)] public byte APC_ITSTOP2;
+            [ARMv4Simulator.Register(Offset=0x00000080U)] public byte APC_PL1_CALCODE;
+            [ARMv4Simulator.Register(Offset=0x00000084U)] public byte APC_PL2_CALCODE;
+            [ARMv4Simulator.Register(Offset=0x00000088U)] public byte APC_PL3_CALCODE;
+            [ARMv4Simulator.Register(Offset=0x0000008CU)] public byte APC_PL4_CALCODE;
+            [ARMv4Simulator.Register(Offset=0x00000090U)] public byte APC_PL5_CALCODE;
+            [ARMv4Simulator.Register(Offset=0x00000094U)] public byte APC_PL6_CALCODE;
+            [ARMv4Simulator.Register(Offset=0x00000098U)] public byte APC_PL7_CALCODE;
+            [ARMv4Simulator.Register(Offset=0x0000009CU)] public byte APC_PL8_CALCODE;
+            [ARMv4Simulator.Register(Offset=0x000000A0U)] public byte APC_PL1_COREVDD;
+            [ARMv4Simulator.Register(Offset=0x000000A4U)] public byte APC_PL2_COREVDD;
+            [ARMv4Simulator.Register(Offset=0x000000A8U)] public byte APC_PL3_COREVDD;
+            [ARMv4Simulator.Register(Offset=0x000000ACU)] public byte APC_PL4_COREVDD;
+            [ARMv4Simulator.Register(Offset=0x000000B0U)] public byte APC_PL5_COREVDD;
+            [ARMv4Simulator.Register(Offset=0x000000B4U)] public byte APC_PL6_COREVDD;
+            [ARMv4Simulator.Register(Offset=0x000000B8U)] public byte APC_PL7_COREVDD;
+            [ARMv4Simulator.Register(Offset=0x000000BCU)] public byte APC_PL8_COREVDD;
+            [ARMv4Simulator.Register(Offset=0x000000C0U)] public byte APC_RET_VDD;
+            [ARMv4Simulator.Register(Offset=0x000000C4U)] public byte APC_INTEGRATION_TEST_REG;
+            [ARMv4Simulator.Register(Offset=0x000000E0U)] public byte APC_DBG_DLYCODE;
+            [ARMv4Simulator.Register(Offset=0x000000FCU)] public byte APC_REV;
         }
 
         //
         // Internal memory.
         //
-        public class RamMemoryHandler : Simulator.MemoryHandler
+        public class RamMemoryHandler : ARMv4Simulator.MemoryHandler
         {
             //
             // State
@@ -3448,7 +3448,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
             // Helper Methods
             //
 
-            public override void Initialize( Simulator owner        ,
+            public override void Initialize( ARMv4Simulator owner        ,
                                              ulong     rangeLength  ,
                                              uint      rangeWidth   ,
                                              uint      readLatency  ,
@@ -3482,7 +3482,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
         //
         // 16KB cache memory
         //
-        public class CacheMemoryHandler : Simulator.AddressSpaceBusHandler
+        public class CacheMemoryHandler : ARMv4Simulator.AddressSpaceBusHandler
         {
             const uint CacheableMask   = 0x80000000u;
             const uint FlushMask       = 0x40000000u;
@@ -3568,7 +3568,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                         //
                         // If there's a detour installed at this spot, read the redirected value!!
                         //
-                        if(res == Simulator.TrackDetour.c_DetourOpcode && kind != TargetAdapterAbstractionLayer.MemoryAccessType.FETCH)
+                        if(res == ARMv4Simulator.TrackDetour.c_DetourOpcode && kind != TargetAdapterAbstractionLayer.MemoryAccessType.FETCH)
                         {
                             res = m_owner.HandleDetour( address        , res );
                             res = m_owner.HandleDetour( uncachedAddress, res );
@@ -3624,7 +3624,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                 //
                 // If there's a detour installed at this spot, read the redirected value!!
                 //
-                if(res == Simulator.TrackDetour.c_DetourOpcode && kind != TargetAdapterAbstractionLayer.MemoryAccessType.FETCH)
+                if(res == ARMv4Simulator.TrackDetour.c_DetourOpcode && kind != TargetAdapterAbstractionLayer.MemoryAccessType.FETCH)
                 {
                     res = m_owner.HandleDetour( address        , res );
                     res = m_owner.HandleDetour( uncachedAddress, res );
@@ -3678,7 +3678,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                         uint data;
                         uint latency = ComputeCacheLatency( address, out data );
 
-                        Simulator.TimingState backup = new Simulator.TimingState();
+                        ARMv4Simulator.TimingState backup = new ARMv4Simulator.TimingState();
 
                         m_owner.SuspendTimingUpdates( ref backup );
 
@@ -3818,7 +3818,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Chipset
                     ulong ready        = m_owner.ClockTicks; if(ready < m_cache_LastBusActivity) ready = m_cache_LastBusActivity;
                     uint  waitStates   = 0;
 
-                    Simulator.TimingState backup = new Simulator.TimingState();
+                    ARMv4Simulator.TimingState backup = new ARMv4Simulator.TimingState();
 
                     m_owner.SaveTimingUpdates( ref backup );
 

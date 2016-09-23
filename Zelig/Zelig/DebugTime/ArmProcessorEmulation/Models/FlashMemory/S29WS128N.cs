@@ -13,7 +13,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.FlashMemory
 
     //--//
 
-    public class S29WS128N : Simulator.MemoryHandler
+    public class S29WS128N : ARMv4Simulator.MemoryHandler
     {
         const uint Sector16KWord = 16 * 1024 * sizeof(ushort);
         const uint Sector64KWord = 64 * 1024 * sizeof(ushort);
@@ -73,7 +73,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.FlashMemory
 
             internal void Advance( uint      relativeAddress ,
                                    ushort    value           ,
-                                   Simulator owner           )
+                                   ARMv4Simulator owner           )
             {
                 //
                 // If the writes are too spaced out, abort.
@@ -217,7 +217,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.FlashMemory
             // Helper Methods
             //
 
-            internal void HandleWrite( Simulator owner   ,
+            internal void HandleWrite( ARMv4Simulator owner   ,
                                        uint      address ,
                                        ushort    value   )
             {
@@ -262,7 +262,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.FlashMemory
                 }
             }
 
-            internal bool HandleRead(     Simulator owner   ,
+            internal bool HandleRead(     ARMv4Simulator owner   ,
                                           uint      address ,
                                       out ushort    value   )
             {
@@ -391,7 +391,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.FlashMemory
         // Helper Methods
         //
 
-        public override void Initialize( Simulator owner        ,
+        public override void Initialize( ARMv4Simulator owner        ,
                                          ulong     rangeLength  ,
                                          uint      rangeWidth   ,
                                          uint      readLatency  ,

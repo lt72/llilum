@@ -98,23 +98,38 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         }
 
 
-        public override InstructionSet GetInstructionSetProvider()
+        public override InstructionSetARM GetInstructionSet()
         {
-            if(m_instructionSetProvider == null)
+            if(m_instructionSet == null)
             {
-                InstructionSetVersion iset = InstructionSetVersion.Build( this.PlatformFamily ).With( this.PlatformVersion ).With( this.PlatformVFP );
+                lock(this)
+                {
+                    if(m_instructionSet == null)
+                    {
+                        InstructionSetVersion iset = InstructionSetVersion.Build( this.PlatformFamily ).With( this.PlatformVersion ).With( this.PlatformVFP );
+                        
+                        CurrentInstructionSetEncoding.RegisterCurrentEncoding( iset );
 
-                if(this.HasVFPv2)
-                {
-                    m_instructionSetProvider = new TargetModel.ArmProcessor.InstructionSet_VFP( iset );
-                }
-                else
-                {
-                    m_instructionSetProvider = new TargetModel.ArmProcessor.InstructionSet( iset );
+                        if(this.HasVFPv2)
+                        {
+                            m_instructionSet = new TargetModel.ArmProcessor.InstructionSetARMv5_VFP( iset );
+                        }
+                        else
+                        {
+                            if(iset.PlatformVersion == InstructionSetVersion.Platform_Version__ARMv7M)
+                            {
+                                m_instructionSet = new TargetModel.ArmProcessor.InstructionSetARMv7M( iset );
+                            }
+                            else
+                            {
+                                m_instructionSet = new TargetModel.ArmProcessor.InstructionSetARMv4( iset );
+                            }
+                        }
+                    }
                 }
             }
 
-            return m_instructionSetProvider;
+            return m_instructionSet;
         }
 
         protected virtual void AllocateState( Capabilities processorCapabilities )
@@ -153,7 +168,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
 
             context2.Transform( ref m_memoryBlocks                  );
               
-			// LT72FORZELIG   
+            // LT72FORZELIG   
             //context2.Transform( ref m_memoryRequirement_VectorTable );
             //context2.Transform( ref m_memoryRequirement_Bootstrap   );
             //context2.Transform( ref m_memoryRequirement_Code        );

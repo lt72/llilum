@@ -50,7 +50,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
 
         public void EmitOpcode__FCMPZ( ZeligIR.Abstractions.RegisterDescriptor Fd )
         {
-            InstructionSet_VFP.Opcode_VFP_CompareToZero enc = this.Encoder_VFP.PrepareForVFP_CompareToZero;
+            InstructionSetARMv5_VFP.Opcode_VFP_CompareToZero enc = this.Encoder_VFP.PrepareForVFP_CompareToZero;
 
             if(Fd.IsDoublePrecision)
             {
@@ -72,7 +72,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
 
         public void EmitOpcode__FMSTAT()
         {
-            InstructionSet_VFP.Opcode_VFP_ConditionCodeTransfer enc = this.Encoder_VFP.PrepareForVFP_ConditionCodeTransfer;
+            InstructionSetARMv5_VFP.Opcode_VFP_ConditionCodeTransfer enc = this.Encoder_VFP.PrepareForVFP_ConditionCodeTransfer;
 
             enc.Prepare( m_pendingCondition ); // uint ConditionCodes ,
 
@@ -82,7 +82,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         public void EmitOpcode__FMRX( ZeligIR.Abstractions.RegisterDescriptor Rd  ,
                                       ZeligIR.Abstractions.RegisterDescriptor reg )
         {
-            InstructionSet_VFP.Opcode_VFP_SystemRegisterTransfer enc = this.Encoder_VFP.PrepareForVFP_SystemRegisterTransfer;
+            InstructionSetARMv5_VFP.Opcode_VFP_SystemRegisterTransfer enc = this.Encoder_VFP.PrepareForVFP_SystemRegisterTransfer;
 
             enc.Prepare( m_pendingCondition,         // uint ConditionCodes ,
                          GetIntegerEncoding( Rd ) ,  // uint Rd             ,
@@ -95,7 +95,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         public void EmitOpcode__FMXR( ZeligIR.Abstractions.RegisterDescriptor Rd  ,
                                       ZeligIR.Abstractions.RegisterDescriptor reg )
         {
-            InstructionSet_VFP.Opcode_VFP_SystemRegisterTransfer enc = this.Encoder_VFP.PrepareForVFP_SystemRegisterTransfer;
+            InstructionSetARMv5_VFP.Opcode_VFP_SystemRegisterTransfer enc = this.Encoder_VFP.PrepareForVFP_SystemRegisterTransfer;
 
             enc.Prepare( m_pendingCondition,         // uint ConditionCodes ,
                          GetIntegerEncoding( Rd ) ,  // uint Rd             ,
@@ -110,7 +110,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                           ZeligIR.Abstractions.RegisterDescriptor Fm  ,
                                           uint                                    Alu )
         {
-            InstructionSet_VFP.Opcode_VFP_UnaryDataOperation enc = this.Encoder_VFP.PrepareForVFP_UnaryDataOperation;
+            InstructionSetARMv5_VFP.Opcode_VFP_UnaryDataOperation enc = this.Encoder_VFP.PrepareForVFP_UnaryDataOperation;
 
             if(Fd.IsDoublePrecision)
             {
@@ -137,7 +137,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         public void EmitOpcode__FSITOS( ZeligIR.Abstractions.RegisterDescriptor Fd ,
                                         ZeligIR.Abstractions.RegisterDescriptor Fm )
         {
-            InstructionSet_VFP.Opcode_VFP_UnaryDataOperation enc = this.Encoder_VFP.PrepareForVFP_UnaryDataOperation;
+            InstructionSetARMv5_VFP.Opcode_VFP_UnaryDataOperation enc = this.Encoder_VFP.PrepareForVFP_UnaryDataOperation;
 
             enc.Prepare( m_pendingCondition                           ,  // uint ConditionCodes ,
                          false                                        ,  // bool IsDouble       ,
@@ -151,7 +151,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         public void EmitOpcode__FSITOD( ZeligIR.Abstractions.RegisterDescriptor Fd ,
                                         ZeligIR.Abstractions.RegisterDescriptor Fm )
         {
-            InstructionSet_VFP.Opcode_VFP_UnaryDataOperation enc = this.Encoder_VFP.PrepareForVFP_UnaryDataOperation;
+            InstructionSetARMv5_VFP.Opcode_VFP_UnaryDataOperation enc = this.Encoder_VFP.PrepareForVFP_UnaryDataOperation;
 
             enc.Prepare( m_pendingCondition                           ,  // uint ConditionCodes ,
                          true                                         ,  // bool IsDouble       ,
@@ -165,7 +165,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         public void EmitOpcode__FUITOS( ZeligIR.Abstractions.RegisterDescriptor Fd ,
                                         ZeligIR.Abstractions.RegisterDescriptor Fm )
         {
-            InstructionSet_VFP.Opcode_VFP_UnaryDataOperation enc = this.Encoder_VFP.PrepareForVFP_UnaryDataOperation;
+            InstructionSetARMv5_VFP.Opcode_VFP_UnaryDataOperation enc = this.Encoder_VFP.PrepareForVFP_UnaryDataOperation;
 
             enc.Prepare( m_pendingCondition                           ,  // uint ConditionCodes ,
                          false                                        ,  // bool IsDouble       ,
@@ -179,7 +179,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         public void EmitOpcode__FUITOD( ZeligIR.Abstractions.RegisterDescriptor Fd ,
                                         ZeligIR.Abstractions.RegisterDescriptor Fm )
         {
-            InstructionSet_VFP.Opcode_VFP_UnaryDataOperation enc = this.Encoder_VFP.PrepareForVFP_UnaryDataOperation;
+            InstructionSetARMv5_VFP.Opcode_VFP_UnaryDataOperation enc = this.Encoder_VFP.PrepareForVFP_UnaryDataOperation;
 
             enc.Prepare( m_pendingCondition                           ,  // uint ConditionCodes ,
                          true                                         ,  // bool IsDouble       ,
@@ -193,7 +193,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         public void EmitOpcode__FTOSIS( ZeligIR.Abstractions.RegisterDescriptor Fd ,
                                         ZeligIR.Abstractions.RegisterDescriptor Fm )
         {
-            InstructionSet_VFP.Opcode_VFP_UnaryDataOperation enc = this.Encoder_VFP.PrepareForVFP_UnaryDataOperation;
+            InstructionSetARMv5_VFP.Opcode_VFP_UnaryDataOperation enc = this.Encoder_VFP.PrepareForVFP_UnaryDataOperation;
 
             enc.Prepare( m_pendingCondition                           ,  // uint ConditionCodes ,
                          false                                        ,  // bool IsDouble       ,
@@ -207,7 +207,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         public void EmitOpcode__FTOSID( ZeligIR.Abstractions.RegisterDescriptor Fd ,
                                         ZeligIR.Abstractions.RegisterDescriptor Fm )
         {
-            InstructionSet_VFP.Opcode_VFP_UnaryDataOperation enc = this.Encoder_VFP.PrepareForVFP_UnaryDataOperation;
+            InstructionSetARMv5_VFP.Opcode_VFP_UnaryDataOperation enc = this.Encoder_VFP.PrepareForVFP_UnaryDataOperation;
 
             enc.Prepare( m_pendingCondition                           ,  // uint ConditionCodes ,
                          true                                         ,  // bool IsDouble       ,
@@ -221,7 +221,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         public void EmitOpcode__FTOUIS( ZeligIR.Abstractions.RegisterDescriptor Fd ,
                                         ZeligIR.Abstractions.RegisterDescriptor Fm )
         {
-            InstructionSet_VFP.Opcode_VFP_UnaryDataOperation enc = this.Encoder_VFP.PrepareForVFP_UnaryDataOperation;
+            InstructionSetARMv5_VFP.Opcode_VFP_UnaryDataOperation enc = this.Encoder_VFP.PrepareForVFP_UnaryDataOperation;
 
             enc.Prepare( m_pendingCondition                           ,  // uint ConditionCodes ,
                          false                                        ,  // bool IsDouble       ,
@@ -235,7 +235,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         public void EmitOpcode__FTOUID( ZeligIR.Abstractions.RegisterDescriptor Fd ,
                                         ZeligIR.Abstractions.RegisterDescriptor Fm )
         {
-            InstructionSet_VFP.Opcode_VFP_UnaryDataOperation enc = this.Encoder_VFP.PrepareForVFP_UnaryDataOperation;
+            InstructionSetARMv5_VFP.Opcode_VFP_UnaryDataOperation enc = this.Encoder_VFP.PrepareForVFP_UnaryDataOperation;
 
             enc.Prepare( m_pendingCondition                           ,  // uint ConditionCodes ,
                          true                                         ,  // bool IsDouble       ,
@@ -249,7 +249,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         public void EmitOpcode__FCVTSD( ZeligIR.Abstractions.RegisterDescriptor Sd ,
                                         ZeligIR.Abstractions.RegisterDescriptor Dm )
         {
-            InstructionSet_VFP.Opcode_VFP_ConvertFloatToFloat enc = this.Encoder_VFP.PrepareForVFP_ConvertFloatToFloat;
+            InstructionSetARMv5_VFP.Opcode_VFP_ConvertFloatToFloat enc = this.Encoder_VFP.PrepareForVFP_ConvertFloatToFloat;
 
             enc.Prepare( m_pendingCondition               ,  // uint ConditionCodes ,
                          true                             ,  // bool IsDouble       ,
@@ -262,7 +262,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         public void EmitOpcode__FCVTDS( ZeligIR.Abstractions.RegisterDescriptor Dd ,
                                         ZeligIR.Abstractions.RegisterDescriptor Sm )
         {
-            InstructionSet_VFP.Opcode_VFP_ConvertFloatToFloat enc = this.Encoder_VFP.PrepareForVFP_ConvertFloatToFloat;
+            InstructionSetARMv5_VFP.Opcode_VFP_ConvertFloatToFloat enc = this.Encoder_VFP.PrepareForVFP_ConvertFloatToFloat;
 
             enc.Prepare( m_pendingCondition               ,  // uint ConditionCodes ,
                          false                            ,  // bool IsDouble       ,
@@ -314,7 +314,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                            ZeligIR.Abstractions.RegisterDescriptor Fm  ,
                                            uint                                    Alu )
         {
-            InstructionSet_VFP.Opcode_VFP_BinaryDataOperation enc = this.Encoder_VFP.PrepareForVFP_BinaryDataOperation;
+            InstructionSetARMv5_VFP.Opcode_VFP_BinaryDataOperation enc = this.Encoder_VFP.PrepareForVFP_BinaryDataOperation;
 
             if(Fd.IsDoublePrecision)
             {
@@ -343,7 +343,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         public void EmitOpcode__FMRS( ZeligIR.Abstractions.RegisterDescriptor Rd ,
                                       ZeligIR.Abstractions.RegisterDescriptor Fn )
         {
-            InstructionSet_VFP.Opcode_VFP_32bitRegisterTransfer enc = this.Encoder_VFP.PrepareForVFP_32bitRegisterTransfer;
+            InstructionSetARMv5_VFP.Opcode_VFP_32bitRegisterTransfer enc = this.Encoder_VFP.PrepareForVFP_32bitRegisterTransfer;
 
             enc.Prepare( m_pendingCondition               ,  // uint ConditionCodes ,
                          GetIntegerEncoding        ( Rd ) ,  // uint Rd             ,
@@ -356,7 +356,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         public void EmitOpcode__FMSR( ZeligIR.Abstractions.RegisterDescriptor Rd ,
                                       ZeligIR.Abstractions.RegisterDescriptor Fn )
         {
-            InstructionSet_VFP.Opcode_VFP_32bitRegisterTransfer enc = this.Encoder_VFP.PrepareForVFP_32bitRegisterTransfer;
+            InstructionSetARMv5_VFP.Opcode_VFP_32bitRegisterTransfer enc = this.Encoder_VFP.PrepareForVFP_32bitRegisterTransfer;
 
             enc.Prepare( m_pendingCondition              ,  // uint ConditionCodes ,
                          GetIntegerEncoding        ( Rd ),  // uint Rd             ,
@@ -371,7 +371,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         public void EmitOpcode__FMRDL( ZeligIR.Abstractions.RegisterDescriptor Rd ,
                                        ZeligIR.Abstractions.RegisterDescriptor Fn )
         {
-            InstructionSet_VFP.Opcode_VFP_32bitLoRegisterTransfer enc = this.Encoder_VFP.PrepareForVFP_32bitLoRegisterTransfer;
+            InstructionSetARMv5_VFP.Opcode_VFP_32bitLoRegisterTransfer enc = this.Encoder_VFP.PrepareForVFP_32bitLoRegisterTransfer;
 
             enc.Prepare( m_pendingCondition               ,  // uint ConditionCodes ,
                          GetIntegerEncoding        ( Rd ) ,  // uint Rd             ,
@@ -384,7 +384,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         public void EmitOpcode__FMDLR( ZeligIR.Abstractions.RegisterDescriptor Rd ,
                                        ZeligIR.Abstractions.RegisterDescriptor Fn )
         {
-            InstructionSet_VFP.Opcode_VFP_32bitLoRegisterTransfer enc = this.Encoder_VFP.PrepareForVFP_32bitLoRegisterTransfer;
+            InstructionSetARMv5_VFP.Opcode_VFP_32bitLoRegisterTransfer enc = this.Encoder_VFP.PrepareForVFP_32bitLoRegisterTransfer;
 
             enc.Prepare( m_pendingCondition              ,  // uint ConditionCodes ,
                          GetIntegerEncoding        ( Rd ),  // uint Rd             ,
@@ -399,7 +399,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         public void EmitOpcode__FMRDH( ZeligIR.Abstractions.RegisterDescriptor Rd ,
                                        ZeligIR.Abstractions.RegisterDescriptor Fn )
         {
-            InstructionSet_VFP.Opcode_VFP_32bitHiRegisterTransfer enc = this.Encoder_VFP.PrepareForVFP_32bitHiRegisterTransfer;
+            InstructionSetARMv5_VFP.Opcode_VFP_32bitHiRegisterTransfer enc = this.Encoder_VFP.PrepareForVFP_32bitHiRegisterTransfer;
 
             enc.Prepare( m_pendingCondition               ,  // uint ConditionCodes ,
                          GetIntegerEncoding        ( Rd ) ,  // uint Rd             ,
@@ -412,7 +412,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         public void EmitOpcode__FMDHR( ZeligIR.Abstractions.RegisterDescriptor Rd ,
                                        ZeligIR.Abstractions.RegisterDescriptor Fn )
         {
-            InstructionSet_VFP.Opcode_VFP_32bitHiRegisterTransfer enc = this.Encoder_VFP.PrepareForVFP_32bitHiRegisterTransfer;
+            InstructionSetARMv5_VFP.Opcode_VFP_32bitHiRegisterTransfer enc = this.Encoder_VFP.PrepareForVFP_32bitHiRegisterTransfer;
 
             enc.Prepare( m_pendingCondition              ,  // uint ConditionCodes ,
                          GetIntegerEncoding        ( Rd ),  // uint Rd             ,
@@ -445,7 +445,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         {
             CHECKS.ASSERT( offset % sizeof(uint) == 0, "offset must be word-aligned, got {0}", offset );
 
-            InstructionSet_VFP.Opcode_VFP_DataTransfer enc = this.Encoder_VFP.PrepareForVFP_DataTransfer;
+            InstructionSetARMv5_VFP.Opcode_VFP_DataTransfer enc = this.Encoder_VFP.PrepareForVFP_DataTransfer;
             bool                                       fUp;
             uint                                       uOffset;
 
@@ -494,7 +494,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                       bool                                    fUp        ,
                                       bool                                    fWriteBack )
         {
-            InstructionSet_VFP.Opcode_VFP_BlockDataTransfer enc = this.Encoder_VFP.PrepareForVFP_BlockDataTransfer;
+            InstructionSetARMv5_VFP.Opcode_VFP_BlockDataTransfer enc = this.Encoder_VFP.PrepareForVFP_BlockDataTransfer;
 
             if(Fd.IsDoublePrecision)
             {
@@ -540,7 +540,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                                       bool                                    fUp        ,
                                       bool                                    fWriteBack )
         {
-            InstructionSet_VFP.Opcode_VFP_BlockDataTransfer enc = this.Encoder_VFP.PrepareForVFP_BlockDataTransfer;
+            InstructionSetARMv5_VFP.Opcode_VFP_BlockDataTransfer enc = this.Encoder_VFP.PrepareForVFP_BlockDataTransfer;
 
             if(Fd.IsDoublePrecision)
             {

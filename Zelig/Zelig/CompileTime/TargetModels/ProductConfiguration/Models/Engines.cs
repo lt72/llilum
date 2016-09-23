@@ -10,12 +10,17 @@ namespace Microsoft.Zelig.Configuration.Environment
     using Microsoft.Zelig.TargetModel.ArmProcessor;
 
     [DisplayName("ARM emulator")]
-    [HardwareModel(typeof(Emulation.ArmProcessor.Simulator), HardwareModelAttribute.Kind.Engine)]
+    [HardwareModel(typeof(Emulation.ArmProcessor.ARMv4Simulator), HardwareModelAttribute.Kind.Engine)]
     public sealed class ArmEmulator : EngineCategory
     {
-        public override object Instantiate(InstructionSet iset)
+        public override object Instantiate(InstructionSetARM iset)
         {
-            return new Emulation.ArmProcessor.Simulator(iset);
+            if(iset is InstructionSetARMv4)
+            {
+                return new Emulation.ArmProcessor.ARMv4Simulator( (InstructionSetARMv4)iset );
+            }
+
+            throw new NotSupportedException( ); 
         }
     }
 }

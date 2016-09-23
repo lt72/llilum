@@ -655,7 +655,7 @@ namespace Microsoft.Zelig.CodeGeneration.IR.ImageBuilders
         private GrowOnlyHashTable< SequentialRegion                          , List< CodeConstant >         > m_regionToCodeConstants;
         private List             <                                             CodeConstant                 > m_pendingConstants;
 
-        private InstructionSet                                                                                m_encoder;
+        private InstructionSetARM                                                                             m_encoder;
 
         //
         // Constructor Methods
@@ -746,11 +746,11 @@ namespace Microsoft.Zelig.CodeGeneration.IR.ImageBuilders
 
         //--//
 
-        public InstructionSet GetInstructionSetProvider( )
+        public InstructionSetARM GetInstructionSetProvider( )
         {
             if( m_encoder == null )
             {
-                m_encoder = m_typeSystem.PlatformAbstraction.GetInstructionSetProvider( );
+                m_encoder = m_typeSystem.PlatformAbstraction.GetInstructionSet( );
             }
 
             return m_encoder;

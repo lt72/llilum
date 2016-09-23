@@ -107,7 +107,7 @@ namespace Microsoft.Zelig.CodeGeneration.IR.Abstractions
 
         public abstract bool PlatformBigEndian   { get; }
 
-        public abstract InstructionSet GetInstructionSetProvider();
+        public abstract InstructionSetARM GetInstructionSet();
 
         public abstract RegisterDescriptor[] GetRegisters();
 

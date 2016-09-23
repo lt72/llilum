@@ -63,7 +63,7 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         protected override bool ApplyRelocation( uint srcAddress ,
                                                  uint dstAddress )
         {
-            InstructionSet.Opcode_SingleDataTransfer_1 op = (InstructionSet.Opcode_SingleDataTransfer_1)ArmCompilationState.GetOpcode( m_cs, m_region, m_offset );
+            InstructionSetARMv4.Opcode_SingleDataTransfer_1 op = (InstructionSetARMv4.Opcode_SingleDataTransfer_1)ArmCompilationState.GetOpcode( m_cs, m_region, m_offset );
 
             if(op.Rn != EncodingDefinition.c_register_pc)
             {

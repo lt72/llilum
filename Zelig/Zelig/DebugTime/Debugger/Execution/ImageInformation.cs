@@ -15,9 +15,9 @@ namespace Microsoft.Zelig.Debugger.ArmProcessor
     using System.Threading;
     
     using                          Microsoft.Zelig.TargetModel.ArmProcessor;
-    using EncDef                 = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition_ARM;
-    using EncDef_VFP             = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition_VFP_ARM;
-    using InstructionSet         = Microsoft.Zelig.TargetModel.ArmProcessor.InstructionSet;
+    using EncDef                 = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition_ARMv4;
+    using EncDef_VFP             = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition_VFP_ARMv5;
+    using InstructionSetARMv4         = Microsoft.Zelig.TargetModel.ArmProcessor.InstructionSetARMv4;
     using IR                     = Microsoft.Zelig.CodeGeneration.IR;
     using RT                     = Microsoft.Zelig.Runtime;
     using TS                     = Microsoft.Zelig.Runtime.TypeSystem;
@@ -27,7 +27,7 @@ namespace Microsoft.Zelig.Debugger.ArmProcessor
 
     public class ImageInformation
     {
-        private static EncDef s_Encoding = (EncodingDefinition_ARM)CurrentInstructionSetEncoding.GetEncoding();
+        private static EncDef s_Encoding = (EncodingDefinition_ARMv4)CurrentInstructionSetEncoding.GetEncoding();
 
         //--//
 
@@ -1100,7 +1100,7 @@ namespace Microsoft.Zelig.Debugger.ArmProcessor
                                       uint                    addressCurrent ,
                                       uint                    addressEnd     )
         {
-            InstructionSet encoder = (InstructionSet)this.TypeSystem.PlatformAbstraction.GetInstructionSetProvider();
+            var encoder = this.TypeSystem.PlatformAbstraction.GetInstructionSet();
 
             for(uint diff = addressEnd - addressStart; diff > 0; addressStart += sizeof(uint), diff -= sizeof(uint))
             {

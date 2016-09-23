@@ -4,20 +4,22 @@
 
 //#define TRACK_EMULATOR_PERFORMANCE
 
-using System.Reflection;
 
 namespace Microsoft.Zelig.Emulation.ArmProcessor
 {
     using                      System;
     using                      System.Collections;
     using                      System.Collections.Generic;
-    using Cfg                = Microsoft.Zelig.Configuration.Environment;
-    using EncDef             = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition_ARM;
-    using InstructionSet     = Microsoft.Zelig.TargetModel.ArmProcessor.InstructionSet;
-    using IR                 = Microsoft.Zelig.CodeGeneration.IR;
+    using                      System.Reflection;
+
+    using Microsoft.Zelig.TargetModel.ArmProcessor;
+    using Cfg               = Microsoft.Zelig.Configuration.Environment;
+    using EncDef            = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition_ARMv4;
+    using InstructionSetARM = Microsoft.Zelig.TargetModel.ArmProcessor.InstructionSetARM;
+    using IR                = Microsoft.Zelig.CodeGeneration.IR;
 
 
-    public class Simulator : SimulatorCore
+    public class ARMv4Simulator : SimulatorCore
     {
         sealed class ProcessorControlImpl : Emulation.Hosting.ProcessorControl
         {
@@ -25,13 +27,13 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor
             // State
             //
 
-            Simulator m_owner;
+            ARMv4Simulator m_owner;
 
             //
             // Constructor Methods
             //
 
-            internal ProcessorControlImpl( Simulator owner )
+            internal ProcessorControlImpl( ARMv4Simulator owner )
             {
                 m_owner = owner;
 
@@ -118,13 +120,13 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor
             // State
             //
 
-            Simulator m_owner;
+            ARMv4Simulator m_owner;
 
             //
             // Constructor Methods
             //
 
-            internal ProcessorStatusImpl( Simulator owner )
+            internal ProcessorStatusImpl( ARMv4Simulator owner )
             {
                 m_owner = owner;
 
@@ -220,14 +222,14 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor
             // State
             //
 
-            Simulator m_owner;
+            ARMv4Simulator m_owner;
             TimingState m_timingState;
 
             //
             // Constructor Methods
             //
 
-            internal ProcessorPerformanceImpl( Simulator owner )
+            internal ProcessorPerformanceImpl( ARMv4Simulator owner )
             {
                 m_owner = owner;
 
@@ -275,13 +277,13 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor
             // State
             //
 
-            Simulator m_owner;
+            ARMv4Simulator m_owner;
 
             //
             // Constructor Methods
             //
 
-            internal MonitorExecutionImpl( Simulator owner )
+            internal MonitorExecutionImpl( ARMv4Simulator owner )
             {
                 m_owner = owner;
 
@@ -400,13 +402,13 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor
             // State
             //
 
-            Simulator m_owner;
+            ARMv4Simulator m_owner;
 
             //
             // Constructor Methods
             //
 
-            internal CodeCoverageImpl( Simulator owner )
+            internal CodeCoverageImpl( ARMv4Simulator owner )
             {
                 m_owner = owner;
 
@@ -534,13 +536,13 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor
             // State
             //
 
-            Simulator m_owner;
+            ARMv4Simulator m_owner;
 
             //
             // Constructor Methods
             //
 
-            internal InteropImpl( Simulator owner )
+            internal InteropImpl( ARMv4Simulator owner )
             {
                 m_owner = owner;
 
@@ -571,13 +573,13 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor
             // State
             //
 
-            Simulator m_owner;
+            ARMv4Simulator m_owner;
 
             //
             // Constructor Methods
             //
 
-            internal DeviceClockTicksTrackingImpl( Simulator owner )
+            internal DeviceClockTicksTrackingImpl( ARMv4Simulator owner )
             {
                 m_owner = owner;
 
@@ -647,7 +649,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor
             // State
             //
 
-            protected Simulator m_owner;
+            protected ARMv4Simulator m_owner;
             private   TimingState m_backup;
 
             //--//
@@ -656,7 +658,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor
             // Helper Methods
             //
 
-            internal void CreateInterop( Simulator owner )
+            internal void CreateInterop( ARMv4Simulator owner )
             {
                 m_owner = owner;
 
@@ -716,7 +718,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor
             // State
             //
 
-            protected Simulator              m_owner;
+            protected ARMv4Simulator              m_owner;
             protected AddressSpaceBusHandler m_parent;
             protected ulong                  m_rangeLength;
             protected uint                   m_rangeWidth;
@@ -735,7 +737,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor
             // Helper Methods
             //
 
-            public virtual void Initialize( Simulator owner        ,
+            public virtual void Initialize( ARMv4Simulator owner        ,
                                             ulong     rangeLength  ,
                                             uint      rangeWidth   ,
                                             uint      readLatency  ,
@@ -1153,7 +1155,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor
             // Helper Methods
             //
 
-            public override void Initialize( Simulator owner        ,
+            public override void Initialize( ARMv4Simulator owner        ,
                                              ulong     rangeLength  ,
                                              uint      rangeWidth   ,
                                              uint      readLatency  ,
@@ -1858,7 +1860,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor
             // Constructor Methods
             //
 
-            internal TopAddressSpaceBusHandler( Simulator owner )
+            internal TopAddressSpaceBusHandler( ARMv4Simulator owner )
             {
                 m_owner = owner;
             }
@@ -1927,7 +1929,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor
                 return Hosting.Interop.CallbackResponse.StopExecution;
             }
 
-            internal void Enable( Simulator owner )
+            internal void Enable( ARMv4Simulator owner )
             {
                 if(m_reg == null)
                 {
@@ -1935,7 +1937,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor
                 }
             }
 
-            internal void Disable( Simulator owner )
+            internal void Disable( ARMv4Simulator owner )
             {
                 if(m_reg != null)
                 {
@@ -2040,7 +2042,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor
             // Helper Methods
             //
 
-            internal void Process( Simulator owner ,
+            internal void Process( ARMv4Simulator owner ,
                                    uint      diff  ,
                                    uint      cpsr  )
             {
@@ -2069,7 +2071,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor
                 }
             }
 
-            internal void Dump( Simulator owner )
+            internal void Dump( ARMv4Simulator owner )
             {
                 Hosting.OutputSink sink;
 
@@ -2356,7 +2358,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor
         // Constructor Methods
         //
 
-        public Simulator(InstructionSet iset) : base(iset)
+        public ARMv4Simulator( InstructionSetARMv4 iset ) : base(iset)
         {
             m_fMonitorMemory          = false;
             m_fMonitorRegisters       = false;
@@ -2384,7 +2386,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor
             m_implCodeCoverage             = new CodeCoverageImpl            ( this );
             m_implInterop                  = new InteropImpl                 ( this );
 
-            this.RegisterService( typeof(Simulator), this );
+            this.RegisterService( typeof(ARMv4Simulator), this );
         }
 
         //
@@ -3124,7 +3126,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor
 
                 try
                 {
-                    InstructionSet.Opcode op = m_instructionSet.Decode( opcode );
+                    InstructionSetARM.Opcode op = m_instructionSet.Decode( opcode );
 
                     bool fExecuted = CheckConditions( op.ConditionCodes );
                     uint target;
@@ -3170,7 +3172,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor
                         {
                             if(m_execution_OutputSink != null)
                             {
-                                m_execution_OutputSink.OutputLine( " {0} {1,-4} : 0x{2:X8} -> 0x{3:X8}", new string( ' ', 80 ), InstructionSet.Opcode.DumpRegister( reg ), m_registersBefore[reg], GetRegister( reg ) );
+                                m_execution_OutputSink.OutputLine( " {0} {1,-4} : 0x{2:X8} -> 0x{3:X8}", new string( ' ', 80 ), InstructionSetARM.Opcode.DumpRegister( reg ), m_registersBefore[reg], GetRegister( reg ) );
                             }
                         }
                     }
@@ -3215,7 +3217,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor
             {
                 if(m_execution_OutputSink != null)
                 {
-                    m_execution_OutputSink.OutputLine( "#### Leaving mode {0}, PC={1:X8}, LR={2:X8}" , InstructionSet.DumpMode( m_cpsr ), m_pc, GetRegister( EncDef.c_register_lr ) );
+                    m_execution_OutputSink.OutputLine( "#### Leaving mode {0}, PC={1:X8}, LR={2:X8}" , InstructionSetARMv4.DumpMode( m_cpsr ), m_pc, GetRegister( EncDef.c_register_lr ) );
                 }
             }
 
@@ -3230,7 +3232,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor
             {
                 if(m_execution_OutputSink != null)
                 {
-                    m_execution_OutputSink.OutputLine( "#### Entering mode {0}, PC={1:X8}, LR={2:X8}" , InstructionSet.DumpMode( m_cpsr ), m_pc, GetRegister( EncDef.c_register_lr ) );
+                    m_execution_OutputSink.OutputLine( "#### Entering mode {0}, PC={1:X8}, LR={2:X8}" , InstructionSetARMv4.DumpMode( m_cpsr ), m_pc, GetRegister( EncDef.c_register_lr ) );
                 }
             }
         }

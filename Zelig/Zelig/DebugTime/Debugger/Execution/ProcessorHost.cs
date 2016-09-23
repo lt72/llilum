@@ -18,7 +18,7 @@ namespace Microsoft.Zelig.Debugger.ArmProcessor
     using Microsoft.Zelig.TargetModel.ArmProcessor;
     using Microsoft.Zelig.CodeGeneration.IR.Abstractions;
 
-    using EncDef             = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition_ARM;
+    using EncDef             = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition_ARMv4;
     using Cfg                = Microsoft.Zelig.Configuration.Environment;
     using IR                 = Microsoft.Zelig.CodeGeneration.IR;
 
@@ -294,7 +294,7 @@ namespace Microsoft.Zelig.Debugger.ArmProcessor
             m_notifyOnExitingRunning    = new List< MemoryDelta >();
         }
 
-        public void SelectEngine(Cfg.EngineCategory category, InstructionSet iset)
+        public void SelectEngine(Cfg.EngineCategory category, InstructionSetARM iset)
         {
             m_softBreakpointTableAddress = 0;
 

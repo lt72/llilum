@@ -19,7 +19,7 @@ namespace Microsoft.Zelig.Debugger.ArmProcessor
 
     using EncDef                 = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition;
     using EncDef_VFP             = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition_VFP;
-    using InstructionSet         = Microsoft.Zelig.TargetModel.ArmProcessor.InstructionSet;
+    using InstructionSet         = Microsoft.Zelig.TargetModel.ArmProcessor.InstructionSetARMv4;
     using IR                     = Microsoft.Zelig.CodeGeneration.IR;
     using RT                     = Microsoft.Zelig.Runtime;
     using TS                     = Microsoft.Zelig.Runtime.TypeSystem;
@@ -87,7 +87,7 @@ namespace Microsoft.Zelig.Debugger.ArmProcessor
         private bool                             m_fVerbose;
 
         private InteropHelper                    m_ih;
-        private Emulation.ArmProcessor.Simulator m_simulator;
+        private Emulation.ArmProcessor.ARMv4Simulator m_simulator;
 
         private List< ProhibitedRange >          m_freeRanges = new List< ProhibitedRange >();
         private int                              m_suspendCount;

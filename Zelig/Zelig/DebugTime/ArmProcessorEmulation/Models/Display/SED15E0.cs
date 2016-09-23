@@ -14,9 +14,9 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Display
 
     //--//
 
-    [Simulator.PeripheralRange(Base=0x20000000U,Length=0x00020000U,Latency=3)]
-    [Simulator.PeripheralRange(Base=0xA0000000U,Length=0x00020000U,Latency=3)]
-    public class SED15E0 : Simulator.Peripheral
+    [ARMv4Simulator.PeripheralRange(Base=0x20000000U,Length=0x00020000U,Latency=3)]
+    [ARMv4Simulator.PeripheralRange(Base=0xA0000000U,Length=0x00020000U,Latency=3)]
+    public class SED15E0 : ARMv4Simulator.Peripheral
     {
         public const uint CONTROL_DISPLAY_OFF                     = 0xAE;
         public const uint CONTROL_DISPLAY_ON                      = 0xAF;
@@ -149,7 +149,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Display
 
         //--//
 
-        [Simulator.Register(Offset=0)] public byte Control
+        [ARMv4Simulator.Register(Offset=0)] public byte Control
         {
             set
             {
@@ -183,7 +183,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.Display
             }
         }
 
-        [Simulator.Register(Offset=1)] public byte Data
+        [ARMv4Simulator.Register(Offset=1)] public byte Data
         {
             set
             {

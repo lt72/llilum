@@ -58,6 +58,11 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
         // Constructor Methods
         //
 
+        private InstructionSetVersion( uint descriptor )
+        {
+            m_platformDescriptor = descriptor;
+        }
+
         public static InstructionSetVersion ARM
         {
             get
@@ -88,10 +93,11 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
             return this;
         }
 
-        private InstructionSetVersion( uint descriptor )
-        {
-            m_platformDescriptor = descriptor;
-        }
+        //--//
+
+        //
+        // Access methods
+        // 
 
         public uint PlatformFamily
         {

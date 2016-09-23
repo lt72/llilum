@@ -18,7 +18,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor.VoxSoloFormFactor
         // WARNING: This interop has been disabled because we need to spin the idle thread in order to pump the DCC queues.
         //
         //[Simulator.Interop(Function="void Microsoft.VoxSoloFormFactor.Peripherals::WaitForInterrupt()")]
-        class InteropHandler_WaitForInterrupt : Simulator.InteropHandler
+        class InteropHandler_WaitForInterrupt : ARMv4Simulator.InteropHandler
         {
             protected override Hosting.Interop.CallbackResponse PerformInterop()
             {

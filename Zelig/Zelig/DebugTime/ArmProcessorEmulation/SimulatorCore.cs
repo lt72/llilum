@@ -9,14 +9,14 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor
     using System.Threading;
     using Microsoft.Zelig.TargetModel.ArmProcessor;
     using Cfg          = Microsoft.Zelig.Configuration.Environment;
-    using EncDef       = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition_ARM;
+    using EncDef       = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition_ARMv4;
 
 
     public abstract class SimulatorCore : Hosting.AbstractEngine
     {
         
-        private static EncodingDefinition_ARM     s_Encoding    = (EncodingDefinition_ARM)CurrentInstructionSetEncoding.GetEncoding();
-        private static EncodingDefinition_VFP_ARM s_EncodingVFP = (EncodingDefinition_VFP_ARM)CurrentInstructionSetEncoding.GetVFPEncoding();
+        private static EncodingDefinition_ARMv4     s_Encoding    = (EncodingDefinition_ARMv4)CurrentInstructionSetEncoding.GetEncoding();
+        private static EncodingDefinition_VFP_ARMv5 s_EncodingVFP = (EncodingDefinition_VFP_ARMv5)CurrentInstructionSetEncoding.GetVFPEncoding();
 
         public delegate bool ProcessCoprocessorRegisterTransfer( ref uint value            ,
                                                                      bool fFromCoprocessor ,
@@ -484,7 +484,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor
 
             //--//
 
-            internal void Start( Simulator st )
+            internal void Start( ARMv4Simulator st )
             {
                 m_clockTicks           = st.m_clockTicks          ;
                 m_busAccess_Read       = st.m_busAccess_Read      ;
@@ -492,7 +492,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor
                 m_busAccess_WaitStates = st.m_busAccess_WaitStates;
             }
 
-            internal void End( Simulator st )
+            internal void End( ARMv4Simulator st )
             {
                 m_clockTicks           = st.m_clockTicks           - m_clockTicks          ;
                 m_busAccess_Read       = st.m_busAccess_Read       - m_busAccess_Read      ;
@@ -687,7 +687,7 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor
         // Constructor Methods
         //
 
-        protected SimulatorCore(InstructionSet iset) : base(iset)
+        protected SimulatorCore(InstructionSetARMv4 iset) : base(iset)
         {
             m_pc          = 0;
             m_cpsr        = EncDef.c_psr_I | EncDef.c_psr_F | EncDef.c_psr_mode_SVC;

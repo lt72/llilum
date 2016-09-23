@@ -123,7 +123,7 @@ namespace Microsoft.Zelig.Debugger.ArmProcessor
                             toolStripStatus_ExecutionState.Text = "Connecting to target...";
                         } );
 
-                        InstructionSet iset = m_imageInformation.ImageBuilder.TypeSystem.PlatformAbstraction.GetInstructionSetProvider();
+                        var iset = m_imageInformation.ImageBuilder.TypeSystem.PlatformAbstraction.GetInstructionSet();
 
                         m_processorHost.SelectEngine(m_currentSession.SelectedEngine, iset);
 

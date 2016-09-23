@@ -12,8 +12,6 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
 
     public partial class ArmPlatform
     {
-        private static EncodingDefinition_ARM s_Encoding = (EncodingDefinition_ARM)CurrentInstructionSetEncoding.GetEncoding();
-
         //--//
 
         class PrepareForRegisterAllocation
@@ -252,12 +250,12 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
                         uint valSeed;
                         uint valRot;
 
-                        if(s_Encoding.check_DataProcessing_ImmediateValue( (uint)val, out valSeed, out valRot ) == true)
+                        if(CurrentInstructionSetEncoding.GetEncoding( ).check_DataProcessing_ImmediateValue( (uint)val, out valSeed, out valRot ) == true)
                         {
                             return true;
                         }
 
-                        if(s_Encoding.check_DataProcessing_ImmediateValue( ~(uint)val, out valSeed, out valRot ) == true)
+                        if(CurrentInstructionSetEncoding.GetEncoding( ).check_DataProcessing_ImmediateValue( ~(uint)val, out valSeed, out valRot ) == true)
                         {
                             var opBin = op as ZeligIR.BinaryOperator;
                             if(opBin != null)

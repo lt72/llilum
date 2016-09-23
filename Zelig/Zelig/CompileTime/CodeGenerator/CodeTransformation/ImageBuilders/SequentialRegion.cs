@@ -1033,7 +1033,7 @@ namespace Microsoft.Zelig.CodeGeneration.IR.ImageBuilders
 
                 textWriter.WriteLine( "    Opcodes for {0} for {1} [{2}]", this.Dumper.CreateLabel( bb ), bb.Owner, bb.Annotation );
 
-                InstructionSet encoder = this.Owner.GetInstructionSetProvider();
+                var encoder = this.Owner.GetInstructionSetProvider();
 
                 uint address = this.IsBaseAddressAssigned ? this.BaseAddress.ToUInt32() : 0;
 

@@ -8,7 +8,7 @@ namespace Microsoft.Zelig.Runtime.TargetPlatform.ARMv4
     using System;
 
     using TS     = Microsoft.Zelig.Runtime.TypeSystem;
-    using EncDef = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition_ARM;
+    using EncDef = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition_ARMv4;
 
 
     public abstract partial class ProcessorARMv4 : Processor

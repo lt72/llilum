@@ -10,8 +10,8 @@ namespace Microsoft.Zelig.Runtime.TargetPlatform.ARMv5
 
     using              Microsoft.Zelig.TargetModel.ArmProcessor;
     using TS         = Microsoft.Zelig.Runtime.TypeSystem;
-    using EncDef     = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition_ARM;
-    using EncDef_VFP = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition_VFP_ARM;
+    using EncDef     = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition_ARMv4;
+    using EncDef_VFP = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition_VFP_ARMv5;
 
 
     public abstract partial class ProcessorARMv5_VFP

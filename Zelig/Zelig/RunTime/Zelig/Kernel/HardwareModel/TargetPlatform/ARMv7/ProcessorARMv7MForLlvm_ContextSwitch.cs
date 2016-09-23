@@ -11,10 +11,9 @@ using System.Runtime.InteropServices;
 namespace Microsoft.Zelig.Runtime.TargetPlatform.ARMv7
 {
     using System;
-
-    using EncDef = Microsoft.Zelig.TargetModel.ArmProcessor.EncodingDefinition;
-    using TS     = Microsoft.Zelig.Runtime.TypeSystem;
-    using RT     = Microsoft.Zelig.Runtime;
+    
+    using TS = Microsoft.Zelig.Runtime.TypeSystem;
+    using RT = Microsoft.Zelig.Runtime;
 
     public abstract partial class ProcessorARMv7MForLlvm
     {
@@ -57,10 +56,6 @@ namespace Microsoft.Zelig.Runtime.TargetPlatform.ARMv7
             [StructLayout( LayoutKind.Sequential, Pack = 4 )]
             public struct RegistersOnStack
             {
-                public const uint StackRegister          = EncDef.c_register_sp;
-                public const uint LinkRegister           = EncDef.c_register_lr;
-                public const uint ProgramCounterRegister = EncDef.c_register_pc;
-
                 //
                 // State
                 //

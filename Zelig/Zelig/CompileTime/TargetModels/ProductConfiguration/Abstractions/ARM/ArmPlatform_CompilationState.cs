@@ -82,18 +82,18 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
             ZeligIR.Abstractions.Platform pa = m_cfg.TypeSystem.PlatformAbstraction;
 
             m_reg_Scratch = pa.GetScratchRegister();
-            m_reg_R0      = pa.GetRegisterForEncoding( EncodingDefinition_ARM.c_register_r0 );
-            m_reg_R1      = pa.GetRegisterForEncoding( EncodingDefinition_ARM.c_register_r1 );
-            m_reg_R2      = pa.GetRegisterForEncoding( EncodingDefinition_ARM.c_register_r2 );
-            m_reg_R3      = pa.GetRegisterForEncoding( EncodingDefinition_ARM.c_register_r3 );
-            m_reg_R4      = pa.GetRegisterForEncoding( EncodingDefinition_ARM.c_register_r4 );
-            m_reg_LR      = pa.GetRegisterForEncoding( EncodingDefinition_ARM.c_register_lr );
-            m_reg_SP      = pa.GetRegisterForEncoding( EncodingDefinition_ARM.c_register_sp );
-            m_reg_PC      = pa.GetRegisterForEncoding( EncodingDefinition_ARM.c_register_pc );
+            m_reg_R0      = pa.GetRegisterForEncoding( EncodingDefinition_ARMv4.c_register_r0 );
+            m_reg_R1      = pa.GetRegisterForEncoding( EncodingDefinition_ARMv4.c_register_r1 );
+            m_reg_R2      = pa.GetRegisterForEncoding( EncodingDefinition_ARMv4.c_register_r2 );
+            m_reg_R3      = pa.GetRegisterForEncoding( EncodingDefinition_ARMv4.c_register_r3 );
+            m_reg_R4      = pa.GetRegisterForEncoding( EncodingDefinition_ARMv4.c_register_r4 );
+            m_reg_LR      = pa.GetRegisterForEncoding( EncodingDefinition_ARMv4.c_register_lr );
+            m_reg_SP      = pa.GetRegisterForEncoding( EncodingDefinition_ARMv4.c_register_sp );
+            m_reg_PC      = pa.GetRegisterForEncoding( EncodingDefinition_ARMv4.c_register_pc );
 
-            m_reg_D0      = pa.GetRegisterForEncoding( EncodingDefinition_VFP_ARM.c_register_d0    );  
-            m_reg_FPSCR   = pa.GetRegisterForEncoding( EncodingDefinition_VFP_ARM.c_register_FPSCR );  
-            m_reg_FPEXC   = pa.GetRegisterForEncoding( EncodingDefinition_VFP_ARM.c_register_FPEXC );  
+            m_reg_D0      = pa.GetRegisterForEncoding( EncodingDefinition_VFP_ARMv5.c_register_d0    );  
+            m_reg_FPSCR   = pa.GetRegisterForEncoding( EncodingDefinition_VFP_ARMv5.c_register_FPSCR );  
+            m_reg_FPEXC   = pa.GetRegisterForEncoding( EncodingDefinition_VFP_ARMv5.c_register_FPEXC );  
         }
 
 
@@ -208,10 +208,10 @@ namespace Microsoft.Zelig.Configuration.Environment.Abstractions
         {
             var sec = reg.GetSectionOfFixedSize( sizeof(uint) );
 
-            InstructionSet.Opcode_Breakpoint enc = this.Encoder.PrepareForBreakpoint;
+            InstructionSetARMv4.Opcode_Breakpoint enc = (InstructionSetARMv4.Opcode_Breakpoint)this.Encoder.PrepareForBreakpoint;
 
-            enc.Prepare( EncodingDefinition_ARM.c_cond_AL,      // uint ConditionCodes ,
-                         0xFFFF                             );  // uint Value          );
+            enc.Prepare( EncodingDefinition.c_cond_AL,      // uint ConditionCodes ,
+                         0xFFFF                         );  // uint Value          );
 
             sec.Write( enc.Encode() );
         }

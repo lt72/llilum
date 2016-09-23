@@ -60,6 +60,47 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
 
         //--//
 
+        ///////////////////////////////////////
+        public const uint c_shift_LSL = 0x0; // logical shift left
+        public const uint c_shift_LSR = 0x1; // logical shift right
+        public const uint c_shift_ASR = 0x2; // arithmetic shift right
+        public const uint c_shift_ROR = 0x3; // rotate right
+        public const uint c_shift_RRX = 0x4; // rotate right with extend
+        ///////////////////////////////////////
+
+        //--//
+
+        //////////////////////////////////////////////
+        public const uint c_halfwordkind_SWP = 0x0; //
+        public const uint c_halfwordkind_U2  = 0x1; //
+        public const uint c_halfwordkind_I1  = 0x2; //
+        public const uint c_halfwordkind_I2  = 0x3; //
+        //////////////////////////////////////////////
+
+        //--//
+
+        /////////////////////////////////////////
+        public const uint c_cond_EQ     = 0x0; //  Z set                                equal
+        public const uint c_cond_NE     = 0x1; //  Z clear                          not equal
+        public const uint c_cond_CS     = 0x2; //  C set                   unsigned     higher or same
+        public const uint c_cond_CC     = 0x3; //  C clear                 unsigned     lower
+        public const uint c_cond_MI     = 0x4; //  N set                                negative
+        public const uint c_cond_PL     = 0x5; //  N clear                              positive or zero
+        public const uint c_cond_VS     = 0x6; //  V set                                overflow
+        public const uint c_cond_VC     = 0x7; //  V clear                           no overflow
+        public const uint c_cond_HI     = 0x8; //  C set and Z clear       unsigned     higher
+        public const uint c_cond_LS     = 0x9; //  C clear or Z set        unsigned     lower or same
+        public const uint c_cond_GE     = 0xA; //  N equals V                           greater or equal
+        public const uint c_cond_LT     = 0xB; //  N not equal to V                     less than
+        public const uint c_cond_GT     = 0xC; //  Z clear AND (N equals V)             greater than
+        public const uint c_cond_LE     = 0xD; //  Z set OR (N not equal to V)          less than or equal
+        public const uint c_cond_AL     = 0xE; //  (ignored) always
+        public const uint c_cond_UNUSED = 0xF; //
+        /////////////////////////////////////////
+        public const uint c_cond_NUM    = 0x10;
+
+        //--//
+
         public enum Format
         {
             MRS                    ,
@@ -164,7 +205,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
         {
             OPCODE_VERIFY_INSERT_FIELD( val, valPos, valLen, bitLen );
 
-            return ((val >> valPos) & EncodingDefinition_ARM.OPCODE_DECODE_MASK( bitLen )) << bitPos;
+            return ((val >> valPos) & EncodingDefinition_ARMv4.OPCODE_DECODE_MASK( bitLen )) << bitPos;
         }
 
         static public uint OPCODE_DECODE_EXTRACTFIELD( uint op     ,
@@ -180,7 +221,7 @@ namespace Microsoft.Zelig.TargetModel.ArmProcessor
                                                        int  bitPos ,
                                                        int  bitLen )
         {
-            return ((op >> bitPos) & EncodingDefinition_ARM.OPCODE_DECODE_MASK( bitLen )) << valPos;
+            return ((op >> bitPos) & EncodingDefinition_ARMv4.OPCODE_DECODE_MASK( bitLen )) << valPos;
         }
 
         //--//

@@ -15,7 +15,7 @@ namespace Microsoft.Zelig.Configuration.Environment
     [EnumDefaults( "Characteristics", Runtime.MemoryAttributes.FLASH              |
                                       Runtime.MemoryAttributes.RandomAccessMemory |
                                       Runtime.MemoryAttributes.ExternalMemory     )]
-    [HardwareModel(typeof(Emulation.ArmProcessor.Simulator.MemoryHandler), HardwareModelAttribute.Kind.Memory)]
+    [HardwareModel(typeof(Emulation.ArmProcessor.ARMv4Simulator.MemoryHandler), HardwareModelAttribute.Kind.Memory)]
     public sealed class I28F320W18_32 : FlashMemoryCategory
     {
     }
@@ -27,7 +27,7 @@ namespace Microsoft.Zelig.Configuration.Environment
     [EnumDefaults( "Characteristics", Runtime.MemoryAttributes.FLASH              |
                                       Runtime.MemoryAttributes.RandomAccessMemory |
                                       Runtime.MemoryAttributes.ExternalMemory     )]
-    [HardwareModel(typeof(Emulation.ArmProcessor.Simulator.MemoryHandler), HardwareModelAttribute.Kind.Memory)]
+    [HardwareModel(typeof(Emulation.ArmProcessor.ARMv4Simulator.MemoryHandler), HardwareModelAttribute.Kind.Memory)]
     public sealed class I28F256L18_16 : FlashMemoryCategory
     {
     }
