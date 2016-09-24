@@ -4,6 +4,7 @@
 
 namespace Microsoft.Llilum.BoardConfigurations
 {
+    using Microsoft.Zelig.Emulation;
     using Microsoft.Zelig.Runtime;
     using Microsoft.Zelig.Configuration.Environment;
 
@@ -11,16 +12,20 @@ namespace Microsoft.Llilum.BoardConfigurations
     [DisplayName( "LPC1768" )]
     public sealed class LPC1768SoC : ProcessorCategory
     {
+
+        //--//
+
         [DependsOn( typeof( LPC1768SoC ) )]
         [DisplayName( "Internal 32KB Static RAM" )]
         [Defaults( "BaseAddress", 0x10000000 )]
         [Defaults( "SizeInBytes", 32 * 1024 )]
         [Defaults( "WordSize", 32 )]
         [Defaults( "WaitStates", 0 )]
-        [EnumDefaults( "Characteristics", MemoryAttributes.RAM |
-                                          MemoryAttributes.RandomAccessMemory |
-                                          MemoryAttributes.InternalMemory |
+        [EnumDefaults( "Characteristics", MemoryAttributes.RAM                     |
+                                          MemoryAttributes.RandomAccessMemory      |
+                                          MemoryAttributes.InternalMemory          |
                                           MemoryAttributes.ConfiguredAtEntryPoint )]
+        [HardwareModel( typeof( Zelig.Emulation.ArmProcessor.Chipset.LPC176x.RamMemoryHandler ), HardwareModelAttribute.Kind.Memory )]
         public sealed class InternalRAM32KB : RamMemoryCategory
         {
         }
@@ -32,13 +37,42 @@ namespace Microsoft.Llilum.BoardConfigurations
         [Defaults( "SizeInBytes", 512 * 1024 )]
         [Defaults( "WordSize", 32 )]
         [Defaults( "WaitStates", 0 )]
-        [EnumDefaults( "Characteristics", MemoryAttributes.FLASH |
-                                          MemoryAttributes.RandomAccessMemory |
-                                          MemoryAttributes.InternalMemory |
+        [EnumDefaults( "Characteristics", MemoryAttributes.FLASH                   |
+                                          MemoryAttributes.RandomAccessMemory      |
+                                          MemoryAttributes.InternalMemory          |
                                           MemoryAttributes.ConfiguredAtEntryPoint )]
+        [HardwareModel( typeof( Zelig.Emulation.ArmProcessor.Chipset.LPC176x.RamMemoryHandler ), HardwareModelAttribute.Kind.Memory )]
         public sealed class InternalFlash512KB : FlashMemoryCategory
         {
         }
+
+        //--//
+
+        [DependsOn( typeof( LPC1768SoC ) )]
+        [DisplayName( "Cache Controller" )]
+        [Defaults( "WordSize", 32 )]
+        [Defaults( "WaitStates", 0 )]
+        [HardwareModel( typeof( Zelig.Emulation.ArmProcessor.Chipset.LPC176x.CacheMemoryHandler ), HardwareModelAttribute.Kind.Memory )]
+        public sealed class CacheController : CacheControllerCategory
+        {
+            public override uint GetUncacheableAddress( uint address )
+            {
+                return Zelig.Emulation.ArmProcessor.Chipset.LPC176x.CacheMemoryHandler.GetUncacheableAddress( address );
+            }
+        }
+
+        [AllowedOptions(typeof(LPC1768SoC.InternalRAM32KB))]
+        [Defaults( "ConnectedToBus", typeof( LPC1768SoC.CacheController ) )]
+        public RamMemoryCategory RamChip;
+
+        [AllowedOptions( typeof( LPC1768SoC.InternalFlash512KB ) )]
+        [Defaults( "ConnectedToBus", typeof( LPC1768SoC.CacheController ) )]
+        public FlashMemoryCategory FlashChip;
+
+        [AllowedOptions( typeof( LPC1768SoC.CacheController ) )]
+        [Defaults( "ConnectedToBus", typeof( LPC1768SoC ) )]
+        public CacheControllerCategory Cache;
+
     }
 
     //--//

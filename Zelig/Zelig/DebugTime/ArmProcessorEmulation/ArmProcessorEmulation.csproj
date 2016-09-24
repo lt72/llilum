@@ -89,6 +89,7 @@
     <Compile Include="Hosting\MemoryProvider.cs" />
     <Compile Include="Hosting\SED15E0Sink.cs" />
     <Compile Include="Models\Chipset\MM9691LP.cs" />
+    <Compile Include="Models\Chipset\LPC176x.cs" />
     <Compile Include="Models\Chipset\PXA27x.cs" />
     <Compile Include="Models\Display\SED15E0.cs" />
     <Compile Include="Models\FlashMemory\S29WS128N.cs" />
