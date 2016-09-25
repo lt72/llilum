@@ -233,10 +233,6 @@ namespace Microsoft.Zelig.Runtime.TargetPlatform.ARMv7
 
             //--//
 
-            public Context(RT.ThreadImpl owner) : base(owner)
-            {
-            }
-
             //
             // Overrides
             //

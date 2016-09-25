@@ -141,11 +141,7 @@ namespace Microsoft.Zelig.Runtime.TargetPlatform.ARMv6
             protected uint EXC_RETURN;
 
             //--//
-
-            protected Context( RT.ThreadImpl owner ) : base(owner)
-            {
-            }
-
+            
             //
             // Overrides
             //

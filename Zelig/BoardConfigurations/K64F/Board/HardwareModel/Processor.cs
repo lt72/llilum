@@ -7,20 +7,16 @@ namespace Microsoft.Llilum.K64F
     using System;
     using System.Runtime.InteropServices;
 
-    using RT = Microsoft.Zelig.Runtime;
-    using ARMv7 = Microsoft.Zelig.Runtime.TargetPlatform.ARMv7;
-    using ChipsetModel = Microsoft.CortexM4OnMBED;
+    using RT            = Microsoft.Zelig.Runtime;
+    using ARMv7         = Microsoft.Zelig.Runtime.TargetPlatform.ARMv7;
+    using ChipsetModel  = Microsoft.CortexM4OnMBED;
 
 
     [RT.ProductFilter( "Microsoft.Llilum.BoardConfigurations.K64F" )]
-    public sealed class Processor : Microsoft.CortexM4OnMBED.Processor
+    public sealed class Processor : ChipsetModel.Processor
     {
         public new class Context : ChipsetModel.Processor.Context
         {
-            public Context( RT.ThreadImpl owner ) : base( owner )
-            {
-            }
-
             public override unsafe void SwitchTo( )
             {
                 //
@@ -36,64 +32,64 @@ namespace Microsoft.Llilum.K64F
 
             using(RT.SmartHandles.InterruptState.Disable( ))
             {
-                switch(irqNumber)
-                {
-                    ////////
-                    //////// UART
-                    //////// 
-                    //////case IRQn.UART0_ERR_IRQn:
-                    //////    processor.RemapInterrupt( (IRQn_Type)IRQn.UART0_ERR_IRQn, Zelig_Exception_UART0_ERR_IRQHandler );
-                    //////    break;
-                    //////case IRQn.UART0_RX_TX_IRQn:
-                    //////    processor.RemapInterrupt( (IRQn_Type)IRQn.UART0_RX_TX_IRQn, Zelig_Exception_UART0_RX_TX_IRQHandler );
-                    //////    break;
-                    //////case IRQn.UART1_ERR_IRQn:
-                    //////    processor.RemapInterrupt( (IRQn_Type)IRQn.UART1_ERR_IRQn, Zelig_Exception_UART1_ERR_IRQHandler );
-                    //////    break;
-                    //////case IRQn.UART1_RX_TX_IRQn:
-                    //////    processor.RemapInterrupt( (IRQn_Type)IRQn.UART1_RX_TX_IRQn, Zelig_Exception_UART1_RX_TX_IRQHandler );
-                    //////    break;
-                    //////case IRQn.UART3_ERR_IRQn:
-                    //////    processor.RemapInterrupt( (IRQn_Type)IRQn.UART3_ERR_IRQn, Zelig_Exception_UART3_ERR_IRQHandler );
-                    //////    break;
-                    //////case IRQn.UART3_RX_TX_IRQn:
-                    //////    processor.RemapInterrupt( (IRQn_Type)IRQn.UART3_RX_TX_IRQn, Zelig_Exception_UART3_RX_TX_IRQHandler );
-                    //////    break;
+                //////switch(irqNumber)
+                //////{
+                //////    ////////
+                //////    //////// UART
+                //////    //////// 
+                //////    //////case IRQn.UART0_ERR_IRQn:
+                //////    //////    processor.RemapInterrupt( (IRQn_Type)IRQn.UART0_ERR_IRQn, Zelig_Exception_UART0_ERR_IRQHandler );
+                //////    //////    break;
+                //////    //////case IRQn.UART0_RX_TX_IRQn:
+                //////    //////    processor.RemapInterrupt( (IRQn_Type)IRQn.UART0_RX_TX_IRQn, Zelig_Exception_UART0_RX_TX_IRQHandler );
+                //////    //////    break;
+                //////    //////case IRQn.UART1_ERR_IRQn:
+                //////    //////    processor.RemapInterrupt( (IRQn_Type)IRQn.UART1_ERR_IRQn, Zelig_Exception_UART1_ERR_IRQHandler );
+                //////    //////    break;
+                //////    //////case IRQn.UART1_RX_TX_IRQn:
+                //////    //////    processor.RemapInterrupt( (IRQn_Type)IRQn.UART1_RX_TX_IRQn, Zelig_Exception_UART1_RX_TX_IRQHandler );
+                //////    //////    break;
+                //////    //////case IRQn.UART3_ERR_IRQn:
+                //////    //////    processor.RemapInterrupt( (IRQn_Type)IRQn.UART3_ERR_IRQn, Zelig_Exception_UART3_ERR_IRQHandler );
+                //////    //////    break;
+                //////    //////case IRQn.UART3_RX_TX_IRQn:
+                //////    //////    processor.RemapInterrupt( (IRQn_Type)IRQn.UART3_RX_TX_IRQn, Zelig_Exception_UART3_RX_TX_IRQHandler );
+                //////    //////    break;
                         
-                    ////////
-                    //////// GPIO
-                    //////// 
-                    //////case IRQn.PORTA_IRQn:
-                    //////    processor.RemapInterrupt( (IRQn_Type)IRQn.PORTA_IRQn, Zelig_Exception_PORTA_IRQHandler );
-                    //////    break;
-                    //////case IRQn.PORTB_IRQn:
-                    //////    processor.RemapInterrupt( (IRQn_Type)IRQn.PORTB_IRQn, Zelig_Exception_PORTB_IRQHandler );
-                    //////    break;
-                    //////case IRQn.PORTC_IRQn:
-                    //////    processor.RemapInterrupt( (IRQn_Type)IRQn.PORTC_IRQn, Zelig_Exception_PORTC_IRQHandler );
-                    //////    break;
-                    //////case IRQn.PORTD_IRQn:
-                    //////    processor.RemapInterrupt( (IRQn_Type)IRQn.PORTD_IRQn, Zelig_Exception_PORTD_IRQHandler );
-                    //////    break;
-                    //////case IRQn.PORTE_IRQn:
-                    //////    processor.RemapInterrupt( (IRQn_Type)IRQn.PORTE_IRQn, Zelig_Exception_PORTE_IRQHandler );
-                    //////    break;
+                //////    ////////
+                //////    //////// GPIO
+                //////    //////// 
+                //////    //////case IRQn.PORTA_IRQn:
+                //////    //////    processor.RemapInterrupt( (IRQn_Type)IRQn.PORTA_IRQn, Zelig_Exception_PORTA_IRQHandler );
+                //////    //////    break;
+                //////    //////case IRQn.PORTB_IRQn:
+                //////    //////    processor.RemapInterrupt( (IRQn_Type)IRQn.PORTB_IRQn, Zelig_Exception_PORTB_IRQHandler );
+                //////    //////    break;
+                //////    //////case IRQn.PORTC_IRQn:
+                //////    //////    processor.RemapInterrupt( (IRQn_Type)IRQn.PORTC_IRQn, Zelig_Exception_PORTC_IRQHandler );
+                //////    //////    break;
+                //////    //////case IRQn.PORTD_IRQn:
+                //////    //////    processor.RemapInterrupt( (IRQn_Type)IRQn.PORTD_IRQn, Zelig_Exception_PORTD_IRQHandler );
+                //////    //////    break;
+                //////    //////case IRQn.PORTE_IRQn:
+                //////    //////    processor.RemapInterrupt( (IRQn_Type)IRQn.PORTE_IRQn, Zelig_Exception_PORTE_IRQHandler );
+                //////    //////    break;
                         
-                    //
-                    // Ethernet
-                    // 
-                    case IRQn.ENET_Receive_IRQn:
-                        processor.RemapInterrupt( (IRQn_Type)IRQn.ENET_Receive_IRQn, Zelig_Exception_ENET_Receive_IRQHandler );
-                        break;
+                //////    //
+                //////    // Ethernet
+                //////    // 
+                //////    case IRQn.ENET_Receive_IRQn:
+                //////        processor.RemapInterrupt( (IRQn_Type)IRQn.ENET_Receive_IRQn, Zelig_Exception_ENET_Receive_IRQHandler );
+                //////        break;
 
-                    case IRQn.ENET_Transmit_IRQn:
-                        processor.RemapInterrupt( (IRQn_Type)IRQn.ENET_Transmit_IRQn, Zelig_Exception_ENET_Transmit_IRQHandler );
-                        break;
+                //////    case IRQn.ENET_Transmit_IRQn:
+                //////        processor.RemapInterrupt( (IRQn_Type)IRQn.ENET_Transmit_IRQn, Zelig_Exception_ENET_Transmit_IRQHandler );
+                //////        break;
 
-                    default:
-                        RT.BugCheck.Assert( false, Zelig.Runtime.BugCheck.StopCode.IncorrectArgument );
-                        break;
-                }
+                //////    default:
+                //////        RT.BugCheck.Assert( false, Zelig.Runtime.BugCheck.StopCode.IncorrectArgument );
+                //////        break;
+                //////}
             }
         }
 
@@ -153,9 +149,9 @@ namespace Microsoft.Llilum.K64F
         }
 
         [RT.Inline]
-        public override Microsoft.Zelig.Runtime.Processor.Context AllocateProcessorContext( RT.ThreadImpl owner )
+        public override Microsoft.Zelig.Runtime.Processor.Context AllocateProcessorContext( )
         {
-            return new Context( owner );
+            return new Context( );
         }
 
         //--//
@@ -846,21 +842,21 @@ namespace Microsoft.Llilum.K64F
         //    ENET_1588_Timer_IRQHandler( );
         //}
 
-        [RT.HardwareExceptionHandler( RT.HardwareException.Interrupt )]
-        [RT.ExportedMethod]
-        [RT.DisableNullChecks]
-        private static void Zelig_Exception_ENET_Transmit_IRQHandler( )
-        {
-            ARMv7.ProcessorARMv7MForLlvm.ExclusiveAccessExceptionHandler( s_ENET_Transmit_IRQHandler );
-        }
+        //////[RT.HardwareExceptionHandler( RT.HardwareException.Interrupt )]
+        //////[RT.ExportedMethod]
+        //////[RT.DisableNullChecks]
+        //////private static void Zelig_Exception_ENET_Transmit_IRQHandler( )
+        //////{
+        //////    ARMv7.ProcessorARMv7MForLlvm.ExclusiveAccessExceptionHandler( s_ENET_Transmit_IRQHandler );
+        //////}
 
-        [RT.HardwareExceptionHandler( RT.HardwareException.Interrupt )]
-        [RT.ExportedMethod]
-        [RT.DisableNullChecks]
-        private static void Zelig_Exception_ENET_Receive_IRQHandler( )
-        {
-            ARMv7.ProcessorARMv7MForLlvm.ExclusiveAccessExceptionHandler( s_ENET_Receive_IRQHandler );
-        }
+        //////[RT.HardwareExceptionHandler( RT.HardwareException.Interrupt )]
+        //////[RT.ExportedMethod]
+        //////[RT.DisableNullChecks]
+        //////private static void Zelig_Exception_ENET_Receive_IRQHandler( )
+        //////{
+        //////    ARMv7.ProcessorARMv7MForLlvm.ExclusiveAccessExceptionHandler( s_ENET_Receive_IRQHandler );
+        //////}
 
         //[RT.HardwareExceptionHandler( RT.HardwareException.Interrupt )]
         //[RT.ExportedMethod]

@@ -73,8 +73,8 @@ namespace Microsoft.Zelig.Runtime
 
             m_start             = start;
             m_stack             = stack;
-            m_swappedOutContext = Processor.Instance.AllocateProcessorContext(this);
-            m_throwContext      = Processor.Instance.AllocateProcessorContext(this);
+            m_swappedOutContext = Processor.Instance.AllocateProcessorContext( );
+            m_throwContext      = Processor.Instance.AllocateProcessorContext( );
 
             m_state             = ThreadState.Unstarted;
             m_registrationLink  = new KernelNode< ThreadImpl                     >( this );

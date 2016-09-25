@@ -54,7 +54,7 @@
 #-CompilationPhaseDisabled GenerateImage
 #-CompilationPhaseDisabled Done
 
--CompilationOption System.String GarbageCollectionManager ConservativeMarkAndSweepCollector
+#-CompilationOption System.String GarbageCollectionManager ConservativeMarkAndSweepCollector
 -CompilationOption System.String TimerPool SyncDispatcherTimerPool
 
 ###

@@ -4,10 +4,10 @@
 
 namespace Microsoft.CortexM3OnMBED
 {
-    using ChipsetModel = Microsoft.CortexM0OnMBED;
+    using ChipsetModel = Microsoft.CortexM3OnCMSISCore;
 
 
-    public class TypeSystemManager : ChipsetModel.TypeSystemManager
+    public abstract class TypeSystemManager : ChipsetModel.TypeSystemManager
     {
     }
 }

@@ -70,6 +70,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="HardwareModel\Board.cs" />
+    <Compile Include="HardwareModel\Memory.cs" />
     <Compile Include="HardwareModel\Device.cs" />
     <Compile Include="HardwareModel\Drivers\ContextSwitchTimer.cs" />
     <Compile Include="HardwareModel\GPIO.cs" />
@@ -87,6 +88,7 @@
     <Compile Include="HardwareModel\Processor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SystemServices\GarbageCollectionManager.cs" />
+    <Compile Include="SystemServices\TypeSystemManager.cs" />
     <Compile Include="SystemServices\ThreadManager.cs" />
     <Compile Include="SystemServices\TimerPool.cs" />
   </ItemGroup>

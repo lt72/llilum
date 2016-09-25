@@ -6,7 +6,7 @@ namespace Microsoft.CortexM4OnMBED
 {
     using Chipset = Microsoft.CortexM3OnMBED;
 
-    public sealed class Memory : Chipset.Memory
+    public abstract class Memory : Chipset.Memory
     {
     }
 }

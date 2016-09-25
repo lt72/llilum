@@ -37,7 +37,7 @@ namespace Microsoft.iMote2Loader
         //--//
 
         [RT.Inline]
-        public override RT.Processor.Context AllocateProcessorContext(RT.ThreadImpl owner)
+        public override RT.Processor.Context AllocateProcessorContext( )
         {
             return null;
         }

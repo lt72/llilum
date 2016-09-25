@@ -9,7 +9,7 @@ namespace Microsoft.CortexM3OnMBED
     using RT            = Microsoft.Zelig.Runtime;
     using ChipsetModel  = Microsoft.CortexM0OnMBED;
 
-    public class Memory : ChipsetModel.Memory
+    public abstract class Memory : ChipsetModel.Memory
     {
     }
 }

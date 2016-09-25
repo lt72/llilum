@@ -7,7 +7,7 @@ namespace Microsoft.CortexM0OnMBED
     using ChipsetModel = Microsoft.CortexM0OnCMSISCore;
 
 
-    public class TypeSystemManager : ChipsetModel.TypeSystemManager
+    public abstract class TypeSystemManager : ChipsetModel.TypeSystemManager
     {
     }
 }

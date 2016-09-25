@@ -90,6 +90,7 @@
     <Compile Include="SystemServices\GarbageCollectionManager.cs" />
     <Compile Include="SystemServices\ThreadManager.cs" />
     <Compile Include="SystemServices\TimerPool.cs" />
+    <Compile Include="SystemServices\TypeSystemManager.cs" />
   </ItemGroup>
   <Choose>
     <When Condition="Exists('$(LlilumSourceRoot)\..\Zelig\')">

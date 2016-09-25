@@ -18,10 +18,6 @@ namespace Microsoft.DeviceModels.Chipset.MM9691LP
             // Constructor Methods
             //
 
-            public Context(RT.ThreadImpl owner) : base(owner)
-            {
-            }
-
 
             //
             // Helper Methods
@@ -71,9 +67,9 @@ namespace Microsoft.DeviceModels.Chipset.MM9691LP
         }
 
         [RT.Inline]
-        public override Microsoft.Zelig.Runtime.Processor.Context AllocateProcessorContext(RT.ThreadImpl owner)
+        public override Microsoft.Zelig.Runtime.Processor.Context AllocateProcessorContext( )
         {
-            return new Context(owner);
+            return new Context( );
         }
     }
 }

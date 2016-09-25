@@ -9,8 +9,14 @@ namespace Microsoft.DeviceModels.Chipset.CortexM3
     using ChipsetModel = Microsoft.Zelig.Runtime.TargetPlatform.ARMv7;
 
 
-    public abstract class Processor : ChipsetModel.ProcessorARMv7MForLlvm
+    public abstract class Processor : ChipsetModel.ProcessorARMv7MForZelig
     {
+
+        public abstract new class Context : ChipsetModel.ProcessorARMv7MForZelig.Context
+        {
+
+        }
+
         //
         // Helper Methods
         //

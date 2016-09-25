@@ -9,13 +9,10 @@ namespace Microsoft.Llilum.LPC1768
 
 
     [RT.ProductFilter("Microsoft.Llilum.BoardConfigurations.LPC1768")]
-    public sealed class Processor : Microsoft.CortexM3OnMBED.Processor
+    public sealed class Processor : ChipsetModel.Processor
     {
         public new class Context : ChipsetModel.Processor.Context
         {
-            public Context(RT.ThreadImpl owner) : base(owner)
-            {
-            }
         }
 
         //
@@ -23,9 +20,9 @@ namespace Microsoft.Llilum.LPC1768
         //
         
         [RT.Inline]
-        public override RT.Processor.Context AllocateProcessorContext(RT.ThreadImpl owner)
+        public override RT.Processor.Context AllocateProcessorContext( )
         {
-            return new Context(owner);
+            return new Context( );
         }
     }
 }

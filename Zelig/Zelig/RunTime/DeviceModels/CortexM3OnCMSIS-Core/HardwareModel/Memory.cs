@@ -6,11 +6,11 @@ namespace Microsoft.CortexM3OnCMSISCore
 {
     using System;
 
-    using RT = Microsoft.Zelig.Runtime;
-    using TS = Microsoft.Zelig.Runtime.TypeSystem;
+    using RT      = Microsoft.Zelig.Runtime;
+    using Chipset = Microsoft.CortexM0OnCMSISCore;
 
 
-    public abstract class Memory : RT.Memory
+    public abstract class Memory : Chipset.Memory
     {
     }
 }

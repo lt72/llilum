@@ -43,7 +43,7 @@ namespace Microsoft.Zelig.Runtime.TargetPlatform.ARMv7.SmartHandles
         public void Toggle()
         {
             uint basepri = ProcessorARMv7M.SetBasePriRegister( m_basepri );
-            ProcessorARMv7MForLlvm.Nop();
+            ProcessorARMv7MForZelig.Nop();
             ProcessorARMv7M.SetBasePriRegister( basepri );
         }
 

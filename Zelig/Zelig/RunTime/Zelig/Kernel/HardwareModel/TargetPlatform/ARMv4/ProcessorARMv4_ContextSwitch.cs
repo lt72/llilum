@@ -140,10 +140,7 @@ namespace Microsoft.Zelig.Runtime.TargetPlatform.ARMv4
             //
             // Constructor Methods
             //
-
-            public Context(ThreadImpl owner) : base(owner)
-            {
-            }
+            
 
             //
             // Helper Methods

@@ -12,39 +12,15 @@ namespace Microsoft.CortexM0OnCMSISCore
 
     public abstract class Processor : ChipsetModel.Processor
     {
-        public abstract new class Context : RT.TargetPlatform.ARMv6.ProcessorARMv6MForLlvm.Context
+        public abstract new class Context : ChipsetModel.Processor.Context
         {
             //
             // Constructor Methods
             //
-            protected Context( RT.ThreadImpl owner ) : base( owner )
-            {
-            }
 
             //
             // Helper Methods
             //
-
-            #region RTOS extensibility
-
-            protected virtual UIntPtr CreateNativeContext( UIntPtr entryPoint, UIntPtr stack, int stackSize )
-            {
-                return (UIntPtr)0;
-            }
-
-            protected virtual void SwitchToContext( UIntPtr thread )
-            {
-            }
-
-            protected virtual void Yield( UIntPtr handle )
-            {
-            }
-
-            protected virtual void Retire( UIntPtr handle )
-            {
-            }
-
-            #endregion
 
             //
             // Access Methods

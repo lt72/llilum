@@ -9,5 +9,8 @@ namespace Microsoft.CortexM0OnCMSISCore
 
     public abstract class Memory : RT.Memory
     {
+        public override void InitializeMemory( )
+        {
+        }
     }
 }

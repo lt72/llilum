@@ -11,7 +11,7 @@ namespace Microsoft.CortexM0OnMBED
     using Chipset = Microsoft.CortexM0OnCMSISCore;
     using LLOS    = Zelig.LlilumOSAbstraction;
 
-    public class MemoryManager : Chipset.MemoryManager
+    public abstract class MemoryManager : Chipset.MemoryManager
     {
         private UIntPtr ManagedHeap;
         private UIntPtr ManagedHeapEnd;

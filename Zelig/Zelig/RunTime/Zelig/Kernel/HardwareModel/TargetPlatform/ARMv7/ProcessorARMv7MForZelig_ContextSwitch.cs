@@ -141,9 +141,6 @@ namespace Microsoft.Zelig.Runtime.TargetPlatform.ARMv7
             // Constructor Methods
             //
 
-            public Context(ThreadImpl owner) : base(owner)
-            {
-            }
 
             //
             // Helper Methods

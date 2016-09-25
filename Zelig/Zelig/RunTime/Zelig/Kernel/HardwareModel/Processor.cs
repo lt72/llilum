@@ -20,17 +20,11 @@ namespace Microsoft.Zelig.Runtime
 
             public bool InPrologue;
             public bool InEpilogue;
-            protected readonly ThreadImpl m_owner;
 
             //
             // Helper Methods
             //
-
-            protected Context(ThreadImpl owner)
-            {
-                m_owner = owner;
-            }
-
+            
             public abstract void Populate();
 
             public abstract void Populate( Context context );
@@ -79,11 +73,6 @@ namespace Microsoft.Zelig.Runtime
             {
                 get;
             }
-
-            public ThreadImpl OwnerThread
-            {
-                get { return m_owner; }
-            }
         }
 
         //
@@ -92,7 +81,7 @@ namespace Microsoft.Zelig.Runtime
 
         public abstract void InitializeProcessor();
 
-        public abstract Context AllocateProcessorContext(ThreadImpl owner);
+        public abstract Context AllocateProcessorContext( );
 
         //--//
 

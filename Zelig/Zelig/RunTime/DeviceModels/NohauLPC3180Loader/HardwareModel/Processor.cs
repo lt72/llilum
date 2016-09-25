@@ -38,7 +38,7 @@ namespace Microsoft.NohauLPC3180Loader
         //--//
 
         [RT.Inline]
-        public override RT.Processor.Context AllocateProcessorContext(RT.ThreadImpl owner)
+        public override RT.Processor.Context AllocateProcessorContext( )
         {
             return null;
         }

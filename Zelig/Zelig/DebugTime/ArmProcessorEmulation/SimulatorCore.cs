@@ -650,34 +650,34 @@ namespace Microsoft.Zelig.Emulation.ArmProcessor
         // State
         //
 
-        protected Cfg.ProductCategory                                                  m_product;
-        protected ulong                                                                m_clockFrequency;
-                                                                                   
-        protected int                                                                  m_suspendCount;
-        protected ulong                                                                m_clockTicks;
-        protected ulong                                                                m_sleepTicks;
-        protected ulong                                                                m_busAccess_Read;
-        protected ulong                                                                m_busAccess_Write;
-        protected ulong                                                                m_busAccess_WaitStates;
-                                                                                   
-        protected uint                                                                 m_pc;
-        private   uint[]                                                               m_registerFile = new uint[(int)RegisterLookup.TOTAL];
-        protected uint                                                                 m_cpsr;
-        protected uint                                                                 m_interruptStatus;
-                                                                                   
-        protected BankedRegisters                                                      m_currentBank;
-        protected BankedRegisters                                                      m_registers_Mode_USER  = new BankedRegisters( EncDef.c_psr_mode_USER  );
-        protected BankedRegisters                                                      m_registers_Mode_FIQ   = new BankedRegisters( EncDef.c_psr_mode_FIQ   );
-        protected BankedRegisters                                                      m_registers_Mode_IRQ   = new BankedRegisters( EncDef.c_psr_mode_IRQ   );
-        protected BankedRegisters                                                      m_registers_Mode_SVC   = new BankedRegisters( EncDef.c_psr_mode_SVC   );
-        protected BankedRegisters                                                      m_registers_Mode_ABORT = new BankedRegisters( EncDef.c_psr_mode_ABORT );
-        protected BankedRegisters                                                      m_registers_Mode_UNDEF = new BankedRegisters( EncDef.c_psr_mode_UNDEF );
-                                                                                   
-        protected uint[]                                                               m_lookupConditions     = new uint[EncDef.c_psr_cc_num];
-                                                                                   
-        private   DebugCommunicationChannelImpl                                        m_implDebugCommunicationChannel;
-        private   DebugCommunicationChannelImpl                                        m_implDebugCommunicationChannel2;
-        private   MemoryProviderImpl                                                   m_memoryProviderImpl;
+        protected Cfg.ProductCategory                                           m_product;
+        protected ulong                                                         m_clockFrequency;
+                                                                        
+        protected int                                                           m_suspendCount;
+        protected ulong                                                         m_clockTicks;
+        protected ulong                                                         m_sleepTicks;
+        protected ulong                                                         m_busAccess_Read;
+        protected ulong                                                         m_busAccess_Write;
+        protected ulong                                                         m_busAccess_WaitStates;
+                                                                        
+        protected uint                                                          m_pc;
+        private   uint[]                                                        m_registerFile = new uint[(int)RegisterLookup.TOTAL];
+        protected uint                                                          m_cpsr;
+        protected uint                                                          m_interruptStatus;
+                                                                        
+        protected BankedRegisters                                               m_currentBank;
+        protected BankedRegisters                                               m_registers_Mode_USER  = new BankedRegisters( EncDef.c_psr_mode_USER  );
+        protected BankedRegisters                                               m_registers_Mode_FIQ   = new BankedRegisters( EncDef.c_psr_mode_FIQ   );
+        protected BankedRegisters                                               m_registers_Mode_IRQ   = new BankedRegisters( EncDef.c_psr_mode_IRQ   );
+        protected BankedRegisters                                               m_registers_Mode_SVC   = new BankedRegisters( EncDef.c_psr_mode_SVC   );
+        protected BankedRegisters                                               m_registers_Mode_ABORT = new BankedRegisters( EncDef.c_psr_mode_ABORT );
+        protected BankedRegisters                                               m_registers_Mode_UNDEF = new BankedRegisters( EncDef.c_psr_mode_UNDEF );
+                                                                        
+        protected uint[]                                                        m_lookupConditions     = new uint[EncDef.c_psr_cc_num];
+                                                                        
+        private   DebugCommunicationChannelImpl                                 m_implDebugCommunicationChannel;
+        private   DebugCommunicationChannelImpl                                 m_implDebugCommunicationChannel2;
+        private   MemoryProviderImpl                                            m_memoryProviderImpl;
 
         private   GrowOnlyHashTable< uint, ProcessCoprocessorRegisterTransfer > m_coprocessorsRegisterTransfer = HashTableFactory.New< uint, ProcessCoprocessorRegisterTransfer >();
         private   GrowOnlyHashTable< uint, ProcessCoprocessorDataTransfer     > m_coprocessorsDataTransfer     = HashTableFactory.New< uint, ProcessCoprocessorDataTransfer     >();

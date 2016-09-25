@@ -12,6 +12,11 @@ namespace Microsoft.DeviceModels.Chipset.CortexM0
 
     public abstract class Processor : ChipsetModel.ProcessorARMv6MForLlvm
     {
+        public abstract new class Context : ChipsetModel.ProcessorARMv6MForLlvm.Context
+        {
+
+        }
+
         //
         // Helper Methods
         //

@@ -114,6 +114,10 @@
       <Project>{e4c618af-1785-472e-a070-8068e20582eb}</Project>
       <Name>ModelForCortexM</Name>
     </ProjectReference>
+    <ProjectReference Include="..\CortexM0OnCMSIS-Core\CortexM0OnCMSIS-Core.csproj">
+      <Project>{b8fe271a-cd41-435e-8766-4db7609c1007}</Project>
+      <Name>CortexM0OnCMSIS-Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

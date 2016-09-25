@@ -8,7 +8,7 @@ namespace Microsoft.CortexM4OnMBED
     using Chipset = Microsoft.CortexM3OnMBED;
 
     
-    public sealed class TypeSystemManager : Chipset.TypeSystemManager
+    public abstract class TypeSystemManager : Chipset.TypeSystemManager
     {
     }
 }

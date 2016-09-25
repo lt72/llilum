@@ -5,7 +5,7 @@
 // The default GC scheme will be Conservative Mark and Sweep.
 // Only one of these should be enabled at a time
 
-#define MarkAndSweepGC
+//#define MarkAndSweepGC
 
 namespace Microsoft.Llilum.LPC1768
 {
@@ -34,5 +34,9 @@ namespace Microsoft.Llilum.LPC1768
     }
 
 #endif
+
+    public sealed class PreciseMarkAndSweepCollector : Chipset.GarbageCollectionManager
+    {
+    }
 }
 

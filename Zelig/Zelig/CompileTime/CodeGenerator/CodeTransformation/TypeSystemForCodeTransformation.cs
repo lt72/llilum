@@ -2486,7 +2486,7 @@ namespace Microsoft.Zelig.CodeGeneration.IR
         {
             TypeRepresentation tdVal = this.WellKnownTypes.Microsoft_Zelig_Runtime_TypeSystem_VTable;
 
-			// LT72FORZELIG: should we remove the code below?
+            // LT72FORZELIG: should we remove the code below?
             // Remap boxed type virtual tables to their underlying type's.
             if (td is BoxedValueTypeRepresentation)
             {
@@ -2810,7 +2810,7 @@ namespace Microsoft.Zelig.CodeGeneration.IR
                     // 
                     // Include all methods for LLVM flow only
                     //
-					// LT72FORZELIG: target zelig compiler
+                    // LT72FORZELIG: target zelig compiler
                     //if(PlatformAbstraction.CodeGenerator == TargetModel.ArmProcessor.InstructionSetVersion.CodeGenerator_LLVM)
                     //{
                         foreach(var td in this.Types)

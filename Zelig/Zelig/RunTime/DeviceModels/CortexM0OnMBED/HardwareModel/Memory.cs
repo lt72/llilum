@@ -9,10 +9,7 @@ namespace Microsoft.CortexM0OnMBED
     using RT            = Microsoft.Zelig.Runtime;
     using ChipsetModel  = Microsoft.CortexM0OnCMSISCore;
 
-    public class Memory : ChipsetModel.Memory
+    public abstract class Memory : ChipsetModel.Memory
     {
-        public override void InitializeMemory( )
-        {
-        }
     }
 }
