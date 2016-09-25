@@ -7,7 +7,7 @@ namespace Microsoft.Llilum.LPC1768
     using RT           = Microsoft.Zelig.Runtime;
     using ChipsetModel = Microsoft.CortexM3OnMBED;
 
-    public sealed class Device : Microsoft.CortexM3OnMBED.Device
+    public sealed class Device : ChipsetModel.Device
     {
         public override void PreInitializeProcessorAndMemory( )
         {
